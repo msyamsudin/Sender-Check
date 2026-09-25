@@ -1,0 +1,15 @@
+{
+  "name": "@sender-check/adapters",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Adapter webmail: menerjemahkan DOM halaman menjadi EmailIdentity. Terpisah dari engine supaya algoritma dapat diuji tanpa browser.",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@sender-check/core": "workspace:*"
+  }
+}

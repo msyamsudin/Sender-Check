@@ -1,0 +1,1206 @@
+[
+  {
+    "id": "legit-personal-001",
+    "label": "legit",
+    "category": "personal",
+    "note": "Personal home domain where the display name and the address name match exactly.",
+    "identity": { "displayName": "Andi Pratama", "fromAddress": "andi.pratama@pratama-family.id" }
+  },
+  {
+    "id": "legit-personal-002",
+    "label": "legit",
+    "category": "personal",
+    "note": "Family domain; the local part is a shortened form of the same person's name.",
+    "identity": { "displayName": "Siti Nurhaliza", "fromAddress": "siti.n@nurhaliza.net" }
+  },
+  {
+    "id": "legit-personal-003",
+    "label": "legit",
+    "category": "personal",
+    "note": "Initials plus surname local part on a personal domain that carries the same surname.",
+    "identity": { "displayName": "Michael Chen", "fromAddress": "mchen@chenhouse.org" }
+  },
+  {
+    "id": "legit-personal-004",
+    "label": "legit",
+    "category": "personal",
+    "note": "Home domain named after the surname; nothing here claims another organisation.",
+    "identity": { "displayName": "Dewi Lestari", "fromAddress": "dewi@lestarihome.com" }
+  },
+  {
+    "id": "legit-personal-005",
+    "label": "legit",
+    "category": "personal",
+    "note": "Normal personal mail from a .web.id home domain.",
+    "identity": { "displayName": "Rizky Ramadhan", "fromAddress": "rizky@ramadhan.web.id" }
+  },
+  {
+    "id": "legit-personal-006",
+    "label": "legit",
+    "category": "personal",
+    "note": "Personal Polish family domain; name and domain refer to the same household.",
+    "identity": { "displayName": "Anna Kowalski", "fromAddress": "anna@kowalski-family.pl" }
+  },
+  {
+    "id": "legit-personal-007",
+    "label": "legit",
+    "category": "personal",
+    "note": "Personal UK domain; local part is the sender's first name.",
+    "identity": { "displayName": "Tom Baker", "fromAddress": "tom@baker-net.co.uk" }
+  },
+  {
+    "id": "legit-personal-008",
+    "label": "legit",
+    "category": "personal",
+    "note": "Typical Malaysian personal domain used by an individual, not a brand claim.",
+    "identity": { "displayName": "Yusuf Ibrahim", "fromAddress": "yusuf@ibrahim-family.my.id" }
+  },
+  {
+    "id": "legit-personal-009",
+    "label": "legit",
+    "category": "personal",
+    "note": "German umlaut in the display name and the ASCII fold in the address are the same name.",
+    "identity": { "displayName": "Clara Müller", "fromAddress": "clara@mueller-home.de" }
+  },
+  {
+    "id": "legit-personal-010",
+    "label": "legit",
+    "category": "personal",
+    "note": "Personal domain whose label repeats the sender's surname.",
+    "identity": { "displayName": "Agus Setiawan", "fromAddress": "agus@setiawan-family.id" }
+  },
+  {
+    "id": "legit-personal-011",
+    "label": "legit",
+    "category": "personal",
+    "note": "First and last name in both the display name and the local part.",
+    "identity": { "displayName": "Nadia Putri", "fromAddress": "nadia.putri@putrihome.com" }
+  },
+  {
+    "id": "legit-personal-012",
+    "label": "legit",
+    "category": "personal",
+    "note": "Apostrophe in the surname is a normal Irish name, not an encoding trick.",
+    "identity": { "displayName": "Paul O'Brien", "fromAddress": "paul@obrien-family.ie" }
+  },
+  {
+    "id": "legit-corporate-001",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Recruitment agency domain legitimately carries the hiring company's name in the display name.",
+    "identity": { "displayName": "HRD PT Maju Jaya", "fromAddress": "recruitment@abccareer.com" }
+  },
+  {
+    "id": "legit-corporate-002",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Applicant tracking system sends on behalf of many employers, so display name and domain differ by design.",
+    "identity": { "displayName": "Talent Acquisition", "fromAddress": "no-reply@greenhouse.io" }
+  },
+  {
+    "id": "legit-corporate-003",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Employee name matches the local part on the company domain.",
+    "identity": { "displayName": "Budi Santoso", "fromAddress": "budi.santoso@acme-manufacturing.co.id" }
+  },
+  {
+    "id": "legit-corporate-004",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Department mailbox where the display name and the local part agree.",
+    "identity": { "displayName": "Finance Department", "fromAddress": "finance@nusantara-group.co.id" }
+  },
+  {
+    "id": "legit-corporate-005",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Routine internal helpdesk mailbox on the company's own domain.",
+    "identity": { "displayName": "IT Helpdesk", "fromAddress": "helpdesk@nusatech.com" }
+  },
+  {
+    "id": "legit-corporate-006",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Payroll mailbox that matches its local part; no third-party brand is claimed.",
+    "identity": { "displayName": "Payroll Team", "fromAddress": "payroll@dayakarya.co.id" }
+  },
+  {
+    "id": "legit-corporate-007",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Lawyer sending from her own firm's domain under her own name.",
+    "identity": { "displayName": "Rina Wulandari", "fromAddress": "rina@wulandari-legal.com" }
+  },
+  {
+    "id": "legit-corporate-008",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Training vendor mailbox; the department label has no relationship to the vendor domain and needs none.",
+    "identity": { "displayName": "Learning & Development", "fromAddress": "ld@bimbingan-karier.com" }
+  },
+  {
+    "id": "legit-corporate-009",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Generic corporate function mailbox on the same company's domain.",
+    "identity": { "displayName": "Corporate Communications", "fromAddress": "corpcomm@energi-nasional.co.id" }
+  },
+  {
+    "id": "legit-corporate-010",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Procurement mailbox on the company domain; the label is a role, not an impersonated brand.",
+    "identity": { "displayName": "Procurement", "fromAddress": "procurement@logistiknusantara.com" }
+  },
+  {
+    "id": "legit-corporate-011",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Security team mailbox on its employer's own domain.",
+    "identity": { "displayName": "Security Operations", "fromAddress": "soc@cyberdefense.co.id" }
+  },
+  {
+    "id": "legit-corporate-012",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Accounts receivable mailbox; role name and local part agree.",
+    "identity": { "displayName": "Accounts Receivable", "fromAddress": "ar@distribusipangan.com" }
+  },
+  {
+    "id": "legit-corporate-013",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Initial-plus-surname local part of the same employee named in the display name.",
+    "identity": { "displayName": "Ahmad Fauzi", "fromAddress": "a.fauzi@pt-karyautama.co.id" }
+  },
+  {
+    "id": "legit-corporate-014",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Benefits administrator sends for client companies, so the department label and vendor domain differ normally.",
+    "identity": { "displayName": "Employee Benefits", "fromAddress": "benefits@hrsolutions.co.id" }
+  },
+  {
+    "id": "legit-corporate-015",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Physician title plus name matching the clinic domain and local part.",
+    "identity": { "displayName": "Dr. Ratna Sari", "fromAddress": "ratna.sari@kliniksehat.co.id" }
+  },
+  {
+    "id": "legit-corporate-016",
+    "label": "legit",
+    "category": "corporate",
+    "note": "Accounting mailbox at a tax consultancy; role label needs no match with the firm name.",
+    "identity": { "displayName": "Accounting", "fromAddress": "accounting@pajak-konsultan.com" }
+  },
+  {
+    "id": "legit-freemail-001",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Gmail address whose local part is the sender's own first name.",
+    "identity": { "displayName": "Andi", "fromAddress": "andi@gmail.com" }
+  },
+  {
+    "id": "legit-freemail-002",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Ordinary personal Gmail account with a year suffix in the local part.",
+    "identity": { "displayName": "Budi Santoso", "fromAddress": "budi.santoso88@gmail.com" }
+  },
+  {
+    "id": "legit-freemail-003",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Consumer Yahoo account with a numeric suffix; nothing claims an organisation.",
+    "identity": { "displayName": "Siti Aminah", "fromAddress": "sitiaminah1990@yahoo.com" }
+  },
+  {
+    "id": "legit-freemail-004",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Regional Yahoo Indonesia account used for personal mail.",
+    "identity": { "displayName": "Dewi", "fromAddress": "dewi.kurnia@yahoo.co.id" }
+  },
+  {
+    "id": "legit-freemail-005",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Old Hotmail account; the digits are a normal signup suffix.",
+    "identity": { "displayName": "John Miller", "fromAddress": "jmiller1978@hotmail.com" }
+  },
+  {
+    "id": "legit-freemail-006",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Rocketmail legacy address with an underscore-separated name.",
+    "identity": { "displayName": "Rudi Hartono", "fromAddress": "rudi_hartono@rocketmail.com" }
+  },
+  {
+    "id": "legit-freemail-007",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Outlook consumer account on the Indonesian domain, personal use.",
+    "identity": { "displayName": "Ayu Lestari", "fromAddress": "ayulestari@outlook.co.id" }
+  },
+  {
+    "id": "legit-freemail-008",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Informal nickname in the display name on a personal free mailbox.",
+    "identity": { "displayName": "Pak Hendra", "fromAddress": "hendra_teknik@yahoo.com" }
+  },
+  {
+    "id": "legit-freemail-009",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Family nickname; the address belongs to the same person.",
+    "identity": { "displayName": "Grandma Rose", "fromAddress": "rose.mary.1948@gmail.com" }
+  },
+  {
+    "id": "legit-freemail-010",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Consumer iCloud address, personal correspondence.",
+    "identity": { "displayName": "Fitri", "fromAddress": "fitri.azzahra@icloud.com" }
+  },
+  {
+    "id": "legit-freemail-011",
+    "label": "legit",
+    "category": "freemail",
+    "note": "mail.com consumer account; the dot-separated initials are the sender's own name.",
+    "identity": { "displayName": "Bambang Pamungkas", "fromAddress": "bambang.p@mail.com" }
+  },
+  {
+    "id": "legit-freemail-012",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Personal Gmail with a nickname and number, no brand or role claim.",
+    "identity": { "displayName": "Kevin", "fromAddress": "kevin.wijaya99@gmail.com" }
+  },
+  {
+    "id": "legit-freemail-013",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Ymail alias domain of Yahoo used for ordinary personal mail.",
+    "identity": { "displayName": "Nurul Hidayah", "fromAddress": "nurulhidayah@ymail.com" }
+  },
+  {
+    "id": "legit-freemail-014",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Live.com consumer mailbox; nothing impersonated.",
+    "identity": { "displayName": "Tono", "fromAddress": "tonosudarso@live.com" }
+  },
+  {
+    "id": "legit-freemail-015",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Plain personal Gmail account; unrelated local part style is normal.",
+    "identity": { "displayName": "Sarah", "fromAddress": "sarah.jenkins@gmail.com" }
+  },
+  {
+    "id": "legit-freemail-016",
+    "label": "legit",
+    "category": "freemail",
+    "note": "Small warung owner writing from her personal Gmail, no organisation claim.",
+    "identity": { "displayName": "Ibu Yanti", "fromAddress": "yanti.warung@gmail.com" }
+  },
+  {
+    "id": "legit-indonesian-single-name-001",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Many Indonesians use one name only; a single-word display name is not an anomaly.",
+    "identity": { "displayName": "Sutrisno", "fromAddress": "sutrisno@gmail.com" }
+  },
+  {
+    "id": "legit-indonesian-single-name-002",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Hajj honorific Hj. is a normal Indonesian title, not a brand token.",
+    "identity": { "displayName": "Hj. Nurhayati", "fromAddress": "nurhayati@gmail.com" }
+  },
+  {
+    "id": "legit-indonesian-single-name-003",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Medical doctor title with name matching both the local part and the hospital domain.",
+    "identity": { "displayName": "Dr. Bambang Wibowo", "fromAddress": "bambang.wibowo@rscahaya.co.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-004",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Ir. is the Indonesian engineering title; name matches the local part.",
+    "identity": { "displayName": "Ir. Joko Purnomo", "fromAddress": "joko.purnomo@konstruksi-nusantara.co.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-005",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "S.Kom is a trailing Indonesian degree, not part of the display name claim.",
+    "identity": { "displayName": "Andi Saputra, S.Kom", "fromAddress": "andi.saputra@softwarehouse.co.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-006",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "S.E. degree suffix on a finance staffer's own mailbox.",
+    "identity": { "displayName": "Ratna, S.E.", "fromAddress": "ratna@keuanganku.co.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-007",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Single-name sender writing from her small shop's domain.",
+    "identity": { "displayName": "Sri Wahyuni", "fromAddress": "sri@warungbuwati.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-008",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Informal Pak address for a craftsman; single name matches the local part.",
+    "identity": { "displayName": "Pak Slamet", "fromAddress": "slamet@tukangkayu.com" }
+  },
+  {
+    "id": "legit-indonesian-single-name-009",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Balinese name with the I/Ida naming pattern; address carries the same first name.",
+    "identity": { "displayName": "Wayan Sudira", "fromAddress": "wayan@baliwoodcraft.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-010",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "H. is the male Hajj honorific on a foundation's own domain.",
+    "identity": { "displayName": "H. Abdul Rahman", "fromAddress": "abdul.rahman@yayasan-alhikmah.or.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-011",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Bu is a normal Indonesian courtesy title for a market vendor.",
+    "identity": { "displayName": "Bu Tuti", "fromAddress": "tuti@pasar-segar.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-012",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Gus is a common pesantren title; the address matches the name.",
+    "identity": { "displayName": "Gus Fauzi", "fromAddress": "fauzi@ponpes-alhikmah.or.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-013",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Mbak is an informal Javanese address; single-name mailbox at her own catering business.",
+    "identity": { "displayName": "Mbak Rina", "fromAddress": "rina@kateringrina.id" }
+  },
+  {
+    "id": "legit-indonesian-single-name-014",
+    "label": "legit",
+    "category": "indonesian-single-name",
+    "note": "Balinese naming prefix I Made on a tour operator's own domain.",
+    "identity": { "displayName": "I Made Sudarma", "fromAddress": "made.sudarma@denpasartour.co.id" }
+  },
+  {
+    "id": "legit-reversed-name-001",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Surname-first display name where the address uses first-name.surname order.",
+    "identity": { "displayName": "Smith, John", "fromAddress": "john.smith@example.com" }
+  },
+  {
+    "id": "legit-reversed-name-002",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Reversed display name on the company domain; same two name tokens as the local part.",
+    "identity": { "displayName": "Santoso, Budi", "fromAddress": "budi.santoso@perusahaan.co.id" }
+  },
+  {
+    "id": "legit-reversed-name-003",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Chinese-Indonesian surname-first convention; the address holds the same name reversed.",
+    "identity": { "displayName": "Wijaya, Kevin", "fromAddress": "kevin.wijaya@gmail.com" }
+  },
+  {
+    "id": "legit-reversed-name-004",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Reversed order on a consumer mailbox, same two name tokens.",
+    "identity": { "displayName": "Rahayu, Siti", "fromAddress": "siti.rahayu@yahoo.com" }
+  },
+  {
+    "id": "legit-reversed-name-005",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Surname-first form used by the firm's own partner.",
+    "identity": { "displayName": "Tan, Michael", "fromAddress": "michael.tan@tanpartners.co.id" }
+  },
+  {
+    "id": "legit-reversed-name-006",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Reversed display name with matching local part at the same logistics company.",
+    "identity": { "displayName": "Gunawan, Hendra", "fromAddress": "hendra.gunawan@logistik.co.id" }
+  },
+  {
+    "id": "legit-reversed-name-007",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Surname-first convention common in Chinese corporate mail; tokens match the address.",
+    "identity": { "displayName": "Chen, Wei", "fromAddress": "wei.chen@unicorn-tech.cn" }
+  },
+  {
+    "id": "legit-reversed-name-008",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Student mailbox using surname-first display name and the same tokens in the address.",
+    "identity": { "displayName": "Pratama, Andi", "fromAddress": "andi.pratama@student.ac.id" }
+  },
+  {
+    "id": "legit-reversed-name-009",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Reversed name at a clinic; local part carries the same two tokens.",
+    "identity": { "displayName": "Kusuma, Dewi", "fromAddress": "dewi.kusuma@klinik.co.id" }
+  },
+  {
+    "id": "legit-reversed-name-010",
+    "label": "legit",
+    "category": "reversed-name",
+    "note": "Law office domain matching the sender's surname, display name reversed.",
+    "identity": { "displayName": "Halim, Yusuf", "fromAddress": "yusuf.halim@halimlawoffice.co.id" }
+  },
+  {
+    "id": "legit-initials-001",
+    "label": "legit",
+    "category": "initials",
+    "note": "Initial plus surname in the display name maps to the concatenated local part.",
+    "identity": { "displayName": "J. Smith", "fromAddress": "jsmith@example.com" }
+  },
+  {
+    "id": "legit-initials-002",
+    "label": "legit",
+    "category": "initials",
+    "note": "Single initial form is a standard corporate mailbox convention.",
+    "identity": { "displayName": "A. Pratama", "fromAddress": "apratama@company.co.id" }
+  },
+  {
+    "id": "legit-initials-003",
+    "label": "legit",
+    "category": "initials",
+    "note": "Two bare initials in the display name; no organisation or brand is claimed.",
+    "identity": { "displayName": "B. S.", "fromAddress": "bs@nusantara.co.id" }
+  },
+  {
+    "id": "legit-initials-004",
+    "label": "legit",
+    "category": "initials",
+    "note": "Abbreviated surname in the display name matches the abbreviated local part.",
+    "identity": { "displayName": "Dewi K.", "fromAddress": "dewi.k@klinik.co.id" }
+  },
+  {
+    "id": "legit-initials-005",
+    "label": "legit",
+    "category": "initials",
+    "note": "Initial plus surname at the family firm's domain.",
+    "identity": { "displayName": "M. Tan", "fromAddress": "mtan@tanco.com" }
+  },
+  {
+    "id": "legit-initials-006",
+    "label": "legit",
+    "category": "initials",
+    "note": "Two initials plus surname; the local part is the same initials plus surname.",
+    "identity": { "displayName": "R. A. Kusuma", "fromAddress": "rakusuma@sekuritas-nusantara.co.id" }
+  },
+  {
+    "id": "legit-initials-007",
+    "label": "legit",
+    "category": "initials",
+    "note": "First initial plus full surname local part matches the abbreviated display name.",
+    "identity": { "displayName": "Hendra G.", "fromAddress": "hgunawan@logistik.co.id" }
+  },
+  {
+    "id": "legit-initials-008",
+    "label": "legit",
+    "category": "initials",
+    "note": "Initial-plus-surname pattern on a record label's own domain.",
+    "identity": { "displayName": "S. Nurhaliza", "fromAddress": "snurhaliza@labelmusik.co.id" }
+  },
+  {
+    "id": "legit-initials-009",
+    "label": "legit",
+    "category": "initials",
+    "note": "Three initials plus surname in both the display name and the address.",
+    "identity": { "displayName": "J. S. Chen", "fromAddress": "jschen@chenholdings.com" }
+  },
+  {
+    "id": "legit-initials-010",
+    "label": "legit",
+    "category": "initials",
+    "note": "Two middle initials with the surname; local part matches exactly.",
+    "identity": { "displayName": "A. B. Santoso", "fromAddress": "absantoso@dayagroup.co.id" }
+  },
+  {
+    "id": "legit-initials-011",
+    "label": "legit",
+    "category": "initials",
+    "note": "Initial plus Malaysian surname at the family company domain.",
+    "identity": { "displayName": "Y. Ibrahim", "fromAddress": "yibrahim@ibrahimco.my" }
+  },
+  {
+    "id": "legit-initials-012",
+    "label": "legit",
+    "category": "initials",
+    "note": "Abbreviated first name at the sender's own craft business domain.",
+    "identity": { "displayName": "W. Sudira", "fromAddress": "wsudira@baliwoodcraft.id" }
+  },
+  {
+    "id": "legit-esp-001",
+    "label": "legit",
+    "category": "esp",
+    "note": "Brand sends from its own domain; the ESP bounce address only appears in Return-Path.",
+    "identity": { "displayName": "Shopify", "fromAddress": "no-reply@shopify.com", "returnPath": "bounce@sendgrid.net", "gmailViaHint": "sendgrid.net" }
+  },
+  {
+    "id": "legit-esp-002",
+    "label": "legit",
+    "category": "esp",
+    "note": "Amazon SES bounce domain in Return-Path is the normal ESP pattern for a brand sending from its own domain.",
+    "identity": { "displayName": "GitHub", "fromAddress": "noreply@github.com", "returnPath": "0100018a7b@amazonses.com", "gmailViaHint": "amazonses.com" }
+  },
+  {
+    "id": "legit-esp-003",
+    "label": "legit",
+    "category": "esp",
+    "note": "Indonesian e-commerce brand on its own domain delivered through SendGrid.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "no-reply@tokopedia.com", "returnPath": "bounce@sendgrid.net", "gmailViaHint": "sendgrid.net" }
+  },
+  {
+    "id": "legit-esp-004",
+    "label": "legit",
+    "category": "esp",
+    "note": "Mailgun bounce address does not weaken the brand/domain alignment in From.",
+    "identity": { "displayName": "Canva", "fromAddress": "hello@canva.com", "returnPath": "bounce+abc123@mailgun.org", "gmailViaHint": "mailgun.org" }
+  },
+  {
+    "id": "legit-esp-005",
+    "label": "legit",
+    "category": "esp",
+    "note": "ESP Return-Path with the brand's own From domain is routine transactional mail.",
+    "identity": { "displayName": "Spotify", "fromAddress": "no-reply@spotify.com", "returnPath": "0100018b2c@amazonses.com" }
+  },
+  {
+    "id": "legit-esp-006",
+    "label": "legit",
+    "category": "esp",
+    "note": "ccsend.com is a well-known bounce domain used by hospitality senders.",
+    "identity": { "displayName": "Airbnb", "fromAddress": "automated@airbnb.com", "returnPath": "bounce@ccsend.com" }
+  },
+  {
+    "id": "legit-esp-007",
+    "label": "legit",
+    "category": "esp",
+    "note": "Mailchimp bounce domain mcsv.net in Return-Path while From stays on the brand domain.",
+    "identity": { "displayName": "Etsy", "fromAddress": "transaction@etsy.com", "returnPath": "bounce@mcsv.net", "gmailViaHint": "mcsv.net" }
+  },
+  {
+    "id": "legit-esp-008",
+    "label": "legit",
+    "category": "esp",
+    "note": "Transactional notification from the product's own domain through Amazon SES.",
+    "identity": { "displayName": "Slack", "fromAddress": "feedback@slack.com", "returnPath": "0100018c3d@amazonses.com" }
+  },
+  {
+    "id": "legit-esp-009",
+    "label": "legit",
+    "category": "esp",
+    "note": "Meeting notification from Zoom's own domain, SendGrid bounce address.",
+    "identity": { "displayName": "Zoom", "fromAddress": "no-reply@zoom.us", "returnPath": "bounce@sendgrid.net" }
+  },
+  {
+    "id": "legit-esp-010",
+    "label": "legit",
+    "category": "esp",
+    "note": "Workspace product mail from its own domain; SES return path is expected.",
+    "identity": { "displayName": "Notion", "fromAddress": "team@makenotion.com", "returnPath": "0100018d4e@amazonses.com" }
+  },
+  {
+    "id": "legit-esp-011",
+    "label": "legit",
+    "category": "esp",
+    "note": "Indonesian marketplace order notification delivered via SendGrid.",
+    "identity": { "displayName": "Blibli", "fromAddress": "no-reply@blibli.com", "returnPath": "bounce@sendgrid.net", "gmailViaHint": "sendgrid.net" }
+  },
+  {
+    "id": "legit-esp-012",
+    "label": "legit",
+    "category": "esp",
+    "note": "Travel booking confirmation from the brand's own domain with an ESP bounce address.",
+    "identity": { "displayName": "Traveloka", "fromAddress": "no-reply@traveloka.com", "returnPath": "bounce@sendgrid.net" }
+  },
+  {
+    "id": "legit-esp-013",
+    "label": "legit",
+    "category": "esp",
+    "note": "Promotional mail from the marketplace's own domain through Mailgun.",
+    "identity": { "displayName": "Bukalapak", "fromAddress": "promo@bukalapak.com", "returnPath": "bounce+xyz@mailgun.org", "gmailViaHint": "mailgun.org" }
+  },
+  {
+    "id": "legit-esp-014",
+    "label": "legit",
+    "category": "esp",
+    "note": "Ride-hailing receipt from the operator's own domain via SendGrid.",
+    "identity": { "displayName": "Gojek", "fromAddress": "no-reply@gojek.com", "returnPath": "bounce@sendgrid.net" }
+  },
+  {
+    "id": "legit-esp-015",
+    "label": "legit",
+    "category": "esp",
+    "note": "Consumer finance statement from the company's own domain; SES used for delivery.",
+    "identity": { "displayName": "Akulaku", "fromAddress": "no-reply@akulaku.com", "returnPath": "0100018e5f@amazonses.com" }
+  },
+  {
+    "id": "legit-esp-016",
+    "label": "legit",
+    "category": "esp",
+    "note": "Digital bank notification from the bank's own domain, SendGrid bounce address.",
+    "identity": { "displayName": "Bank Jago", "fromAddress": "no-reply@jago.com", "returnPath": "bounce@sendgrid.net" }
+  },
+  {
+    "id": "legit-esp-017",
+    "label": "legit",
+    "category": "esp",
+    "note": "Course platform in Indonesia sending class reminders via Mailgun from its own domain.",
+    "identity": { "displayName": "Dicoding", "fromAddress": "no-reply@dicoding.com", "returnPath": "bounce@mailgun.org", "gmailViaHint": "mailgun.org" }
+  },
+  {
+    "id": "legit-esp-018",
+    "label": "legit",
+    "category": "esp",
+    "note": "Course completion mail from the platform's own domain with an ESP return path.",
+    "identity": { "displayName": "Coursera", "fromAddress": "no-reply@coursera.org", "returnPath": "bounce@sendgrid.net" }
+  },
+  {
+    "id": "legit-esp-019",
+    "label": "legit",
+    "category": "esp",
+    "note": "Publisher digest from the publisher's own domain; SES handles bounces.",
+    "identity": { "displayName": "Medium", "fromAddress": "noreply@medium.com", "returnPath": "0100018f6a@amazonses.com" }
+  },
+  {
+    "id": "legit-esp-020",
+    "label": "legit",
+    "category": "esp",
+    "note": "Design tool notification from its own domain delivered through SendGrid.",
+    "identity": { "displayName": "Figma", "fromAddress": "no-reply@figma.com", "returnPath": "bounce@sendgrid.net", "gmailViaHint": "sendgrid.net" }
+  },
+  {
+    "id": "legit-alias-001",
+    "label": "legit",
+    "category": "alias",
+    "note": "Plus-addressing tag on a personal Gmail account, still the same person.",
+    "identity": { "displayName": "Andi Pratama", "fromAddress": "andi+newsletter@gmail.com" }
+  },
+  {
+    "id": "legit-alias-002",
+    "label": "legit",
+    "category": "alias",
+    "note": "Plus tag used to sort shopping mail; display name is the account owner.",
+    "identity": { "displayName": "Budi Santoso", "fromAddress": "budi+tokopedia@yahoo.com" }
+  },
+  {
+    "id": "legit-alias-003",
+    "label": "legit",
+    "category": "alias",
+    "note": "Extra dotted segment is a common provider alias convention, not a different identity.",
+    "identity": { "displayName": "Siti Rahayu", "fromAddress": "siti.rahayu.ext@example.com" }
+  },
+  {
+    "id": "legit-alias-004",
+    "label": "legit",
+    "category": "alias",
+    "note": "Plus tag plus year suffix on a personal account; display name unchanged.",
+    "identity": { "displayName": "Kevin Wijaya", "fromAddress": "kevin.wijaya99+shopee@gmail.com" }
+  },
+  {
+    "id": "legit-alias-005",
+    "label": "legit",
+    "category": "alias",
+    "note": "googlemail.com is a historical alias domain of the same Gmail mailbox.",
+    "identity": { "displayName": "Dewi Kurnia", "fromAddress": "dewi.kurnia@googlemail.com" }
+  },
+  {
+    "id": "legit-alias-006",
+    "label": "legit",
+    "category": "alias",
+    "note": "ymail.com is Yahoo's alternate domain, same consumer mailbox.",
+    "identity": { "displayName": "Rina Wulandari", "fromAddress": "rina.wulandari@ymail.com" }
+  },
+  {
+    "id": "legit-alias-007",
+    "label": "legit",
+    "category": "alias",
+    "note": "rocketmail.com is a legacy Yahoo alias domain, not a lookalike.",
+    "identity": { "displayName": "Hendra Gunawan", "fromAddress": "hendra.gunawan@rocketmail.com" }
+  },
+  {
+    "id": "legit-alias-008",
+    "label": "legit",
+    "category": "alias",
+    "note": "Contractor suffix in the local part while the display name is the same person at the same company.",
+    "identity": { "displayName": "John Smith", "fromAddress": "john.smith.contractor@acme.co.id" }
+  },
+  {
+    "id": "legit-mailing-list-001",
+    "label": "legit",
+    "category": "mailing-list",
+    "note": "List display name matches the list identity and its hosting domain.",
+    "identity": { "displayName": "Linux Kernel Mailing List", "fromAddress": "linux-kernel@vger.kernel.org" }
+  },
+  {
+    "id": "legit-mailing-list-002",
+    "label": "legit",
+    "category": "mailing-list",
+    "note": "Debian's own announce list; name and domain belong together.",
+    "identity": { "displayName": "Debian Security Announce", "fromAddress": "debian-security-announce@lists.debian.org" }
+  },
+  {
+    "id": "legit-mailing-list-003",
+    "label": "legit",
+    "category": "mailing-list",
+    "note": "Project mailing list on the project's own mail domain.",
+    "identity": { "displayName": "Python Docs", "fromAddress": "docs@mail.python.org" }
+  },
+  {
+    "id": "legit-mailing-list-004",
+    "label": "legit",
+    "category": "mailing-list",
+    "note": "Google Groups list whose display name is the group itself, not an impersonated person.",
+    "identity": { "displayName": "Kubernetes Announce", "fromAddress": "kubernetes-announce@googlegroups.com" }
+  },
+  {
+    "id": "legit-mailing-list-005",
+    "label": "legit",
+    "category": "mailing-list",
+    "note": "Community discussion group; the name describes the group, and no bank or brand is claimed.",
+    "identity": { "displayName": "Asosiasi DevOps Indonesia", "fromAddress": "devops-indonesia@googlegroups.com" }
+  },
+  {
+    "id": "legit-mailing-list-006",
+    "label": "legit",
+    "category": "mailing-list",
+    "note": "Ubuntu security notices list on Canonical's list host.",
+    "identity": { "displayName": "Ubuntu Security Notice", "fromAddress": "ubuntu-security-announce@lists.ubuntu.com" }
+  },
+  {
+    "id": "legit-support-billing-001",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Support address where the display name matches the local part and the domain label.",
+    "identity": { "displayName": "Rise", "fromAddress": "support@rise.com" }
+  },
+  {
+    "id": "legit-support-billing-002",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Brand info address on its own mailer subdomain; brand token is present in both.",
+    "identity": { "displayName": "Netflix", "fromAddress": "info@mailer.netflix.com" }
+  },
+  {
+    "id": "legit-support-billing-003",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Wallet customer service on the wallet's own .co.id domain.",
+    "identity": { "displayName": "GoPay", "fromAddress": "cs@gopay.co.id" }
+  },
+  {
+    "id": "legit-support-billing-004",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Help desk address on the payment provider's own domain.",
+    "identity": { "displayName": "OVO", "fromAddress": "help@ovo.id" }
+  },
+  {
+    "id": "legit-support-billing-005",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Care address on the wallet operator's own domain.",
+    "identity": { "displayName": "DANA Indonesia", "fromAddress": "care@dana.id" }
+  },
+  {
+    "id": "legit-support-billing-006",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Bank contact address on the bank's registered domain, matching its HaloBCA style mailbox.",
+    "identity": { "displayName": "BCA", "fromAddress": "halobca@bca.co.id" }
+  },
+  {
+    "id": "legit-support-billing-007",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Payment gateway support address on the gateway's own domain.",
+    "identity": { "displayName": "Midtrans", "fromAddress": "support@midtrans.com" }
+  },
+  {
+    "id": "legit-support-billing-008",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Support mailbox that matches both local part and company domain.",
+    "identity": { "displayName": "Xendit", "fromAddress": "support@xendit.co" }
+  },
+  {
+    "id": "legit-support-billing-009",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Cloud provider billing mailbox on the provider's own domain.",
+    "identity": { "displayName": "DigitalOcean Billing", "fromAddress": "billing@digitalocean.com" }
+  },
+  {
+    "id": "legit-support-billing-010",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Payment processor support address; display name and domain agree.",
+    "identity": { "displayName": "Stripe Support", "fromAddress": "support@stripe.com" }
+  },
+  {
+    "id": "legit-support-billing-011",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Utility billing mailbox on the utility's own domain; the Indonesian word Tagihan is a role label.",
+    "identity": { "displayName": "Tagihan PLN", "fromAddress": "tagihan@pln.co.id" }
+  },
+  {
+    "id": "legit-support-billing-012",
+    "label": "legit",
+    "category": "support-billing",
+    "note": "Telco customer care mailbox on the operator's own domain.",
+    "identity": { "displayName": "Telkomsel Customer Care", "fromAddress": "care@telkomsel.co.id" }
+  },
+  {
+    "id": "legit-legit-subdomain-001",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "Brand token legitimately sits in a delegated sending subdomain of the brand's own domain.",
+    "identity": { "displayName": "Shopify", "fromAddress": "notifications@mail.shopify.com" }
+  },
+  {
+    "id": "legit-legit-subdomain-002",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "GitHub uses its own email subdomain; registrable domain is still github.com.",
+    "identity": { "displayName": "GitHub", "fromAddress": "no-reply@email.github.com" }
+  },
+  {
+    "id": "legit-legit-subdomain-003",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "Bank notification subdomain under the bank's own registrable domain.",
+    "identity": { "displayName": "Mandiri Online", "fromAddress": "no-reply@notifikasi.bankmandiri.co.id" }
+  },
+  {
+    "id": "legit-legit-subdomain-004",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "Coffee chain promotional subdomain under the chain's own domain.",
+    "identity": { "displayName": "Kopi Kenangan", "fromAddress": "promo@email.kopikenangan.com" }
+  },
+  {
+    "id": "legit-legit-subdomain-005",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "News subdomain of the marketplace's own registrable domain.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "no-reply@news.tokopedia.com" }
+  },
+  {
+    "id": "legit-legit-subdomain-006",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "State bank notification subdomain; registrable domain still belongs to the bank.",
+    "identity": { "displayName": "BNI", "fromAddress": "no-reply@email.bni.co.id" }
+  },
+  {
+    "id": "legit-legit-subdomain-007",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "Travel brand mail subdomain under the brand's own domain.",
+    "identity": { "displayName": "Traveloka", "fromAddress": "info@mail.traveloka.com" }
+  },
+  {
+    "id": "legit-legit-subdomain-008",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "University notice sent from an email subdomain of the university's .ac.id domain.",
+    "identity": { "displayName": "Universitas Indonesia", "fromAddress": "noreply@email.ui.ac.id" }
+  },
+  {
+    "id": "legit-legit-subdomain-009",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "Ministry notification subdomain under the ministry's own go.id domain.",
+    "identity": { "displayName": "Kementerian Keuangan", "fromAddress": "noreply@email.kemenkeu.go.id" }
+  },
+  {
+    "id": "legit-legit-subdomain-010",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "Brand label as a delegated subdomain beneath a hosting provider's registrable domain, a normal hosted-sender pattern.",
+    "identity": { "displayName": "Toko Buku Nusantara", "fromAddress": "no-reply@tokonusantara.com.host.co.id" }
+  },
+  {
+    "id": "legit-legit-subdomain-011",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "E-signature vendor sending from its own mail subdomain.",
+    "identity": { "displayName": "DocuSign", "fromAddress": "dse@mail.docusign.com" }
+  },
+  {
+    "id": "legit-legit-subdomain-012",
+    "label": "legit",
+    "category": "legit-subdomain",
+    "note": "Meeting reminder from the vendor's own mail subdomain; registrable domain matches the brand.",
+    "identity": { "displayName": "Zoom", "fromAddress": "no-reply@mail.zoom.us" }
+  },
+  {
+    "id": "legit-punycode-idn-001",
+    "label": "legit",
+    "category": "punycode-idn",
+    "note": "Real Cyrillic .рф domain that belongs to the brand named in the display name, not a Latin lookalike.",
+    "identity": { "displayName": "Яндекс", "fromAddress": "no-reply@xn--d1acpjx3f.xn--p1ai" }
+  },
+  {
+    "id": "legit-punycode-idn-002",
+    "label": "legit",
+    "category": "punycode-idn",
+    "note": "IDN test domain in Cyrillic; the display name is Cyrillic too, so there is no script mismatch.",
+    "identity": { "displayName": "Пример", "fromAddress": "info@xn--e1afmkfd.xn--p1ai" }
+  },
+  {
+    "id": "legit-punycode-idn-003",
+    "label": "legit",
+    "category": "punycode-idn",
+    "note": "Chinese-script punycode domain (测试.中国), a genuine standalone IDN rather than a brand impersonation.",
+    "identity": { "displayName": "测试域名", "fromAddress": "info@xn--0zwm56d.xn--fiqs8s" }
+  },
+  {
+    "id": "legit-punycode-idn-004",
+    "label": "legit",
+    "category": "punycode-idn",
+    "note": "Standard Arabic IDN example domain; the whole identity is Arabic-script, so nothing is disguised.",
+    "identity": { "displayName": "مثال", "fromAddress": "info@xn--mgbh0fb.xn--kgbechtv" }
+  },
+  {
+    "id": "legit-punycode-idn-005",
+    "label": "legit",
+    "category": "punycode-idn",
+    "note": "Indonesian punycode .id sender whose decoded label is the plain Indonesian word warunge, not a Latin brand lookalike.",
+    "identity": { "displayName": "Warung Digital", "fromAddress": "info@xn--warung-gva.id" }
+  },
+  {
+    "id": "legit-punycode-idn-006",
+    "label": "legit",
+    "category": "punycode-idn",
+    "note": "Hindi-script .भारत sender; the domain is an IDN TLD, not a Latin homograph of a bank.",
+    "identity": { "displayName": "केंद्र सहायता", "fromAddress": "support@kendra.xn--h2brj9c" }
+  },
+  {
+    "id": "legit-punycode-idn-007",
+    "label": "legit",
+    "category": "punycode-idn",
+    "note": "Korean-script .한국 domain for a trade association; the display name is Korean as well.",
+    "identity": { "displayName": "한국무역", "fromAddress": "info@trade.xn--3e0b707e" }
+  },
+  {
+    "id": "legit-punycode-idn-008",
+    "label": "legit",
+    "category": "punycode-idn",
+    "note": "Kazakh postal operator on the .қаз IDN TLD; brand and script are consistent.",
+    "identity": { "displayName": "Қазпошта", "fromAddress": "info@qazpost.xn--80ao21a" }
+  },
+  {
+    "id": "legit-cjk-arabic-devanagari-001",
+    "label": "legit",
+    "category": "cjk-arabic-devanagari",
+    "note": "Chinese display name with a Latin pinyin local part, a completely normal corporate pattern.",
+    "identity": { "displayName": "张伟", "fromAddress": "zhang.wei@unicom-tech.cn" }
+  },
+  {
+    "id": "legit-cjk-arabic-devanagari-002",
+    "label": "legit",
+    "category": "cjk-arabic-devanagari",
+    "note": "Japanese company name with the same surname romanised in the address.",
+    "identity": { "displayName": "株式会社山田", "fromAddress": "yamada@yamada-corp.co.jp" }
+  },
+  {
+    "id": "legit-cjk-arabic-devanagari-003",
+    "label": "legit",
+    "category": "cjk-arabic-devanagari",
+    "note": "Arabic display name transliterated in the local part on the family group's own domain.",
+    "identity": { "displayName": "محمد الأحمد", "fromAddress": "mohammed.alahmad@alahmad-group.ae" }
+  },
+  {
+    "id": "legit-cjk-arabic-devanagari-004",
+    "label": "legit",
+    "category": "cjk-arabic-devanagari",
+    "note": "Devanagari name romanised in the address of the exporter's own domain.",
+    "identity": { "displayName": "राजेश कुमार", "fromAddress": "rajesh.kumar@kumar-export.in" }
+  },
+  {
+    "id": "legit-cjk-arabic-devanagari-005",
+    "label": "legit",
+    "category": "cjk-arabic-devanagari",
+    "note": "Thai display name with a romanised first name in the local part.",
+    "identity": { "displayName": "สมชาย ใจดี", "fromAddress": "somchai@jaidee.co.th" }
+  },
+  {
+    "id": "legit-cjk-arabic-devanagari-006",
+    "label": "legit",
+    "category": "cjk-arabic-devanagari",
+    "note": "Vietnamese diacritics in the name with the ASCII fold in the address of the same company.",
+    "identity": { "displayName": "Nguyễn Văn An", "fromAddress": "an.nguyen@vnan-pharma.vn" }
+  },
+  {
+    "id": "legit-cjk-arabic-devanagari-007",
+    "label": "legit",
+    "category": "cjk-arabic-devanagari",
+    "note": "Spanish accents in the display name fold cleanly onto the ASCII address tokens.",
+    "identity": { "displayName": "José Álvarez", "fromAddress": "jose.alvarez@example.com" }
+  },
+  {
+    "id": "legit-cjk-arabic-devanagari-008",
+    "label": "legit",
+    "category": "cjk-arabic-devanagari",
+    "note": "Nordic diacritics in the display name correspond to the ASCII local part.",
+    "identity": { "displayName": "Björn Öberg", "fromAddress": "bjorn.oberg@oberg.se" }
+  },
+  {
+    "id": "legit-auth-combinations-001",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "DKIM, SPF and DMARC all pass with header.from aligned to the From domain.",
+    "identity": { "displayName": "Google", "fromAddress": "no-reply@google.com", "authenticationResults": "mx.google.com; dkim=pass header.i=@google.com header.s=20230601; spf=pass (google.com: domain of no-reply@google.com designates 209.85.220.69 as permitted sender) smtp.mailfrom=no-reply@google.com; dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=google.com" }
+  },
+  {
+    "id": "legit-auth-combinations-002",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "ESP Return-Path with aligned DMARC pass for the brand's own From domain.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "no-reply@tokopedia.com", "returnPath": "bounce@sendgrid.net", "authenticationResults": "mx.google.com; dkim=pass header.i=@tokopedia.com header.s=sel2023; spf=pass (google.com: domain of bounce@sendgrid.net designates 1.2.3.4 as permitted sender) smtp.mailfrom=bounce@sendgrid.net; dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=tokopedia.com" }
+  },
+  {
+    "id": "legit-auth-combinations-003",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "Weak DMARC policy p=NONE but the passing result still aligns with the From domain used by the ministry.",
+    "identity": { "displayName": "Kementerian Keuangan", "fromAddress": "noreply@kemenkeu.go.id", "authenticationResults": "mx.google.com; dkim=pass header.i=@kemenkeu.go.id header.s=mail2022; spf=pass (google.com: domain of noreply@kemenkeu.go.id designates 103.10.20.5 as permitted sender) smtp.mailfrom=noreply@kemenkeu.go.id; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=kemenkeu.go.id" }
+  },
+  {
+    "id": "legit-auth-combinations-004",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "SendGrid bounce domain in SPF while DMARC passes for the brand's own From domain.",
+    "identity": { "displayName": "Shopify", "fromAddress": "no-reply@shopify.com", "returnPath": "bounce@sendgrid.net", "authenticationResults": "mx.google.com; dkim=pass header.i=@shopify.com header.s=s1; spf=pass (google.com: domain of bounce@sendgrid.net designates 1.2.3.4 as permitted sender) smtp.mailfrom=bounce@sendgrid.net; dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=shopify.com" }
+  },
+  {
+    "id": "legit-auth-combinations-005",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "Reply-To equal to From is a normal pattern and authentication passes for the wallet's domain.",
+    "identity": { "displayName": "DANA Indonesia", "fromAddress": "care@dana.id", "replyTo": "care@dana.id", "authenticationResults": "mx.google.com; dkim=pass header.i=@dana.id header.s=dana2023; spf=pass (google.com: domain of care@dana.id designates 45.126.140.20 as permitted sender) smtp.mailfrom=care@dana.id; dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=dana.id" }
+  },
+  {
+    "id": "legit-auth-combinations-006",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "Reply-To on a delegated notification subdomain of the same registrable domain, aligned DMARC pass.",
+    "identity": { "displayName": "Bank Mandiri", "fromAddress": "no-reply@bankmandiri.co.id", "replyTo": "no-reply@notifikasi.bankmandiri.co.id", "authenticationResults": "mx.google.com; dkim=pass header.i=@bankmandiri.co.id header.s=mandiri2024; spf=pass (google.com: domain of no-reply@bankmandiri.co.id designates 202.6.4.10 as permitted sender) smtp.mailfrom=no-reply@bankmandiri.co.id; dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=bankmandiri.co.id" }
+  },
+  {
+    "id": "legit-auth-combinations-007",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "Brand mailer subdomain authenticated with three aligned passes.",
+    "identity": { "displayName": "Netflix", "fromAddress": "info@mailer.netflix.com", "authenticationResults": "mx.google.com; dkim=pass header.i=@mailer.netflix.com header.s=nflx2023; spf=pass (google.com: domain of info@mailer.netflix.com designates 198.51.100.7 as permitted sender) smtp.mailfrom=info@mailer.netflix.com; dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=mailer.netflix.com" }
+  },
+  {
+    "id": "legit-auth-combinations-008",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "Multiple DKIM selectors and aligned SPF and DMARC for the company's own domain.",
+    "identity": { "displayName": "Acme Corp", "fromAddress": "no-reply@acme.co.id", "authenticationResults": "mx.google.com; dkim=pass header.i=@acme.co.id header.s=acme1; dkim=pass header.i=@acme.co.id header.s=acme2; spf=pass (google.com: domain of no-reply@acme.co.id designates 203.0.113.9 as permitted sender) smtp.mailfrom=no-reply@acme.co.id; dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=acme.co.id" }
+  },
+  {
+    "id": "legit-auth-combinations-009",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "University .ac.id sender with aligned passes; nothing in the headers contradicts the display name.",
+    "identity": { "displayName": "Universitas Indonesia", "fromAddress": "noreply@ui.ac.id", "authenticationResults": "mx.google.com; dkim=pass header.i=@ui.ac.id header.s=ui2023; spf=pass (google.com: domain of noreply@ui.ac.id designates 152.118.1.1 as permitted sender) smtp.mailfrom=noreply@ui.ac.id; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=ui.ac.id" }
+  },
+  {
+    "id": "legit-auth-combinations-010",
+    "label": "legit",
+    "category": "auth-combinations",
+    "note": "Reply-To on the same domain as From together with aligned authentication passes.",
+    "identity": { "displayName": "Steam Support", "fromAddress": "no-reply@steampowered.com", "replyTo": "support@steampowered.com", "authenticationResults": "mx.google.com; dkim=pass header.i=@steampowered.com header.s=valve2024; spf=pass (google.com: domain of no-reply@steampowered.com designates 198.51.100.55 as permitted sender) smtp.mailfrom=no-reply@steampowered.com; dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=steampowered.com" }
+  },
+  {
+    "id": "legit-random-localpart-001",
+    "label": "legit",
+    "category": "random-localpart",
+    "note": "Consumer ISP mailbox with an assigned random local part; the display name is simply the account holder.",
+    "identity": { "displayName": "Budi Santoso", "fromAddress": "x7k2@randomisp.co.id" }
+  },
+  {
+    "id": "legit-random-localpart-002",
+    "label": "legit",
+    "category": "random-localpart",
+    "note": "Cable ISP issue an opaque customer username, which says nothing about the person's identity.",
+    "identity": { "displayName": "Siti Aminah", "fromAddress": "kj8f3p@radnet.co.id" }
+  },
+  {
+    "id": "legit-random-localpart-003",
+    "label": "legit",
+    "category": "random-localpart",
+    "note": "Regional ISP account number as local part; no organisation is claimed in the display name.",
+    "identity": { "displayName": "Andi", "fromAddress": "a92kd7@jabarnet.id" }
+  },
+  {
+    "id": "legit-random-localpart-004",
+    "label": "legit",
+    "category": "random-localpart",
+    "note": "Assigned ISP handle for a home connection, a very common Indonesian pattern.",
+    "identity": { "displayName": "Dewi Lestari", "fromAddress": "zq44mn@myisp.net.id" }
+  },
+  {
+    "id": "legit-random-localpart-005",
+    "label": "legit",
+    "category": "random-localpart",
+    "note": "Student registration number as the local part of a campus mailbox.",
+    "identity": { "displayName": "Rina Kusumawati", "fromAddress": "mhs2104032@student.ugm.ac.id" }
+  },
+  {
+    "id": "legit-random-localpart-006",
+    "label": "legit",
+    "category": "random-localpart",
+    "note": "Campus single sign-on style numeric local part; the display name is the student's own name.",
+    "identity": { "displayName": "Fajar Nugroho", "fromAddress": "18220043@std.stei.itb.ac.id" }
+  },
+  {
+    "id": "legit-random-localpart-007",
+    "label": "legit",
+    "category": "random-localpart",
+    "note": "Alumni mailbox keyed by student number; numeric local parts are normal at universities.",
+    "identity": { "displayName": "Yusuf Maulana", "fromAddress": "17082021@alumni.unpad.ac.id" }
+  },
+  {
+    "id": "legit-random-localpart-008",
+    "label": "legit",
+    "category": "random-localpart",
+    "note": "Opaque local part assigned by a business ISP; nothing in the display name claims a brand.",
+    "identity": { "displayName": "Hendra Wijaya", "fromAddress": "p3x9k2@cbn.net.id" }
+  }
+]

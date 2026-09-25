@@ -1,0 +1,10 @@
+packages:
+  - 'packages/*'
+  - 'tools/*'
+  - 'examples'
+
+# pnpm 11 memblokir postinstall dependency secara default. esbuild (dipakai vitest)
+# butuh binary-nya saat install, jadi hanya paket ini yang diizinkan menjalankan script.
+# Catatan: pnpm 11 mengganti nama kunci `onlyBuiltDependencies` (pnpm 10) menjadi `allowBuilds`.
+allowBuilds:
+  esbuild: true

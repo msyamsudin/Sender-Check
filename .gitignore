@@ -1,0 +1,23 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+.wxt/
+.output/
+
+# Editor
+.idea/
+*.swp
+
+# Jangan pernah commit rahasia. Proyek ini tidak memerlukan satu pun kredensial,
+# jadi kehadiran berkas ini adalah tanda ada sesuatu yang salah.
+.env
+.env.*
+
+# Artefak yang ditulis ulang setiap kali `pnpm corpus` dijalankan. Sengaja tidak
+# di-commit supaya diff tidak dipenuhi perubahan laporan yang tidak berarti.
+tools/corpus/reports/
+
+# Hasil bundel skrip konsol. Dibangun ulang dengan `pnpm console:build`.
+tools/console/dist/

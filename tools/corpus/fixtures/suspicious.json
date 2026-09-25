@@ -1,0 +1,1024 @@
+[
+  {
+    "id": "suspicious-lookalike-domain-001",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "PayPal's name on a domain where a digit replaces the letter l, a textbook phishing lookalike.",
+    "identity": { "displayName": "PayPal", "fromAddress": "service@paypa1.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-002",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Support claim for a well-known wallet while the registrable domain is an unrelated hyphenated lookalike.",
+    "identity": { "displayName": "PayPal Service", "fromAddress": "support@paypa1-secure.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-003",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Zero for the letter o in the domain while the display name claims Microsoft account mail.",
+    "identity": { "displayName": "Microsoft", "fromAddress": "account@micros0ft.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-004",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Google security claim from a domain that swaps o for zero.",
+    "identity": { "displayName": "Google", "fromAddress": "security@g00gle.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-005",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "rn for m inside the marketplace brand token in the domain, classic visual substitution.",
+    "identity": { "displayName": "Amazon", "fromAddress": "orders@arnazon.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-006",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Indonesian bank name on a doubled-letter lookalike domain that the bank does not own.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "cs@bankbcaa.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-007",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "KlikBCA local part on a hyphenated domain that imitates the bank's service name.",
+    "identity": { "displayName": "BCA", "fromAddress": "klikbca@bca-klik.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-008",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Digit-for-letter substitution in the Netflix brand token while the display name claims the brand.",
+    "identity": { "displayName": "Netflix", "fromAddress": "info@netfl1x.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-009",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Apple ID claim on a domain built from the brand plus a verification word, not Apple's domain.",
+    "identity": { "displayName": "Apple", "fromAddress": "support@apple-id-verify.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-010",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Instagram security claim from a domain that replaces the i with a digit one.",
+    "identity": { "displayName": "Instagram", "fromAddress": "security@1nstagram.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-011",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "WhatsApp verification claim on a domain that merely appends a scare word to the brand.",
+    "identity": { "displayName": "WhatsApp", "fromAddress": "support@whatsapp-verification.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-012",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Tokopedia brand claim where the domain substitutes the digit one for the letter l.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "cs@tokoped1a.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-013",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Shopee brand plus country suffix on a domain the marketplace does not own.",
+    "identity": { "displayName": "Shopee", "fromAddress": "promo@shope-indonesia.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-014",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Wallet brand with a country suffix on a hyphenated domain, imitating an official sender.",
+    "identity": { "displayName": "DANA", "fromAddress": "cs@dana-indonesia.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-015",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "OVO help address on a hyphenated domain that is not the wallet's real domain.",
+    "identity": { "displayName": "OVO", "fromAddress": "help@ovo-id.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-016",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "GoPay brand claim on a hyphenated lookalike domain with no relation to the operator.",
+    "identity": { "displayName": "GoPay", "fromAddress": "cs@gopay-id.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-017",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "Bank name plus an online suffix on a domain that is not the bank's registrable domain.",
+    "identity": { "displayName": "Mandiri", "fromAddress": "cs@mandiri-online.com" }
+  },
+  {
+    "id": "suspicious-lookalike-domain-018",
+    "label": "suspicious",
+    "category": "lookalike-domain",
+    "note": "State bank brand with the letter i replaced by a digit under an Indonesian-looking TLD.",
+    "identity": { "displayName": "BRI", "fromAddress": "cs@br1.co.id" }
+  },
+  {
+    "id": "suspicious-typo-domain-001",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "LinkedIn notification claim from a domain with the final letter dropped and a typo ending.",
+    "identity": { "displayName": "LinkedIn", "fromAddress": "messages@linkedln.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-002",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Triple-o typo in the Facebook domain while the display name claims a security notice.",
+    "identity": { "displayName": "Facebook", "fromAddress": "security@faceboook.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-003",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Bank name with a dropped letter in the domain, a classic typosquat of a trusted institution.",
+    "identity": { "displayName": "Standard Chartered", "fromAddress": "service@standardchatered.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-004",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Courier brand plus country token on a domain with a typo suffix, not the courier's domain.",
+    "identity": { "displayName": "DHL", "fromAddress": "tracking@dhl-express-id.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-005",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Ride-hailing brand misspelled by one letter while the display name claims customer service.",
+    "identity": { "displayName": "Gojek", "fromAddress": "cs@gojeg.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-006",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Travel brand with a transposed vowel in the domain while the display name claims the brand.",
+    "identity": { "displayName": "Traveloka", "fromAddress": "cs@travaloka.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-007",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Marketplace brand with a dropped letter in the registrable label.",
+    "identity": { "displayName": "Bukalapak", "fromAddress": "cs@bukalapk.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-008",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Bank name with an extra letter appended to the brand token.",
+    "identity": { "displayName": "Mandiri", "fromAddress": "cs@mandirii.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-009",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "State bank acronym with l substituted for i inside a .co.id lookalike domain.",
+    "identity": { "displayName": "BNI", "fromAddress": "cs@bnl.co.id" }
+  },
+  {
+    "id": "suspicious-typo-domain-010",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Marketplace brand doubled at the end of the domain label.",
+    "identity": { "displayName": "Shopee", "fromAddress": "cs@shopeee.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-011",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Telco brand with a doubled final letter while the display name claims the operator.",
+    "identity": { "displayName": "Telkomsel", "fromAddress": "info@telkomsell.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-012",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Energy company name with a doubled final letter on a domain the company does not own.",
+    "identity": { "displayName": "Pertamina", "fromAddress": "info@pertaminaa.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-013",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "ISP brand with a doubled final letter; the display name claims to be that ISP's support.",
+    "identity": { "displayName": "Biznet Support", "fromAddress": "support@biznett.com" }
+  },
+  {
+    "id": "suspicious-typo-domain-014",
+    "label": "suspicious",
+    "category": "typo-domain",
+    "note": "Paylater brand with the letter i replaced by l in the domain label.",
+    "identity": { "displayName": "Kredivo", "fromAddress": "cs@kredlvo.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-001",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Latin brand display name with Greek omicron characters standing in for the o letters in the domain.",
+    "identity": { "displayName": "Google", "fromAddress": "security@gοοgle.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-002",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic a inside the Apple brand token while the display name shows plain Latin Apple.",
+    "identity": { "displayName": "Apple", "fromAddress": "support@аpple.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-003",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic o mixed into the Microsoft label in the domain, invisible in the rendered name.",
+    "identity": { "displayName": "Microsoft", "fromAddress": "account@micrоsoft.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-004",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic a replacing the second letter of the PayPal brand token in the domain.",
+    "identity": { "displayName": "PayPal", "fromAddress": "service@pаypal.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-005",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic o inside the Amazon label while the display name claims an order notification.",
+    "identity": { "displayName": "Amazon", "fromAddress": "orders@amazоn.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-006",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Indonesian bank acronym spelled with Cyrillic s and a inside a .co.id hostname.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "cs@bса.co.id" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-007",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Ukrainian i substituted into the bank's brand token in the domain.",
+    "identity": { "displayName": "Mandiri", "fromAddress": "cs@mandіri.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-008",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic i inside the Netflix label, which renders almost identically in most mail clients.",
+    "identity": { "displayName": "Netflix", "fromAddress": "info@netflіx.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-009",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic o inside the marketplace brand token while the display name shows the Latin brand.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "cs@tоkopedia.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-010",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic o inside the Shopee label with a promotional display name.",
+    "identity": { "displayName": "Shopee", "fromAddress": "cs@shоpee.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-011",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Both a letters of the wallet brand replaced with Cyrillic a inside an .id hostname.",
+    "identity": { "displayName": "DANA", "fromAddress": "cs@dаnа.id" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-012",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic i inside the exchange brand token in the domain.",
+    "identity": { "displayName": "Binance", "fromAddress": "support@bіnance.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-013",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic a inside the gaming platform brand token while the display name claims support.",
+    "identity": { "displayName": "Steam", "fromAddress": "support@steаm.com" }
+  },
+  {
+    "id": "suspicious-homoglyph-unicode-014",
+    "label": "suspicious",
+    "category": "homoglyph-unicode",
+    "note": "Cyrillic a inside the WhatsApp label, making a visually identical but unrelated domain.",
+    "identity": { "displayName": "WhatsApp", "fromAddress": "support@whаtsapp.com" }
+  },
+  {
+    "id": "suspicious-punycode-idn-001",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Punycode hostname that decodes to the Apple brand spelled with Cyrillic lookalike letters.",
+    "identity": { "displayName": "Apple", "fromAddress": "support@xn--80ak6aa92e.com", "gmailOwnWarning": true }
+  },
+  {
+    "id": "suspicious-punycode-idn-002",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Known IDN homograph hostname for a game store while the display name shows the plain Latin brand.",
+    "identity": { "displayName": "Epic Games", "fromAddress": "support@xn--e1awd7f.com", "gmailOwnWarning": true }
+  },
+  {
+    "id": "suspicious-punycode-idn-003",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Punycode label that folds to the Google brand with non-Latin o characters, hidden behind xn--.",
+    "identity": { "displayName": "Google", "fromAddress": "security@xn--ggle-55da.com" }
+  },
+  {
+    "id": "suspicious-punycode-idn-004",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Punycode Amazon label with a non-Latin character inside the brand token.",
+    "identity": { "displayName": "Amazon", "fromAddress": "orders@xn--mazon-3ve.com" }
+  },
+  {
+    "id": "suspicious-punycode-idn-005",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Punycode .co.id hostname carrying the bank acronym with non-Latin characters.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "cs@xn--b-8sb4c.co.id" }
+  },
+  {
+    "id": "suspicious-punycode-idn-006",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Punycode hostname whose decoded label imitates the marketplace brand.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "cs@xn--tkopedia-nbh.com" }
+  },
+  {
+    "id": "suspicious-punycode-idn-007",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Punycode label based on the bank name with substituted non-Latin characters.",
+    "identity": { "displayName": "Mandiri", "fromAddress": "cs@xn--mandri-svf.com" }
+  },
+  {
+    "id": "suspicious-punycode-idn-008",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Punycode Netflix lookalike under a generic TLD while the display name claims the brand.",
+    "identity": { "displayName": "Netflix", "fromAddress": "info@xn--netflx-tvf.com", "gmailOwnWarning": true }
+  },
+  {
+    "id": "suspicious-punycode-idn-009",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Punycode .id hostname disguised as the wallet brand with non-Latin letters.",
+    "identity": { "displayName": "DANA", "fromAddress": "cs@xn--dn-7kcb.id" }
+  },
+  {
+    "id": "suspicious-punycode-idn-010",
+    "label": "suspicious",
+    "category": "punycode-idn",
+    "note": "Punycode hostname that renders as the messaging brand with mixed-script characters.",
+    "identity": { "displayName": "WhatsApp", "fromAddress": "support@xn--whtsapp-3fg.com" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-001",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Brand appears only in the subdomain while the registrable domain is an unrelated xyz host.",
+    "identity": { "displayName": "PayPal", "fromAddress": "support@paypal.com.secure-login.xyz" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-002",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Bank name and its .co.id address are baked into the subdomain, but the registrable domain is a throwaway top.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "no-reply@bca.co.id.verifikasi-akun.top" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-003",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Bank brand and country code as subdomain labels under an unrelated xyz registrable domain.",
+    "identity": { "displayName": "Mandiri", "fromAddress": "cs@mandiri.co.id.klik-aman.xyz" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-004",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Apple brand and a verification phrase used as subdomains beneath an unrelated support TLD.",
+    "identity": { "displayName": "Apple", "fromAddress": "support@apple.com.id-verify.support" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-005",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Streaming brand placed in the subdomain while the real registrable domain is a billing-themed click domain.",
+    "identity": { "displayName": "Netflix", "fromAddress": "info@netflix.com.billing-update.click" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-006",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Wallet brand and .id address used as subdomain labels under an unrelated xyz host.",
+    "identity": { "displayName": "DANA", "fromAddress": "cs@dana.id.saldo-verifikasi.xyz" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-007",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Wallet brand plus a reward bait phrase as subdomains of an unrelated top-level domain.",
+    "identity": { "displayName": "OVO", "fromAddress": "help@ovo.id.poin-reward.top" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-008",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Marketplace brand and country code in the subdomain, account-blocked scare word in the registrable area.",
+    "identity": { "displayName": "Shopee", "fromAddress": "cs@shopee.co.id.akun-diblokir.xyz" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-009",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Wallet operator name and .co.id used as subdomains beneath an unrelated verification host.",
+    "identity": { "displayName": "GoPay", "fromAddress": "cs@gopay.co.id.verifikasi.top" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-010",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Messaging brand as a subdomain label with an account-check bait domain at the registrable level.",
+    "identity": { "displayName": "WhatsApp", "fromAddress": "support@whatsapp.com.cek-akun.xyz" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-011",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Search brand in the subdomain only, registrable domain is an account-review bait name.",
+    "identity": { "displayName": "Google", "fromAddress": "security@google.com.account-review.win" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-012",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Microsoft brand placed in the subdomain while the registrable domain is a password-reset bait name.",
+    "identity": { "displayName": "Microsoft", "fromAddress": "account@microsoft.com.password-reset.work" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-013",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "State bank acronym and .co.id as subdomain labels under an unrelated xyz token host.",
+    "identity": { "displayName": "BRI", "fromAddress": "cs@bri.co.id.token-aktivasi.xyz" }
+  },
+  {
+    "id": "suspicious-subdomain-spoof-014",
+    "label": "suspicious",
+    "category": "subdomain-spoof",
+    "note": "Marketplace domain copied into the subdomain with an order-cancelled bait registrable domain.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "cs@tokopedia.com.pesanan-batal.click" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-001",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Bank display name and a lookalike From domain, but replies are routed to a third unrelated domain.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "halobca@bca-notifikasi.com", "replyTo": "cs@bca-verifikasi.xyz" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-002",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Corporate-looking wallet From domain but the Reply-To is a free Gmail account.",
+    "identity": { "displayName": "DANA Indonesia", "fromAddress": "no-reply@dana-care.com", "replyTo": "dana.help@gmail.com" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-003",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Payment brand claim where From and Reply-To are two different lookalike domains.",
+    "identity": { "displayName": "PayPal", "fromAddress": "service@paypal-billing.com", "replyTo": "support@paypa1.com" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-004",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Recruitment mail whose From domain is unrelated to the HRD name and whose replies go to free mail.",
+    "identity": { "displayName": "HRD PT Nusantara", "fromAddress": "hrd@nusantara-career.com", "replyTo": "hrd.nusantara@gmail.com" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-005",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Marketplace support name on a lookalike domain with replies redirected to a consumer mailbox.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "cs@tokopedia-bantuan.com", "replyTo": "tokopedia.care@yahoo.com" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-006",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Bank name with the From on a lookalike domain and the Reply-To on consumer Outlook.",
+    "identity": { "displayName": "Mandiri", "fromAddress": "cs@mandiri-aman.com", "replyTo": "mandiri.cs@outlook.com" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-007",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Streaming brand billing claim where the Reply-To sits on a completely different lookalike domain.",
+    "identity": { "displayName": "Netflix", "fromAddress": "info@netflix-billing.com", "replyTo": "billing@netflix-support.xyz" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-008",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Marketplace promotion with a lookalike From domain and replies pointed at a personal Gmail account.",
+    "identity": { "displayName": "Shopee", "fromAddress": "cs@shopee-promo.com", "replyTo": "shopee.cs@gmail.com" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-009",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Government tax claim where the From is a lookalike domain and replies go to a free mailbox.",
+    "identity": { "displayName": "Kemenkeu", "fromAddress": "info@kemenkeu-pajak.com", "replyTo": "pajak.kemenkeu@gmail.com" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-010",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "University academic notice whose From domain is a lookalike and whose Reply-To is consumer mail.",
+    "identity": { "displayName": "Universitas Indonesia", "fromAddress": "admin@ui-akademik.com", "replyTo": "admin.ui@gmail.com" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-011",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Wallet reward claim with the From on a lookalike domain and the Reply-To on consumer Gmail.",
+    "identity": { "displayName": "OVO", "fromAddress": "help@ovo-reward.com", "replyTo": "ovo.help@gmail.com" }
+  },
+  {
+    "id": "suspicious-reply-to-mismatch-012",
+    "label": "suspicious",
+    "category": "reply-to-mismatch",
+    "note": "Account verification claim where From and Reply-To are two unrelated lookalike domains.",
+    "identity": { "displayName": "Microsoft Account", "fromAddress": "account@microsoft-verify.com", "replyTo": "account@microsoft-support.top" }
+  },
+  {
+    "id": "suspicious-auth-combinations-001",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Bank brand on a doubled-letter lookalike domain while DMARC fails for that same From domain.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "cs@bankbcaa.com", "authenticationResults": "mx.google.com; dkim=none (message not signed) header.d=none; spf=fail (google.com: domain of cs@bankbcaa.com does not designate 45.12.9.8 as permitted sender) smtp.mailfrom=cs@bankbcaa.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=bankbcaa.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-002",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Payment brand claim with both SPF and DMARC failing for the lookalike sending domain.",
+    "identity": { "displayName": "PayPal", "fromAddress": "service@paypa1.com", "authenticationResults": "mx.google.com; dkim=fail header.i=@paypa1.com header.s=default; spf=fail (google.com: domain of service@paypa1.com does not designate 91.203.5.14 as permitted sender) smtp.mailfrom=service@paypa1.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=paypa1.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-003",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Wallet display name with a broken DKIM signature on a domain unrelated to the wallet.",
+    "identity": { "displayName": "DANA", "fromAddress": "cs@dana-care.com", "authenticationResults": "mx.google.com; dkim=fail (body hash did not verify) header.i=@dana-care.com header.s=mailer; spf=pass (google.com: domain of cs@dana-care.com designates 103.55.1.4 as permitted sender) smtp.mailfrom=cs@dana-care.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=dana-care.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-004",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Marketplace brand claim with DMARC failing for the lookalike From domain.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "cs@tokopedia-promo.com", "authenticationResults": "mx.google.com; dkim=none (message not signed) header.d=none; spf=softfail (google.com: domain of cs@tokopedia-promo.com does not designate 185.9.2.77 as permitted sender) smtp.mailfrom=cs@tokopedia-promo.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=tokopedia-promo.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-005",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Bank name on an unrelated domain with SPF failing for the sending host.",
+    "identity": { "displayName": "Mandiri", "fromAddress": "cs@mandiri-aman.com", "authenticationResults": "mx.google.com; dkim=pass header.i=@mandiri-aman.com header.s=s1; spf=fail (google.com: domain of cs@mandiri-aman.com does not designate 172.67.9.30 as permitted sender) smtp.mailfrom=cs@mandiri-aman.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=mandiri-aman.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-006",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Fake prize claim from a lookalike marketplace domain with both DKIM and DMARC failing.",
+    "identity": { "displayName": "Shopee Hadiah", "fromAddress": "cs@shopee-hadiah.com", "authenticationResults": "mx.google.com; dkim=fail header.i=@shopee-hadiah.com header.s=sel; spf=fail (google.com: domain of cs@shopee-hadiah.com does not designate 45.90.28.11 as permitted sender) smtp.mailfrom=cs@shopee-hadiah.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=shopee-hadiah.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-007",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Microsoft account claim from a zero-substituted domain with DMARC failing.",
+    "identity": { "displayName": "Microsoft Account", "fromAddress": "account@micros0ft.com", "authenticationResults": "mx.google.com; dkim=none (message not signed) header.d=none; spf=neutral (google.com: 91.203.5.14 is neither permitted nor denied by domain of account@micros0ft.com) smtp.mailfrom=account@micros0ft.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=micros0ft.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-008",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Government tax claim on a lookalike domain with SPF and DMARC failing.",
+    "identity": { "displayName": "Kemenkeu RI", "fromAddress": "info@pajak-kemenkeu.com", "authenticationResults": "mx.google.com; dkim=fail header.i=@pajak-kemenkeu.com header.s=default; spf=fail (google.com: domain of info@pajak-kemenkeu.com does not designate 103.147.8.6 as permitted sender) smtp.mailfrom=info@pajak-kemenkeu.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=pajak-kemenkeu.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-009",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "State bank brand on an unrelated domain with DMARC failing for the From domain.",
+    "identity": { "displayName": "BNI", "fromAddress": "cs@bni-online.com", "authenticationResults": "mx.google.com; dkim=none (message not signed) header.d=none; spf=pass (google.com: domain of cs@bni-online.com designates 103.55.1.9 as permitted sender) smtp.mailfrom=cs@bni-online.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=bni-online.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-010",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Wallet reward claim with SPF failing and DMARC failing for the lookalike domain.",
+    "identity": { "displayName": "OVO", "fromAddress": "help@ovo-reward.com", "authenticationResults": "mx.google.com; dkim=pass header.i=@ovo-reward.com header.s=k1; spf=fail (google.com: domain of help@ovo-reward.com does not designate 185.199.4.22 as permitted sender) smtp.mailfrom=help@ovo-reward.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=ovo-reward.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-011",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Wallet brand on a hyphenated lookalike domain with DKIM and DMARC failing.",
+    "identity": { "displayName": "GoPay", "fromAddress": "cs@gopay-id.com", "authenticationResults": "mx.google.com; dkim=fail header.i=@gopay-id.com header.s=mail; spf=fail (google.com: domain of cs@gopay-id.com does not designate 172.67.9.30 as permitted sender) smtp.mailfrom=cs@gopay-id.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=gopay-id.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-012",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "Apple ID claim on a lookalike domain with DMARC failing, so the brand claim is unauthenticated.",
+    "identity": { "displayName": "Apple", "fromAddress": "support@apple-id-verify.com", "authenticationResults": "mx.google.com; dkim=none (message not signed) header.d=none; spf=fail (google.com: domain of support@apple-id-verify.com does not designate 91.203.5.90 as permitted sender) smtp.mailfrom=support@apple-id-verify.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=apple-id-verify.com" }
+  },
+  {
+    "id": "suspicious-auth-combinations-013",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "State bank acronym with a digit lookalike domain and both SPF and DMARC failing.",
+    "identity": { "displayName": "BRI", "fromAddress": "cs@br1.co.id", "authenticationResults": "mx.google.com; dkim=fail header.i=@br1.co.id header.s=default; spf=fail (google.com: domain of cs@br1.co.id does not designate 103.147.8.60 as permitted sender) smtp.mailfrom=cs@br1.co.id; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=br1.co.id" }
+  },
+  {
+    "id": "suspicious-auth-combinations-014",
+    "label": "suspicious",
+    "category": "auth-combinations",
+    "note": "University name on an unrelated academic-sounding domain with DMARC failing.",
+    "identity": { "displayName": "Universitas Indonesia", "fromAddress": "admin@ui-akademik.com", "authenticationResults": "mx.google.com; dkim=none (message not signed) header.d=none; spf=neutral (google.com: 45.90.28.11 is neither permitted nor denied by domain of admin@ui-akademik.com) smtp.mailfrom=admin@ui-akademik.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=ui-akademik.com" }
+  },
+  {
+    "id": "suspicious-freemail-001",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "A national bank name in the display name sent from a personal Gmail address.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "bcaindonesia@gmail.com" }
+  },
+  {
+    "id": "suspicious-freemail-002",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Marketplace claims official status while sending from a Gmail account it does not own.",
+    "identity": { "displayName": "Tokopedia Official", "fromAddress": "tokopedia.help@gmail.com" }
+  },
+  {
+    "id": "suspicious-freemail-003",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Wallet operator name on a consumer Gmail address rather than the wallet's own domain.",
+    "identity": { "displayName": "DANA Indonesia", "fromAddress": "dana.indonesia@gmail.com" }
+  },
+  {
+    "id": "suspicious-freemail-004",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Marketplace country office claimed from an unofficial Gmail account.",
+    "identity": { "displayName": "Shopee Indonesia", "fromAddress": "shopee.official@gmail.com" }
+  },
+  {
+    "id": "suspicious-freemail-005",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Bank customer service label attached to a personal Yahoo account.",
+    "identity": { "displayName": "Mandiri CS", "fromAddress": "cs.mandiri@yahoo.com" }
+  },
+  {
+    "id": "suspicious-freemail-006",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Ministry name on a free mailbox, which no Indonesian ministry uses for official tax mail.",
+    "identity": { "displayName": "Kemenkeu RI", "fromAddress": "kemenkeu.pajak@gmail.com" }
+  },
+  {
+    "id": "suspicious-freemail-007",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Wallet support claim from a consumer Gmail address.",
+    "identity": { "displayName": "OVO Support", "fromAddress": "ovo.help@gmail.com" }
+  },
+  {
+    "id": "suspicious-freemail-008",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Wallet operator care label on a regional Yahoo account.",
+    "identity": { "displayName": "GoPay Care", "fromAddress": "gopay.care@yahoo.co.id" }
+  },
+  {
+    "id": "suspicious-freemail-009",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Bank customer service name on a personal Gmail account.",
+    "identity": { "displayName": "BRI Customer Service", "fromAddress": "bri.cs@gmail.com" }
+  },
+  {
+    "id": "suspicious-freemail-010",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Streaming service billing claim from a free mailbox the service does not use.",
+    "identity": { "displayName": "Netflix Billing", "fromAddress": "netflix.billing@gmail.com" }
+  },
+  {
+    "id": "suspicious-freemail-011",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Company HRD identity asserted from a free Gmail account with no tie to the company.",
+    "identity": { "displayName": "HRD PT Maju Jaya", "fromAddress": "hrd.majujaya@gmail.com" }
+  },
+  {
+    "id": "suspicious-freemail-012",
+    "label": "suspicious",
+    "category": "freemail",
+    "note": "Payment brand security team claimed from a personal Gmail address.",
+    "identity": { "displayName": "PayPal Security", "fromAddress": "paypal.security@gmail.com" }
+  },
+  {
+    "id": "suspicious-random-localpart-001",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Finance department claim on a corporate-sounding domain with a machine-generated local part.",
+    "identity": { "displayName": "Finance Department", "fromAddress": "x9182kzq@corp-payments.xyz" }
+  },
+  {
+    "id": "suspicious-random-localpart-002",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Recruitment role claim on an unrelated career-sounding domain with a random string local part.",
+    "identity": { "displayName": "HRD Rekrutmen", "fromAddress": "k29fj3@karir-nasional.xyz" }
+  },
+  {
+    "id": "suspicious-random-localpart-003",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Tax office name on a lookalike domain with an obviously generated local part.",
+    "identity": { "displayName": "Pajak Online", "fromAddress": "z73kd9@kemenkeu-pajak.com" }
+  },
+  {
+    "id": "suspicious-random-localpart-004",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Bank name on a lookalike notification domain with a random-string mailbox.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "q8w2e1@bca-notif.xyz" }
+  },
+  {
+    "id": "suspicious-random-localpart-005",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Account team claim on a lookalike verification domain with a generated local part.",
+    "identity": { "displayName": "Microsoft Account", "fromAddress": "a1b2c3d4@microsoft-verify.top" }
+  },
+  {
+    "id": "suspicious-random-localpart-006",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "IT support role on a bulk-sender-looking domain with a random mailbox name.",
+    "identity": { "displayName": "IT Support", "fromAddress": "x0z9y8@corp-helpdesk.xyz" }
+  },
+  {
+    "id": "suspicious-random-localpart-007",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Invoice sender label on a secure-sounding domain with a machine-generated local part.",
+    "identity": { "displayName": "Invoice", "fromAddress": "pp2k9s@billing-secure.xyz" }
+  },
+  {
+    "id": "suspicious-random-localpart-008",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Verified sender label with a random local part on a generic bulk-mail domain.",
+    "identity": { "displayName": "Verified Sender", "fromAddress": "m4n8b2@secure-mailer.top" }
+  },
+  {
+    "id": "suspicious-random-localpart-009",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Marketplace brand on a lookalike help domain with an opaque local part.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "t7k2p9@tokopedia-bantuan.xyz" }
+  },
+  {
+    "id": "suspicious-random-localpart-010",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Streaming brand billing claim with an opaque mailbox on a lookalike domain.",
+    "identity": { "displayName": "Netflix", "fromAddress": "n9f3x1@netflix-billing.xyz" }
+  },
+  {
+    "id": "suspicious-random-localpart-011",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Document sharing claim on a click domain with a random local part.",
+    "identity": { "displayName": "Document Share", "fromAddress": "d5k8q2@file-share-secure.click" }
+  },
+  {
+    "id": "suspicious-random-localpart-012",
+    "label": "suspicious",
+    "category": "random-localpart",
+    "note": "Wallet brand on a verification-themed lookalike domain with a generated mailbox.",
+    "identity": { "displayName": "DANA", "fromAddress": "a8s2d7@dana-verifikasi.top" }
+  },
+  {
+    "id": "suspicious-support-billing-001",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Display name is one bank address while the actual From is a completely different lookalike domain.",
+    "identity": { "displayName": "support@yourbank.com", "fromAddress": "support@evil-lookalike.xyz" }
+  },
+  {
+    "id": "suspicious-support-billing-002",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Display name embeds the bank's customer service address while the From domain is an unrelated lookalike.",
+    "identity": { "displayName": "cs@bankbcaa.com", "fromAddress": "no-reply@bca-verifikasi.xyz" }
+  },
+  {
+    "id": "suspicious-support-billing-003",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Display name carries a streaming service billing address that does not match the sending domain.",
+    "identity": { "displayName": "billing@netflix.com", "fromAddress": "info@netflix-payments.xyz" }
+  },
+  {
+    "id": "suspicious-support-billing-004",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Payment brand support claim on a help-themed domain unrelated to the brand.",
+    "identity": { "displayName": "PayPal Support", "fromAddress": "service@paypal-help.xyz" }
+  },
+  {
+    "id": "suspicious-support-billing-005",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Display name embeds the wallet's real help address while mail actually comes from a fake balance domain.",
+    "identity": { "displayName": "help@dana.id", "fromAddress": "care@dana-saldo.xyz" }
+  },
+  {
+    "id": "suspicious-support-billing-006",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Display name is a government address but the From domain is an unrelated tax-themed lookalike.",
+    "identity": { "displayName": "admin@kemenkeu.go.id", "fromAddress": "info@pajak-online.xyz" }
+  },
+  {
+    "id": "suspicious-support-billing-007",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Display name claims the messaging brand's security address while the From is a confirmation bait domain.",
+    "identity": { "displayName": "security@whatsapp.com", "fromAddress": "verify@wa-confirm.top" }
+  },
+  {
+    "id": "suspicious-support-billing-008",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Display name embeds the marketplace support address while the From is an order-themed lookalike.",
+    "identity": { "displayName": "support@tokopedia.com", "fromAddress": "cs@tokopedia-pesanan.xyz" }
+  },
+  {
+    "id": "suspicious-support-billing-009",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Display name claims the bank's no-reply address while the From domain is an unrelated secure-sounding lookalike.",
+    "identity": { "displayName": "noreply@mandiri.co.id", "fromAddress": "cs@mandiri-aman.top" }
+  },
+  {
+    "id": "suspicious-support-billing-010",
+    "label": "suspicious",
+    "category": "support-billing",
+    "note": "Display name embeds an Apple support address while the From is an iCloud-verify lookalike domain.",
+    "identity": { "displayName": "support@apple.com", "fromAddress": "id@icloud-verify.xyz" }
+  },
+  {
+    "id": "suspicious-corporate-001",
+    "label": "suspicious",
+    "category": "corporate",
+    "note": "Bank brand claimed from an unrelated consulting company's domain, with the brand also echoed in the local part.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "bcacare@mitrasolusindo.com" }
+  },
+  {
+    "id": "suspicious-corporate-002",
+    "label": "suspicious",
+    "category": "corporate",
+    "note": "Marketplace brand claimed from the domain of an unrelated digital agency.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "tokopedia@digitalmediakarya.com" }
+  },
+  {
+    "id": "suspicious-corporate-003",
+    "label": "suspicious",
+    "category": "corporate",
+    "note": "Consumer streaming brand name paired with a generic partner company domain.",
+    "identity": { "displayName": "Netflix Billing", "fromAddress": "netflixbilling@streamingpartners.co" }
+  },
+  {
+    "id": "suspicious-corporate-004",
+    "label": "suspicious",
+    "category": "corporate",
+    "note": "State energy company name on a private energy-trading domain that does not belong to it.",
+    "identity": { "displayName": "Pertamina", "fromAddress": "pertamina@energi-global.com" }
+  },
+  {
+    "id": "suspicious-corporate-005",
+    "label": "suspicious",
+    "category": "corporate",
+    "note": "Telco brand claimed from an unrelated connectivity company's domain.",
+    "identity": { "displayName": "Telkomsel", "fromAddress": "telkomsel@koneksi-nusantara.com" }
+  },
+  {
+    "id": "suspicious-corporate-006",
+    "label": "suspicious",
+    "category": "corporate",
+    "note": "Wallet brand claimed from the domain of an unrelated financial technology firm.",
+    "identity": { "displayName": "DANA", "fromAddress": "danawallet@fintek-lestari.com" }
+  },
+  {
+    "id": "suspicious-corporate-007",
+    "label": "suspicious",
+    "category": "corporate",
+    "note": "Software brand claimed from a generic software services company domain.",
+    "identity": { "displayName": "Microsoft", "fromAddress": "msoffice@softwaresolusindo.com" }
+  },
+  {
+    "id": "suspicious-corporate-008",
+    "label": "suspicious",
+    "category": "corporate",
+    "note": "Ministry name claimed from a private tax consultancy domain.",
+    "identity": { "displayName": "Kemenkeu", "fromAddress": "kemenkeu@pajakkonsultan.com" }
+  },
+  {
+    "id": "suspicious-alias-001",
+    "label": "suspicious",
+    "category": "alias",
+    "note": "Display name presents itself as a bank employee address while the real sender is a personal Gmail account.",
+    "identity": { "displayName": "budi.santoso@bca.co.id", "fromAddress": "budi.santoso88@gmail.com" }
+  },
+  {
+    "id": "suspicious-alias-002",
+    "label": "suspicious",
+    "category": "alias",
+    "note": "Display name is the marketplace support address while the From sits on an unrelated promo-resmi domain.",
+    "identity": { "displayName": "support@shopee.co.id", "fromAddress": "shopee.care@promo-resmi.xyz" }
+  },
+  {
+    "id": "suspicious-alias-003",
+    "label": "suspicious",
+    "category": "alias",
+    "note": "Display name claims a company HRD address but the message actually comes from free mail.",
+    "identity": { "displayName": "hrd@pt-majujaya.co.id", "fromAddress": "majujaya.hrd@gmail.com" }
+  },
+  {
+    "id": "suspicious-alias-004",
+    "label": "suspicious",
+    "category": "alias",
+    "note": "Display name is the wallet's notification address while the From is an unrelated balance-themed domain.",
+    "identity": { "displayName": "no-reply@dana.id", "fromAddress": "dana.notif@saldo-akun.top" }
+  },
+  {
+    "id": "suspicious-esp-001",
+    "label": "suspicious",
+    "category": "esp",
+    "note": "ESP return path does not excuse a national bank name being sent from an unrelated bulk-mail domain.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "no-reply@promo-mailer.com", "returnPath": "bounce@sendgrid.net", "gmailViaHint": "sendgrid.net" }
+  },
+  {
+    "id": "suspicious-esp-002",
+    "label": "suspicious",
+    "category": "esp",
+    "note": "Streaming brand name on a marketing platform's own domain; the ESP is legitimate but the brand claim is not its domain.",
+    "identity": { "displayName": "Netflix", "fromAddress": "info@marketing-cloud.io", "returnPath": "bounce@mailgun.org", "gmailViaHint": "mailgun.org" }
+  },
+  {
+    "id": "suspicious-esp-003",
+    "label": "suspicious",
+    "category": "esp",
+    "note": "Marketplace brand sent from a generic blast-email domain over Amazon SES, so the brand claim is unsupported.",
+    "identity": { "displayName": "Tokopedia", "fromAddress": "cs@blast-email.com", "returnPath": "0100018a2b@amazonses.com", "gmailViaHint": "amazonses.com" }
+  },
+  {
+    "id": "suspicious-esp-004",
+    "label": "suspicious",
+    "category": "esp",
+    "note": "Ministry name on a generic government-notification bulk domain delivered through SendGrid.",
+    "identity": { "displayName": "Kemenkeu RI", "fromAddress": "info@notif-pemerintah.com", "returnPath": "bounce@sendgrid.net", "gmailViaHint": "sendgrid.net" }
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "name": "@sender-check/core",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Engine analisis murni: tanpa DOM, tanpa chrome.*, tanpa network, tanpa AI/ML, tanpa database brand runtime.",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts"
+}

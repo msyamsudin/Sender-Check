@@ -1,0 +1,14 @@
+{
+  "name": "@sender-check/examples",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Contoh pemakaian engine yang dapat dijalankan: pnpm example",
+  "license": "MIT",
+  "dependencies": {
+    "@sender-check/core": "workspace:*"
+  },
+  "scripts": {
+    "start": "node analyze-emails.ts"
+  }
+}

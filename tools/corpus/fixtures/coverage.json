@@ -1,0 +1,30 @@
+[
+  {
+    "id": "legit-coverage-001",
+    "label": "legit",
+    "category": "display-name-is-own-address",
+    "note": "Display name adalah alamat pengirim itu sendiri. Lazim dan bukan anomali: yang ditampilkan sama persis dengan yang mengirim. Fixture ini ada karena test kelengkapan katalog menemukan bahwa kode DISPLAY_NAME_EXACTLY_MATCHES_ADDRESS tidak pernah dipicu kasus mana pun.",
+    "identity": { "displayName": "john@example.com", "fromAddress": "john@example.com" }
+  },
+  {
+    "id": "suspicious-coverage-002",
+    "label": "suspicious",
+    "category": "disposable-org-claim",
+    "note": "Klaim organisasi di atas alamat sekali pakai. Fixture ini ada karena seluruh kelas domain disposable sebelumnya tidak terwakili di corpus sama sekali.",
+    "identity": { "displayName": "Bank BCA", "fromAddress": "bca.indonesia@mailinator.com" }
+  },
+  {
+    "id": "suspicious-coverage-003",
+    "label": "suspicious",
+    "category": "disposable-org-claim",
+    "note": "Nama kementerian dikirim dari layanan surel sekali pakai, yang tidak mungkin dipakai instansi pemerintah untuk korespondensi resmi.",
+    "identity": { "displayName": "Kementerian Keuangan", "fromAddress": "pajak@guerrillamail.com" }
+  },
+  {
+    "id": "legit-coverage-004",
+    "label": "legit",
+    "category": "disposable-personal",
+    "note": "Perorangan memakai alamat sekali pakai dengan nama yang tercermin pada local-part. Memakai alamat sekali pakai bukan bukti penipuan identitas, sehingga hanya boleh menghasilkan bukti kontekstual.",
+    "identity": { "displayName": "Andi Pratama", "fromAddress": "andi.pratama@mailinator.com" }
+  }
+]

@@ -1,0 +1,48 @@
+{
+  "name": "sender-check",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Pemeriksa konsistensi display name pengirim dengan alamat emailnya, dengan penjelasan bukti. Client-side, tanpa network request, tanpa AI/ML, tanpa database brand.",
+  "license": "MIT",
+  "author": "msyamsudin",
+  "homepage": "https://github.com/msyamsudin/Sender-Check#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/msyamsudin/Sender-Check.git"
+  },
+  "bugs": {
+    "url": "https://github.com/msyamsudin/Sender-Check/issues"
+  },
+  "keywords": [
+    "email-security",
+    "phishing",
+    "sender-identity",
+    "display-name",
+    "typosquatting",
+    "homoglyph",
+    "punycode",
+    "public-suffix-list",
+    "browser-extension",
+    "gmail"
+  ],
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json",
+    "corpus": "pnpm --filter @sender-check/corpus run corpus",
+    "rules": "pnpm --filter @sender-check/corpus run rules",
+    "docs:check": "node tools/check-docs.ts",
+    "console:build": "pnpm --filter @sender-check/console run build",
+    "example": "pnpm --filter @sender-check/examples run start"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

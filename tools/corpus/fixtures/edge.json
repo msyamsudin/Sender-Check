@@ -1,0 +1,394 @@
+[
+  {
+    "id": "unassessable-no-display-name-001",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Webmail rendered no display name at all, so there is no name/address relationship to judge.",
+    "identity": { "displayName": null, "fromAddress": "john.smith@example.com" }
+  },
+  {
+    "id": "unassessable-no-display-name-002",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "No display name was rendered, leaving nothing to compare against the sending domain.",
+    "identity": { "displayName": null, "fromAddress": "no-reply@shopify.com" }
+  },
+  {
+    "id": "unassessable-no-display-name-003",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Missing display name on a lookalike domain; with no name there is no identity claim to evaluate.",
+    "identity": { "displayName": null, "fromAddress": "cs@bankbcaa.com" }
+  },
+  {
+    "id": "unassessable-no-display-name-004",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Plain consumer mailbox with no display name, so nothing is claimed about any organisation.",
+    "identity": { "displayName": null, "fromAddress": "budi@gmail.com" }
+  },
+  {
+    "id": "unassessable-no-display-name-005",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Support address without a display name; the generic local part is the only identity present.",
+    "identity": { "displayName": null, "fromAddress": "support@tokopedia.com" }
+  },
+  {
+    "id": "unassessable-no-display-name-006",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Punycode lookalike host with no display name, so no brand is explicitly claimed in the name field.",
+    "identity": { "displayName": null, "fromAddress": "info@xn--80ak6aa92e.com" }
+  },
+  {
+    "id": "unassessable-no-display-name-007",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Random-looking mailbox with no display name; there is no stated identity to compare.",
+    "identity": { "displayName": null, "fromAddress": "x9182kzq@corp-payments.xyz" }
+  },
+  {
+    "id": "unassessable-no-display-name-008",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Government domain without a rendered display name, leaving only the address to read.",
+    "identity": { "displayName": null, "fromAddress": "admin@kemenkeu.go.id" }
+  },
+  {
+    "id": "unassessable-no-display-name-009",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Recruitment mailbox with no display name, so the employer name is absent rather than mismatched.",
+    "identity": { "displayName": null, "fromAddress": "hrd@abccareer.com" }
+  },
+  {
+    "id": "unassessable-no-display-name-010",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "No display name on a billing-themed lookalike domain; nothing is asserted in the name field.",
+    "identity": { "displayName": null, "fromAddress": "billing@netflix-payments.xyz" }
+  },
+  {
+    "id": "unassessable-no-display-name-011",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Mailing list address with no display name, which is normal for list traffic and carries no claim.",
+    "identity": { "displayName": null, "fromAddress": "rahayu@lists.example.org" }
+  },
+  {
+    "id": "unassessable-no-display-name-012",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Student number mailbox with no display name; the local part is an opaque identifier.",
+    "identity": { "displayName": null, "fromAddress": "mhs2104032@student.ugm.ac.id" }
+  },
+  {
+    "id": "unassessable-no-display-name-013",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Bank notification subdomain with no display name rendered by the client.",
+    "identity": { "displayName": null, "fromAddress": "notifikasi@email.bankmandiri.co.id" }
+  },
+  {
+    "id": "unassessable-no-display-name-014",
+    "label": "unassessable",
+    "category": "no-display-name",
+    "note": "Subdomain-spoof style host with no display name, so no brand text is supplied by the sender.",
+    "identity": { "displayName": null, "fromAddress": "cs@bca.co.id.verifikasi-akun.top" }
+  },
+  {
+    "id": "unassessable-edge-empty-001",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Empty-string display name, which is distinct from null but still supplies no identity claim.",
+    "identity": { "displayName": "", "fromAddress": "john.smith@example.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-002",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Empty display name on a lookalike domain; the empty string asserts nothing to compare.",
+    "identity": { "displayName": "", "fromAddress": "cs@bankbcaa.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-003",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Empty display name on an ISP-assigned mailbox, a common rendering artifact.",
+    "identity": { "displayName": "", "fromAddress": "x7k2@randomisp.co.id" }
+  },
+  {
+    "id": "unassessable-edge-empty-004",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Empty display name on a phishing-style domain; with no name there is no claim to assess.",
+    "identity": { "displayName": "", "fromAddress": "support@paypal-secure.xyz" }
+  },
+  {
+    "id": "unassessable-edge-empty-005",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Empty display name on a consumer mailbox; nothing distinguishes this from an ordinary empty name.",
+    "identity": { "displayName": "", "fromAddress": "budi@gmail.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-006",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Empty display name on a brand mail subdomain, where the client simply rendered no name.",
+    "identity": { "displayName": "", "fromAddress": "no-reply@mail.shopify.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-007",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Whitespace-only display name, which carries no tokens to compare with the address.",
+    "identity": { "displayName": " ", "fromAddress": "info@example.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-008",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Whitespace-only display name on a lookalike domain; blank text is not an identity claim.",
+    "identity": { "displayName": "   ", "fromAddress": "cs@dana-care.xyz" }
+  },
+  {
+    "id": "unassessable-edge-empty-009",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Tab-only display name from a malformed header, leaving nothing to evaluate.",
+    "identity": { "displayName": "\t", "fromAddress": "budi@gmail.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-010",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Emoji-only display name imitating a security badge but asserting no name or organisation.",
+    "identity": { "displayName": "🔒✅", "fromAddress": "security@bankbcaa.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-011",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Emoji-only display name on a lookalike retailer domain; it names nobody and no company.",
+    "identity": { "displayName": "📦", "fromAddress": "orders@arnazon.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-012",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Celebration emoji as the whole display name, typical of bulk promotion with no stated sender.",
+    "identity": { "displayName": "🎉🎉🎉", "fromAddress": "promo@shopee-hadiah.xyz" }
+  },
+  {
+    "id": "unassessable-edge-empty-013",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Very long display name that is a full sentence rather than a name or an organisation claim.",
+    "identity": { "displayName": "Pemberitahuan penting mengenai pembaruan kebijakan layanan dan perubahan ketentuan penggunaan akun Anda yang berlaku mulai tanggal satu bulan berikutnya tanpa terkecuali bagi seluruh pengguna terdaftar", "fromAddress": "info@example.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-014",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Extremely long English display name built from a generic notice sentence, not an identity.",
+    "identity": { "displayName": "Important notice regarding updates to our terms of service, privacy policy and account security settings that may affect how you access your account in the coming weeks", "fromAddress": "no-reply@mailer-hub.xyz" }
+  },
+  {
+    "id": "unassessable-edge-empty-015",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Very long display name duplicating a department chain, which identifies no specific sender.",
+    "identity": { "displayName": "Direktorat Jenderal Administrasi Hukum Umum Kementerian Hukum dan Hak Asasi Manusia Republik Indonesia Bagian Layanan Tata Usaha dan Kearsipan", "fromAddress": "admin@layanan-xyz.go.id" }
+  },
+  {
+    "id": "unassessable-edge-empty-016",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Display name is exactly the local part of the consumer address, so it adds no new information.",
+    "identity": { "displayName": "john123", "fromAddress": "john123@gmail.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-017",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Display name repeats the opaque local part of an assigned ISP mailbox.",
+    "identity": { "displayName": "x7k2", "fromAddress": "x7k2@randomisp.co.id" }
+  },
+  {
+    "id": "unassessable-edge-empty-018",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Display name is a copy of a role local part, giving no basis to judge who or what is behind it.",
+    "identity": { "displayName": "cs.helpdesk", "fromAddress": "cs.helpdesk@vendor-xyz.com" }
+  },
+  {
+    "id": "unassessable-edge-empty-019",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Display name reproduces a generic role local part on a domain that identifies no organisation.",
+    "identity": { "displayName": "admin", "fromAddress": "admin@mail-hub.xyz" }
+  },
+  {
+    "id": "unassessable-edge-empty-020",
+    "label": "unassessable",
+    "category": "edge-empty",
+    "note": "Display name mirrors the personal local part on a domain that carries no brand at all.",
+    "identity": { "displayName": "budi.santoso", "fromAddress": "budi.santoso@mail-xyz.com" }
+  },
+  {
+    "id": "unassessable-generic-token-001",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Display name is only the generic word Admin, which names no person and no organisation.",
+    "identity": { "displayName": "Admin", "fromAddress": "admin@example.com" }
+  },
+  {
+    "id": "unassessable-generic-token-002",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Only the word Support as a display name, so there is no claim to compare with the vendor domain.",
+    "identity": { "displayName": "Support", "fromAddress": "x92kf@vendor-cloud.xyz" }
+  },
+  {
+    "id": "unassessable-generic-token-003",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Display name is the literal string no-reply, a technical label rather than an identity.",
+    "identity": { "displayName": "no-reply", "fromAddress": "noreply@mailer-hub.xyz" }
+  },
+  {
+    "id": "unassessable-generic-token-004",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Notification channel label only; it identifies no brand and no person.",
+    "identity": { "displayName": "notifications", "fromAddress": "notif@cloud-sender.xyz" }
+  },
+  {
+    "id": "unassessable-generic-token-005",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Display name Tim is the Indonesian word for team, so no individual or company is named.",
+    "identity": { "displayName": "Tim", "fromAddress": "tim@example.com" }
+  },
+  {
+    "id": "unassessable-generic-token-006",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Indonesian word for support used alone as the display name, with no organisation attached.",
+    "identity": { "displayName": "Dukungan", "fromAddress": "dukungan@layanan-xyz.com" }
+  },
+  {
+    "id": "unassessable-generic-token-007",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Indonesian word for billing as the only display name; generic role label with no owner.",
+    "identity": { "displayName": "Tagihan", "fromAddress": "tagihan@mailer-xyz.com" }
+  },
+  {
+    "id": "unassessable-generic-token-008",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Indonesian word for security used alone, which asserts no specific organisation.",
+    "identity": { "displayName": "Keamanan", "fromAddress": "keamanan@secure-xyz.top" }
+  },
+  {
+    "id": "unassessable-generic-token-009",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Indonesian word meaning official as the whole display name, a claim-free generic label.",
+    "identity": { "displayName": "Resmi", "fromAddress": "resmi@info-xyz.com" }
+  },
+  {
+    "id": "unassessable-generic-token-010",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Indonesian word for notification alone as the display name on a generic mail domain.",
+    "identity": { "displayName": "Notifikasi", "fromAddress": "notifikasi@mail-xyz.co.id" }
+  },
+  {
+    "id": "unassessable-generic-token-011",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Billing role label only; nothing in the name identifies a company to check.",
+    "identity": { "displayName": "Billing", "fromAddress": "billing@invoice-hub.xyz" }
+  },
+  {
+    "id": "unassessable-generic-token-012",
+    "label": "unassessable",
+    "category": "generic-token",
+    "note": "Customer service role label with no brand, so no consistency question can be posed.",
+    "identity": { "displayName": "Customer Service", "fromAddress": "cs@layanan-xyz.com" }
+  },
+  {
+    "id": "unassessable-mailing-list-001",
+    "label": "unassessable",
+    "category": "mailing-list",
+    "note": "Human name on a generic list server; the name belongs to a poster, not to the list domain owner.",
+    "identity": { "displayName": "Sarah Chen", "fromAddress": "sarah.chen@lists.example.org" }
+  },
+  {
+    "id": "unassessable-mailing-list-002",
+    "label": "unassessable",
+    "category": "mailing-list",
+    "note": "Human name relayed through Google Groups, where the domain belongs to the platform, not the person.",
+    "identity": { "displayName": "Budi Santoso", "fromAddress": "budi@googlegroups.com" }
+  },
+  {
+    "id": "unassessable-mailing-list-003",
+    "label": "unassessable",
+    "category": "mailing-list",
+    "note": "Group name as the display name on a group host; there is no personal or corporate identity claim.",
+    "identity": { "displayName": "Arsitektur Perangkat Lunak", "fromAddress": "arsitektur-pl@googlegroups.com" }
+  },
+  {
+    "id": "unassessable-mailing-list-004",
+    "label": "unassessable",
+    "category": "mailing-list",
+    "note": "Personal name on a project list server; list hosts are unrelated to the poster's own domain.",
+    "identity": { "displayName": "John Miller", "fromAddress": "jmiller@lists.debian.org" }
+  },
+  {
+    "id": "unassessable-mailing-list-005",
+    "label": "unassessable",
+    "category": "mailing-list",
+    "note": "Short personal name on a legacy group host, which says nothing about the sender's organisation.",
+    "identity": { "displayName": "Rina", "fromAddress": "rina@yahoogroups.com" }
+  },
+  {
+    "id": "unassessable-mailing-list-006",
+    "label": "unassessable",
+    "category": "mailing-list",
+    "note": "Administrative list mailbox whose display name is only a list-admin label.",
+    "identity": { "displayName": "Admin ML", "fromAddress": "admin@lists.nusantara.co.id" }
+  },
+  {
+    "id": "unassessable-corporate-001",
+    "label": "unassessable",
+    "category": "corporate",
+    "note": "Human name on an opaque relay domain that carries no brand, so no relationship can be checked.",
+    "identity": { "displayName": "John Smith", "fromAddress": "j.smith@mx4471.net" }
+  },
+  {
+    "id": "unassessable-corporate-002",
+    "label": "unassessable",
+    "category": "corporate",
+    "note": "Personal name at an infrastructure-style relay host where no organisation is implied or expected.",
+    "identity": { "displayName": "Budi Santoso", "fromAddress": "budi@relay04.co" }
+  },
+  {
+    "id": "unassessable-corporate-003",
+    "label": "unassessable",
+    "category": "corporate",
+    "note": "Human name on a hostname that names no company, leaving nothing to compare against.",
+    "identity": { "displayName": "Sarah Jenkins", "fromAddress": "s.jenkins@host2271.com" }
+  },
+  {
+    "id": "unassessable-corporate-004",
+    "label": "unassessable",
+    "category": "corporate",
+    "note": "Personal name on an opaque node domain with no brand token and no organisation claim.",
+    "identity": { "displayName": "Andi Wijaya", "fromAddress": "andi.wijaya@node9930.io" }
+  }
+]

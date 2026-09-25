@@ -1,0 +1,96 @@
+[
+  {
+    "id": "suspicious-realworld-001",
+    "label": "suspicious",
+    "category": "reply-to-asserts-identity",
+    "note": "Laporan pengguna: display name 'Rise' dengan From no-reply@mngl.in yang tidak memuat 'rise' sama sekali, tetapi Reply-To support@riseworks.digital memuatnya. SPF/DKIM/DMARC semuanya selaras dengan mngl.in sehingga autentikasi tidak memberi sinyal apa pun. Nilai authenticationResults tidak disertakan karena tangkapan layar Show original hanya menampilkan TLS.",
+    "identity": {
+      "displayName": "Rise",
+      "fromAddress": "no-reply@mngl.in",
+      "replyTo": "support@riseworks.digital",
+      "returnPath": "no-reply@mngl.in"
+    }
+  },
+  {
+    "id": "suspicious-realworld-002",
+    "label": "suspicious",
+    "category": "reply-to-asserts-identity",
+    "note": "Varian yang sama dengan Reply-To memakai token identitas sebagai komponen berpenyekat, bukan sebagai awalan domain.",
+    "identity": {
+      "displayName": "Rise",
+      "fromAddress": "no-reply@mngl.in",
+      "replyTo": "support@rise-kyc.digital",
+      "returnPath": "no-reply@mngl.in"
+    }
+  },
+  {
+    "id": "unassessable-realworld-003",
+    "label": "unassessable",
+    "category": "tier-boundary",
+    "note": "Varian Tier A saja dari kasus laporan, tanpa Reply-To dan tanpa Return-Path. Sengaja diberi label unassessable: tanpa header Show original, display name dan alamat memang tidak punya hubungan yang dapat diperiksa, dan engine tidak boleh mengarang dasar penilaian. Fixture ini menjaga batas Tier A/Tier B tetap jujur.",
+    "identity": {
+      "displayName": "Rise",
+      "fromAddress": "no-reply@mngl.in"
+    }
+  },
+  {
+    "id": "suspicious-realworld-004",
+    "label": "suspicious",
+    "category": "reply-to-asserts-identity",
+    "note": "Pola yang sama pada merek Indonesia: display name bank dengan From pada domain bulk-mail dan Reply-To pada domain yang memuat nama bank.",
+    "identity": {
+      "displayName": "Bank Mandiri",
+      "fromAddress": "no-reply@klikmail.co",
+      "replyTo": "verifikasi@mandiri-klik.id",
+      "returnPath": "bounce@klikmail.co"
+    }
+  },
+  {
+    "id": "legit-realworld-005",
+    "label": "legit",
+    "category": "esp-reply-to",
+    "note": "Pola ESP yang sah: From memakai domain brand sendiri, Return-Path di infrastruktur pengiriman, Reply-To kembali ke domain brand. Token identitas cocok dengan domain From, sehingga rule Reply-To tidak boleh menyala.",
+    "identity": {
+      "displayName": "Rise",
+      "fromAddress": "no-reply@riseworks.digital",
+      "replyTo": "support@riseworks.digital",
+      "returnPath": "bounce@sendgrid.net",
+      "authenticationResults": "mx.google.com; dkim=pass header.i=@riseworks.digital; spf=pass (google.com: domain of bounce@sendgrid.net designates 1.2.3.4 as permitted sender) smtp.mailfrom=bounce@sendgrid.net; dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=riseworks.digital"
+    }
+  },
+  {
+    "id": "legit-realworld-006",
+    "label": "legit",
+    "category": "esp-reply-to",
+    "note": "Dukungan pelanggan dialihdayakan: Reply-To berada di penyedia helpdesk pihak ketiga yang tidak memuat nama brand. Karena token identitas tidak muncul di domain Reply-To, rule tidak boleh menyala.",
+    "identity": {
+      "displayName": "Acme",
+      "fromAddress": "no-reply@acme.com",
+      "replyTo": "ticket-9931@helpdesk-provider.com",
+      "returnPath": "bounce@mailgun.org"
+    }
+  },
+  {
+    "id": "legit-realworld-007",
+    "label": "legit",
+    "category": "esp-reply-to",
+    "note": "Subdomain pengirim dan domain Reply-To yang berbeda tetap berada pada domain registrable yang sama; keduanya milik brand yang sama.",
+    "identity": {
+      "displayName": "Rise",
+      "fromAddress": "no-reply@mail.riseworks.digital",
+      "replyTo": "support@riseworks.digital"
+    }
+  },
+  {
+    "id": "legit-realworld-008",
+    "label": "legit",
+    "category": "esp-reply-to",
+    "note": "From berada langsung di domain infrastruktur pengiriman yang dikenal, dengan Reply-To di domain brand. Konfigurasi ini lazim dan sah, sehingga harus dikecualikan.",
+    "identity": {
+      "displayName": "Acme",
+      "fromAddress": "no-reply@sendgrid.net",
+      "replyTo": "support@acme.com",
+      "returnPath": "bounce@sendgrid.net"
+    }
+  }
+]

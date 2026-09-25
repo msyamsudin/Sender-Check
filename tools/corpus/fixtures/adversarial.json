@@ -1,0 +1,128 @@
+[
+  {
+    "id": "legit-adversarial-001",
+    "label": "legit",
+    "category": "adversarial-personal-variant",
+    "note": "A person uses a personal domain one letter away from their name (common Indonesian spelling variant) with a generic local part. Structurally resembles a typosquat, but is legitimate.",
+    "identity": { "displayName": "Rizky", "fromAddress": "hello@rizki.id" }
+  },
+  {
+    "id": "legit-adversarial-002",
+    "label": "legit",
+    "category": "adversarial-personal-variant",
+    "note": "Domain is the person's initials while the local part carries the full first name; the local-part match is what makes this consistent.",
+    "identity": { "displayName": "Budi Santoso", "fromAddress": "budi@bdi.co.id" }
+  },
+  {
+    "id": "legit-adversarial-003",
+    "label": "legit",
+    "category": "adversarial-personal-variant",
+    "note": "Spelling variant of a personal name (Yusuf/Yusup) on the person's own domain.",
+    "identity": { "displayName": "Yusuf", "fromAddress": "yusuf@yusup.com" }
+  },
+  {
+    "id": "legit-adversarial-004",
+    "label": "legit",
+    "category": "adversarial-brand-suffix",
+    "note": "Brand plus two extra characters used as ordinary company naming (Rise HQ), not a padded typosquat.",
+    "identity": { "displayName": "Rise", "fromAddress": "hello@risehq.com" }
+  },
+  {
+    "id": "legit-adversarial-005",
+    "label": "legit",
+    "category": "adversarial-own-domain-component",
+    "note": "Company name appears as one word of its own longer domain; every display-name token is accounted for by the domain itself.",
+    "identity": { "displayName": "Rise Security", "fromAddress": "info@rise-security-hq.com" }
+  },
+  {
+    "id": "legit-adversarial-006",
+    "label": "legit",
+    "category": "adversarial-own-domain-component",
+    "note": "Surname is a component of the consultant's own domain.",
+    "identity": { "displayName": "Ahmad Fauzi", "fromAddress": "ahmad.fauzi@fauzi-consulting.com" }
+  },
+  {
+    "id": "legit-adversarial-007",
+    "label": "legit",
+    "category": "adversarial-own-domain-component",
+    "note": "Display name is misspelled relative to the sender's own domain; the local part reflecting the name is what keeps this consistent.",
+    "identity": { "displayName": "Micheal Smith", "fromAddress": "micheal.smith@michaelsmith.com" }
+  },
+  {
+    "id": "legit-adversarial-008",
+    "label": "legit",
+    "category": "adversarial-own-domain-component",
+    "note": "Domain is the two-word business name joined without a separator; the compact match is a weak consistency, not a mismatch.",
+    "identity": { "displayName": "Warung Kopi", "fromAddress": "admin@warungkopi.id" }
+  },
+  {
+    "id": "legit-adversarial-009",
+    "label": "legit",
+    "category": "adversarial-acronym-domain",
+    "note": "Domain is the institution's official acronym, unrelated to any identity token in the display name.",
+    "identity": { "displayName": "Universitas Gadjah Mada", "fromAddress": "info@ugm.ac.id" }
+  },
+  {
+    "id": "legit-adversarial-010",
+    "label": "legit",
+    "category": "adversarial-hosted-subdomain",
+    "note": "Hosted beneath a provider's registrable domain; the brand tokens are only prefixes or suffixes inside a single label, not standalone labels.",
+    "identity": { "displayName": "Toko Buku Nusantara", "fromAddress": "no-reply@tokonusantara.com.host.co.id" }
+  },
+  {
+    "id": "legit-adversarial-011",
+    "label": "legit",
+    "category": "adversarial-surname-only-domain",
+    "note": "Domain carries only the surname while the display name has two words.",
+    "identity": { "displayName": "Dewi Lestari", "fromAddress": "dewi@lestari.id" }
+  },
+  {
+    "id": "legit-adversarial-012",
+    "label": "legit",
+    "category": "adversarial-exact-single-token",
+    "note": "Legitimate company whose single-token name exactly equals its registrable label.",
+    "identity": { "displayName": "Sentra", "fromAddress": "cs@sentra.co.id" }
+  },
+  {
+    "id": "suspicious-adversarial-001",
+    "label": "suspicious",
+    "category": "adversarial-padded-typosquat",
+    "note": "Bank acronym on a domain that pads the brand with a doubled letter, a classic typosquat.",
+    "identity": { "displayName": "BCA", "fromAddress": "cs@bcaa.co.id" }
+  },
+  {
+    "id": "suspicious-adversarial-002",
+    "label": "suspicious",
+    "category": "adversarial-substituted-typosquat",
+    "note": "Bank acronym with one letter replaced on a domain the bank does not own.",
+    "identity": { "displayName": "BNI", "fromAddress": "cs@bnl.co.id" }
+  },
+  {
+    "id": "suspicious-adversarial-003",
+    "label": "suspicious",
+    "category": "adversarial-substituted-typosquat",
+    "note": "Bank acronym with the letter i replaced by the digit one.",
+    "identity": { "displayName": "BRI", "fromAddress": "cs@br1.co.id" }
+  },
+  {
+    "id": "suspicious-adversarial-004",
+    "label": "suspicious",
+    "category": "adversarial-brand-as-component",
+    "note": "Bank brand used as a standalone word inside a hyphenated domain the bank does not own.",
+    "identity": { "displayName": "KlikBCA", "fromAddress": "cs@bca-klik.com" }
+  },
+  {
+    "id": "suspicious-adversarial-005",
+    "label": "suspicious",
+    "category": "adversarial-substituted-typosquat",
+    "note": "Five-letter brand with a single substituted letter on a lookalike domain.",
+    "identity": { "displayName": "Gojek", "fromAddress": "cs@gojeg.com" }
+  },
+  {
+    "id": "suspicious-adversarial-006",
+    "label": "suspicious",
+    "category": "adversarial-shortened-typosquat",
+    "note": "Brand with one letter dropped and a country suffix appended, on a domain the marketplace does not own.",
+    "identity": { "displayName": "Shopee", "fromAddress": "promo@shope-id.com" }
+  }
+]

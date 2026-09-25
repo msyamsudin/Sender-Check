@@ -1,0 +1,28 @@
+# Normalisasi akhir baris.
+#
+# Tanpa berkas ini, Git di Windows akan mengubah LF menjadi CRLF saat checkout, dan
+# repositori bisa berakhir dengan campuran keduanya. Karena pengembang utamanya memakai
+# Windows sementara CI memakai Linux, hal itu pasti terjadi.
+* text=auto eol=lf
+
+# Berkas data yang berasal dari sumber resmi. Dibiarkan LF supaya tetap identik dengan
+# hulu, sehingga perbandingan dengan versi resmi berikutnya tetap masuk akal.
+tools/gen-psl/public_suffix_list.dat text eol=lf
+tools/gen-unicode/confusables.txt text eol=lf
+
+# Berkas biner. Belum ada saat ini, dinyatakan eksplisit untuk mencegah Git mencoba
+# menormalkan akhir barisnya di kemudian hari.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Berkas hasil generate ditandai supaya tidak dihitung sebagai kontribusi pada
+# statistik bahasa dan tidak muncul di diff bawaan.
+packages/core/src/data/psl.generated.ts linguist-generated=true
+packages/core/src/data/confusables.generated.ts linguist-generated=true
+tools/gen-psl/public_suffix_list.dat linguist-vendored=true
+tools/gen-unicode/confusables.txt linguist-vendored=true

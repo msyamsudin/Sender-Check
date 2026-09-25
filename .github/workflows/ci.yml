@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck, test, dan release gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Versi pnpm diambil dari field `packageManager` di package.json, sehingga
+      # CI dan mesin pengembang tidak dapat menyimpang.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # Dijalankan terpisah dari test agar pesan kegagalannya menyebut tautan mana
+      # yang rusak, bukan sekadar satu assertion yang gagal.
+      - name: Periksa tautan dokumentasi
+        run: pnpm docs:check
+
+      # Termasuk test arsitektur (core bebas DOM/jaringan/jam), test kelengkapan
+      # katalog rule, dan penjaga encoding berkas.
+      - name: Test
+        run: pnpm test
+
+      # Menjalankan release gate. Keluar dengan kode 1 bila precision atau nag rate
+      # tidak memenuhi ambang, sehingga pull request yang menurunkan presisi gagal.
+      - name: Corpus dan release gate
+        run: pnpm corpus
+
+      - name: Unggah laporan corpus
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-report
+          path: tools/corpus/reports/corpus-report.md
+          if-no-files-found: warn
+          retention-days: 30
