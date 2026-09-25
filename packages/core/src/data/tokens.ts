@@ -10,8 +10,8 @@
  *  3. PERSON_TITLES       — gelar yang menandakan display name adalah nama orang.
  *                           Kebalikan dari (2).
  *
- * Daftar Indonesia disertakan karena penggunanya berbahasa Indonesia, dan tanpa
- * padanan ini `"Dukungan Pelanggan" <cs@freemail>` akan lolos tanpa sinyal.
+ * Padanan Indonesianya disertakan, karena tanpa itu `"Dukungan Pelanggan" <cs@freemail>`
+ * akan lolos tanpa sinyal.
  */
 
 /** Token yang tidak membawa identitas. Bobotnya nol dalam pencocokan nama. */

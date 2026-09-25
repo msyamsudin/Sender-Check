@@ -88,8 +88,6 @@ gagal. Itu disengaja: rule yang tidak punya kasus nyata adalah rule yang belum d
   dilakukannya. Yang perlu ditulis adalah alasan di balik pilihan tersebut, terutama
   ketika pilihannya tampak aneh. Banyak komentar di repositori ini berbentuk "ini terlihat
   berlebihan, tetapi tanpa ini kasus X akan salah" — pertahankan gaya itu.
-- **Bahasa Indonesia** untuk komentar, dokumentasi, dan pesan commit. Nama variabel dan
-  fungsi tetap bahasa Inggris.
 - **Jangan mengedit berkas `*.generated.ts` secara manual.** Keduanya punya generator di
   `tools/`. Lihat `README.md` bagian "Regenerasi data".
 - **Jangan menambah dependensi runtime.** Engine tidak boleh punya dependensi selain

@@ -45,8 +45,8 @@ const sourceFiles = collectTypeScriptFiles(coreSrc).map((path) => ({
 }));
 
 /**
- * Daftar terlarang berupa pola kode, bukan kata, supaya komentar berbahasa Indonesia
- * yang memuat kata seperti "dokumen" tidak ikut tertangkap.
+ * Daftar terlarang berupa pola kode, bukan kata, supaya sebutan seperti "dokumen" di
+ * dalam komentar tidak ikut tertangkap.
  */
 const FORBIDDEN: ReadonlyArray<{ label: string; pattern: RegExp }> = [
   { label: 'DOM document', pattern: /\bdocument\s*\./ },
