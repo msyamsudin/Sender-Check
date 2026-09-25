@@ -13,7 +13,7 @@
  * bergantung pada orang yang ingat menjalankannya.
  */
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { dirname, join, normalize, resolve } from 'node:path';
+import { dirname, join, normalize, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -42,6 +42,45 @@ export interface DocCheckResult {
 }
 
 /**
+ * Artefak hasil build yang **memang tidak ada** di checkout bersih.
+ *
+ * Direktori-direktori ini diabaikan `.gitignore`, jadi berkasnya hanya ada setelah
+ * `pnpm console:build` atau `pnpm corpus` dijalankan. Dokumentasi tetap boleh
+ * menunjuknya — justru itu gunanya dokumentasi — tetapi menuntut keberadaannya adalah
+ * kesalahan: pemeriksa ini lulus di mesin pengembang yang sudah pernah build dan gagal
+ * di CI yang baru saja meng-clone. Itu pernah benar-benar terjadi.
+ *
+ * Memakai daftar tertutup, bukan awalan direktori, supaya berkas salah tulis di dalam
+ * direktori itu tetap tertangkap selama berkasnya ada.
+ */
+const GENERATED_ARTIFACTS: ReadonlyArray<{ path: string; generator: string }> = [
+  { path: 'tools/console/dist', generator: 'tools/console/build.ts' },
+  { path: 'tools/console/dist/sender-check.probe.js', generator: 'tools/console/build.ts' },
+  { path: 'tools/console/dist/sender-check.console.js', generator: 'tools/console/build.ts' },
+  { path: 'tools/console/dist/CARA-PAKAI.txt', generator: 'tools/console/build.ts' },
+  { path: 'tools/corpus/reports', generator: 'tools/corpus/src/cli.ts' },
+  { path: 'tools/corpus/reports/corpus-report.md', generator: 'tools/corpus/src/cli.ts' },
+];
+
+/**
+ * `true` bila target adalah artefak build yang generatornya benar-benar ada di repo.
+ *
+ * Direktori hasil build ikut didaftarkan karena dokumentasi memang menautkan
+ * direktorinya ("bundelnya ada di sini"). Untuk direktori, satu-satunya syarat adalah
+ * generatornya ada — bukan isinya, karena isi direktori itu memang berbeda-beda
+ * tergantung perintah build yang terakhir dijalankan.
+ */
+function isGeneratedArtifact(relativeTarget: string): boolean {
+  const target = relativeTarget.replace(/\/$/, '');
+  const entry = GENERATED_ARTIFACTS.find((item) => item.path === target);
+  if (entry === undefined) return false;
+
+  // Generatornya harus ada. Kalau tidak, path ini menunjuk sesuatu yang tidak dapat
+  // dibuat siapa pun, dan itu tetap masalah.
+  return existsSync(join(repoRoot, entry.generator));
+}
+
+/**
  * Memeriksa seluruh dokumentasi.
  *
  * Dua basis resolusi dipakai, dan membedakannya penting:
@@ -59,9 +98,14 @@ export function checkDocs(): DocCheckResult {
     if (/^[a-z][a-z0-9+.-]*:/i.test(withoutAnchor)) return;
     if (withoutAnchor.startsWith('/')) return;
 
-    checkedTargets++;
     const target = normalize(join(base, withoutAnchor));
-    if (!existsSync(target)) problems.push({ file, target: rawTarget, reason });
+    const relativeTarget = relative(repoRoot, target).replaceAll('\\', '/');
+
+    // Artefak build dihitung sebagai target yang diperiksa, tetapi tidak dituntut ada.
+    checkedTargets++;
+    if (existsSync(target)) return;
+    if (isGeneratedArtifact(relativeTarget)) return;
+    problems.push({ file, target: rawTarget, reason });
   };
 
   for (const file of DOC_FILES) {

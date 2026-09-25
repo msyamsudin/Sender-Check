@@ -35,6 +35,13 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # `tools/console/dist/` diabaikan git, sehingga tidak ada di checkout bersih.
+      # Dibangun di sini karena dua hal bergantung padanya: test yang memastikan bundel
+      # yang ditempel ke konsol Firefox tidak tertinggal dari sumbernya, dan langkah
+      # `pnpm docs:check` yang menautkan direktori bundel itu dari dokumentasi.
+      - name: Build bundel skrip konsol
+        run: pnpm console:build
+
       # Dijalankan terpisah dari test agar pesan kegagalannya menyebut tautan mana
       # yang rusak, bukan sekadar satu assertion yang gagal.
       - name: Periksa tautan dokumentasi

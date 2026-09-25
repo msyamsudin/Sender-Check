@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { checkDocs } from '../../../tools/check-docs.ts';
 
@@ -36,5 +39,32 @@ describe('dokumentasi', () => {
       .filter((p) => p.reason.includes('tidak ditautkan'))
       .map((p) => p.target);
     expect(orphans).toEqual([]);
+  });
+
+  it('tidak menuntut keberadaan artefak build yang diabaikan git', () => {
+    // Pemeriksa ini sempat menuntut `tools/console/dist/` dan `tools/corpus/reports/`
+    // benar-benar ada. Akibatnya ia lulus di mesin yang sudah pernah `pnpm console:build`
+    // dan gagal di CI yang baru saja meng-clone — kegagalan pertama repositori ini.
+    //
+    // Test ini tidak mengubah apa pun di disk: bila artefaknya ada (mesin pengembang),
+    // pemeriksaan tetap menemukannya; bila tidak ada (CI), pemeriksa harus tetap bersih.
+    const problemsInBuildDirs = result.problems
+      .filter((problem) => /^(tools\/console\/dist|tools\/corpus\/reports)/.test(problem.target))
+      .map((problem) => `${problem.file} -> ${problem.target}`);
+    expect(problemsInBuildDirs).toEqual([]);
+  });
+
+  it('pengecualian artefak build hanya berlaku untuk direktori yang diabaikan git', () => {
+    // Menjaga agar daftar pengecualian tidak dipakai untuk membungkam path yang salah
+    // tulis: setiap direktori yang dikecualikan harus benar-benar ada di `.gitignore`.
+    const here = dirname(fileURLToPath(import.meta.url));
+    const gitignore = readFileSync(join(here, '..', '..', '..', '.gitignore'), 'utf8');
+
+    for (const ignoredDirectory of ['tools/console/dist/', 'tools/corpus/reports/']) {
+      expect(
+        gitignore.includes(ignoredDirectory),
+        `${ignoredDirectory} tidak ada di .gitignore, sehingga pengecualiannya tidak sah`,
+      ).toBe(true);
+    }
   });
 });

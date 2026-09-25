@@ -62,6 +62,15 @@ bedanya versi paket dan versi algoritma yang dimaksudkan sejak awal.
   `role="alert"` untuk banyak hal di luar peringatan keamanan, sehingga rule
   `GMAIL_OWN_WARNING_PRESENT` dapat memberi tahu pengguna sesuatu yang tidak benar. Isi
   teks peringatannya kini diperiksa lebih dulu.
+- **`pnpm docs:check` menuntut keberadaan artefak build yang diabaikan git**
+  (`tools/console/dist/` dan `tools/corpus/reports/`). Akibatnya pemeriksa itu **lulus
+  secara palsu** di mesin yang sudah pernah `pnpm console:build` dan gagal di CI yang
+  baru saja meng-clone — kegagalan pertama repositori ini. Artefak build kini
+  didaftarkan sebagai pengecualian, tetapi hanya bila generatornya benar-benar ada,
+  sehingga path yang salah tulis di dalam direktori itu tetap tertangkap.
+- **CI tidak pernah menjalankan `pnpm console:build`.** Bundel di `tools/console/dist/`
+  diabaikan git, sehingga langkah `docs:check` yang menautkan direktori itu gagal di
+  checkout bersih. Langkah build kini dijalankan sebelum pemeriksaan dokumentasi.
 
 ### Ditambahkan (revisi sebelum rilis)
 
