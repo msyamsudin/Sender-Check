@@ -14,8 +14,6 @@ runtime.
 > menunjukkan hubungan antara nama yang ditampilkan dan alamat yang sebenarnya, beserta alasannya,
 > lalu menyerahkan penilaiannya kepadamu.
 
-Seluruh kode, komentar, dan dokumentasi ditulis dalam Bahasa Indonesia.
-
 ---
 
 ## Status
