@@ -607,9 +607,16 @@ berbasis snapshot DOM yang gagal di CI ketika Gmail mengubah struktur.
    harus diperiksa lebih dulu (`looksLikeGmailWarning`). Probe tetap melaporkan jumlah elemen
    yang cocok, tetapi `contributed` hanya `true` bila teks peringatannya benar-benar ada.
 4. **Penanda "via" dibaca dari dalam baris pesan, bukan dengan menaiki leluhur elemen pengirim.**
-   Penanda itu **bersaudara** dengan elemen pengirim di dalam `tr`. Menaiki `parentElement` tidak
-   pernah mencapainya, dan baris pesan hampir selalu lebih panjang daripada batas teks yang
-   dipakai versi awal, sehingga indikator "via" tidak pernah terbaca sama sekali.
+   Menaiki `parentElement` tidak dapat mencapai elemen bersaudara, dan baris pesan hampir selalu
+   lebih panjang daripada batas teks yang dipakai versi awal; dua hal itu membuat pembacaan lama
+   tidak pernah berhasil. Pencarian **ke dalam** baris memperbaiki keduanya, dan arah itu benar
+   terlepas dari nama kelas penandanya.
+   **Yang belum terverifikasi justru kelasnya.** `span.zx` dipakai sebagai kandidat pertama, tetapi
+   pada setiap probe nyata yang tercatat selector itu melaporkan 0 kecocokan, dan tidak ada baris
+   ber-"via" yang pernah ditemukan pada tampilan inbox maupun Promotions. Jadi pembacaan "via"
+   adalah **best-effort yang belum pernah terbukti bekerja**, bukan sinyal Tier A yang dapat
+   diandalkan. Bila Gmail tidak merender penanda itu sama sekali, hasilnya `undefined` dan tidak ada
+   rule yang terpicu — itu keadaan yang benar, bukan bug.
 
 Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 

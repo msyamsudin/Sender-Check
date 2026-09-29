@@ -14,20 +14,15 @@ import {
   computeMetrics,
   gatesPass,
   loadCases,
-  NAG_RATE_GATE,
-  PRECISION_GATE,
   renderMarkdown,
   runCases,
+  summaryLines,
   type CaseResult,
 } from './harness.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const fixturesDir = join(here, '..', 'fixtures');
 const reportsDir = join(here, '..', 'reports');
-
-function percent(value: number): string {
-  return `${(value * 100).toFixed(1)}%`;
-}
 
 function printCase(result: CaseResult): void {
   const codes = result.verdict.evidence
@@ -46,22 +41,10 @@ function main(): void {
   const results = runCases(cases);
   const metrics = computeMetrics(results);
 
-  console.log('=== Sender-Check corpus ===');
-  console.log(`algorithmVersion : ${ALGORITHM_VERSION}`);
-  console.log(`pslVersion       : ${PSL_VERSION}`);
-  console.log(`kasus            : ${metrics.total}`);
-  console.log(
-    `label            : legit ${metrics.byLabel.legit}, suspicious ${metrics.byLabel.suspicious}, unassessable ${metrics.byLabel.unassessable}`,
-  );
-  console.log('');
-  console.log(`state            : ${Object.entries(metrics.byState).map(([k, v]) => `${k}=${v}`).join('  ')}`);
-  console.log('');
-  console.log(`precision (flagged HIGH) : ${percent(metrics.precisionHigh)}  (gate >= ${percent(PRECISION_GATE)})`);
-  console.log(`precision (semua flagged): ${percent(metrics.precision)}`);
-  console.log(`recall (suspicious)      : ${percent(metrics.recall)}`);
-  console.log(`nag rate (visible)       : ${percent(metrics.nagRate)}  (gate <= ${percent(NAG_RATE_GATE)})`);
-  console.log(`nag rate (wide)          : ${percent(metrics.nagRateWide)}`);
-  console.log('');
+  // Ringkasannya datang dari `harness.ts`, bukan disusun di sini, karena angka-angka
+  // yang sama dikutip `docs/USAGE.md` dan dijaga oleh test dokumentasi. Lihat komentar
+  // pada `summaryLines`.
+  for (const line of summaryLines(metrics)) console.log(line);
 
   if (metrics.falsePositives.length > 0) {
     console.log(`FALSE POSITIVE (${metrics.falsePositives.length}):`);

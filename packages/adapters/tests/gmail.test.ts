@@ -178,11 +178,16 @@ describe('pemindaian inbox: strategi selector', () => {
     expect(() => scanGmailInbox(doc)).not.toThrow();
   });
 
-  it('membaca indikator via dari elemen span.zx di baris pengirim', () => {
-    // Bentuk yang dipakai Gmail: penanda "via" bersaudara dengan elemen pengirim di
-    // dalam baris yang sama, dan baris itu juga memuat cuplikan pesan. Cuplikan
-    // sengaja dibuat panjang melewati batas 400 karakter versi sebelumnya, karena
-    // itulah yang membuat pembacaan lama selalu gagal.
+  it('membaca indikator via dari penanda di dalam baris, bila kelasnya memang benar', () => {
+    // PERINGATAN: test ini menguji mekanisme, bukan kenyataan Gmail. DOM di bawah dibangun
+    // dari asumsi bahwa penandanya berkelas `zx`, sementara `span.zx` belum pernah cocok
+    // pada satu pun halaman Gmail sungguhan (selalu 0). Jadi yang dibuktikan di sini adalah
+    // bahwa pembacaan ke dalam baris bekerja SEANDAINYA kelas itu benar.
+    // Lihat catatan pada VIA_ELEMENT_CLASSES di src/gmail.ts.
+    //
+    // Yang diuji: penanda "via" bersaudara dengan elemen pengirim di dalam baris yang sama,
+    // dan baris itu juga memuat cuplikan pesan yang panjangnya melewati batas 400 karakter
+    // versi sebelumnya — itulah yang membuat pembacaan lama selalu gagal.
     const doc = fakeDocument({
       tag: 'tr',
       children: [
@@ -210,6 +215,8 @@ describe('pemindaian inbox: strategi selector', () => {
     // Elemen pembungkus dan elemen dalam sama-sama membawa atribut `email`. Penanda
     // "via" hanya dapat ditemukan dari elemen dalam, sehingga pembacaan tidak boleh
     // berhenti pada elemen pertama yang menghasilkan pengirim.
+    //
+    // Seperti test sebelumnya: kelas `zx` di sini adalah asumsi yang belum terverifikasi.
     const doc = fakeDocument({
       tag: 'tr',
       children: [
@@ -235,6 +242,8 @@ describe('pemindaian inbox: strategi selector', () => {
   });
 
   it('membaca indikator via dari aria-label walau tanpa elemen penanda', () => {
+    // Cadangan ini pun belum terverifikasi: `[aria-label*="via"]` juga selalu 0 pada
+    // probe nyata. Yang diuji hanya bahwa jalur cadangannya tidak rusak.
     const doc = fakeDocument({
       tag: 'tr',
       children: [

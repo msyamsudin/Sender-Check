@@ -64,7 +64,11 @@ const SENDER_SELECTORS: readonly SenderSelector[] = [
   },
 ];
 
-/** Kandidat selector untuk indikator "via". Dilaporkan di mode diagnostik; pembacaannya di `readViaHint`. */
+/**
+ * Kandidat selector untuk indikator "via". Dilaporkan di mode diagnostik; pembacaannya
+ * di `readViaHint`. Keduanya **belum pernah cocok** pada probe nyata mana pun — lihat
+ * catatan pada `VIA_ELEMENT_CLASSES`.
+ */
 const VIA_SELECTORS: readonly SenderSelector[] = [
   { selector: 'span.zx', purpose: 'penanda "via" pada baris pengirim' },
   { selector: '[aria-label*="via"]', purpose: 'penanda "via" lewat aria-label' },
@@ -89,11 +93,24 @@ const VIA_IN_TEXT = /(?:^|\s)via\s+([a-z0-9-]+(?:\.[a-z0-9-]+)+)/i;
 const DOMAIN_TAIL = /^([a-z0-9-]+(?:\.[a-z0-9-]+)+)/i;
 
 /**
- * Kelas elemen yang Gmail pakai khusus untuk penanda "via" pada baris pengirim.
+ * Kandidat kelas elemen penanda "via". **Hipotesis, bukan hasil pengukuran.**
  *
- * `span.zx` dilaporkan **cocok 1** pada probe halaman inbox sungguhan, sementara
- * `[aria-label*="via"]` tidak cocok. Karena itu penanda ini dipakai lebih dulu;
- * tingkat berikutnya hanya cadangan bila Gmail mengganti namanya.
+ * `span.zx` berasal dari dugaan awal tentang cara Gmail merender penanda "via", dan
+ * sampai sekarang **belum pernah terbukti**. Pada setiap probe nyata yang tercatat,
+ * selector ini melaporkan **0 kecocokan**: dua halaman inbox (47 dan 12 baris, yang
+ * pertama contoh keluarannya ada di `docs/FIREFOX.md`), satu thread terbuka, dan satu
+ * tampilan Promotions. Belum ada satu pun halaman yang menghasilkan kecocokan.
+ *
+ * Versi sebelumnya menulis di sini bahwa `span.zx` "dilaporkan cocok 1 pada probe
+ * halaman inbox sungguhan". Angka itu salah tempat: **1** adalah jumlah kecocokan
+ * `[role="alert"]` pada keluaran yang sama, dan contoh keluaran nyata di
+ * `docs/FIREFOX.md` mencatat `span.zx` justru sebagai "tidak cocok". Klaim itu dicabut
+ * di sini karena klaim salah yang tampak terverifikasi lebih berbahaya daripada tidak
+ * ada klaim sama sekali: ia menghentikan orang berikutnya dari memeriksanya.
+ *
+ * Akibatnya jalur ini **tidak boleh diandalkan**. `readViaHint` tetap mencobanya karena
+ * biayanya nol dan ia akan bekerja begitu Gmail memang memakai kelas ini — tetapi
+ * pembacaan "via" yang berhasil belum pernah teramati sama sekali.
  */
 const VIA_ELEMENT_CLASSES: readonly string[] = ['span.zx', 'span[class*="zx"]'];
 
@@ -223,7 +240,8 @@ function queryWithin(root: ElementLike, selector: string): ElementLike[] {
  *
  * ## Kenapa baris, bukan leluhur
  *
- * Gmail merender penanda "via" sebagai elemen **bersaudara** dengan elemen pengirim:
+ * Bentuk di bawah ini **asumsi, bukan pengamatan**: penanda "via" bersaudara dengan
+ * elemen pengirim, dan kelasnya `zx`.
  *
  * ```html
  * <tr class="zA">
@@ -232,22 +250,25 @@ function queryWithin(root: ElementLike, selector: string): ElementLike[] {
  * </tr>
  * ```
  *
- * Versi sebelumnya menaiki `parentElement` dari elemen pengirim dan membaca
- * `textContent` setiap leluhur. Dua hal membuatnya tidak pernah bekerja:
- * penanda itu tidak berada di rantai leluhur, dan leluhur yang memuatnya
- * (baris pesan) hampir selalu lebih panjang daripada batas 400 karakter yang
- * dipakai saat itu, sehingga selalu ditolak. Terverifikasi dengan DOM tiruan:
- * `span.zx` berisi "via sendgrid.net" ada di baris yang sama, `viaHint` tetap
- * tidak terisi.
+ * Yang **tidak** diasumsikan adalah letaknya: apa pun nama kelasnya, penanda itu berada
+ * di dalam baris pesan yang sama. Karena itu pencarian dimulai dari wadah baris (`tr`,
+ * atau leluhur terdekat yang tersedia) dan dilakukan **ke dalam**, bukan ke atas. Arah
+ * itu benar terlepas dari kelasnya, dan itulah perbaikan sebenarnya — versi sebelumnya
+ * menaiki `parentElement` dan membaca `textContent` setiap leluhur, sehingga tidak dapat
+ * mencapai elemen bersaudara, ditambah batas 400 karakter yang selalu terlampaui oleh
+ * panjang baris Gmail.
  *
- * Karena itu pencarian dimulai dari wadah baris (`tr`, atau leluhur terdekat
- * yang tersedia) dan dilakukan **ke dalam**, bukan ke atas.
+ * Perilaku barunya diuji dengan DOM tiruan. Perlu ditegaskan: test itu **membuktikan
+ * mekanismenya, bukan asumsinya** — DOM tiruannya dibangun dari bentuk di atas, jadi ia
+ * tidak dapat membuktikan bahwa Gmail sungguhan memakai kelas `zx`. Sampai sekarang tidak
+ * ada probe nyata yang pernah menemukan elemen itu.
  */
 function readViaHint(el: ElementLike): string | null {
   const row = el.closest('tr') ?? el.parentElement ?? el;
 
-  // Tingkat 1: elemen yang Gmail khususkan untuk penanda ini. Pada probe halaman
-  // inbox sungguhan `span.zx` cocok 1, jadi jalur inilah yang diharapkan bekerja.
+  // Tingkat 1: kelas yang *diharapkan* menjadi penanda "via". Belum pernah cocok pada
+  // satu pun probe nyata, jadi ini hipotesis murah yang dicoba lebih dulu — bukan jalur
+  // yang diandalkan. Lihat catatan pada VIA_ELEMENT_CLASSES.
   for (const selector of VIA_ELEMENT_CLASSES) {
     for (const marker of queryWithin(row, selector)) {
       const text = marker.textContent ?? '';
