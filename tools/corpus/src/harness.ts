@@ -11,7 +11,13 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { analyze, type EmailIdentity, type Verdict } from '@sender-check/core';
+import {
+  ALGORITHM_VERSION,
+  PSL_VERSION,
+  analyze,
+  type EmailIdentity,
+  type Verdict,
+} from '@sender-check/core';
 
 export type Label = 'legit' | 'suspicious' | 'unassessable';
 
@@ -198,6 +204,39 @@ export function computeMetrics(results: readonly CaseResult[]): Metrics {
 
 function percent(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
+}
+
+/**
+ * Ringkasan yang dicetak CLI, sekaligus **satu-satunya sumber kebenaran** untuk angkanya.
+ *
+ * Diletakkan di sini, bukan di `cli.ts`, karena keluaran ini **dikutip dokumentasi**:
+ * `docs/USAGE.md` memuat blok "Arti keluaran" berisi angka-angka ini. Sebelumnya CLI
+ * mencetaknya sendiri dan dokumen menyalinnya dengan tangan — dan salinan itu memang
+ * tertinggal: angka `state` di dokumen berjumlah 400 sementara `kasus` pada baris di
+ * atasnya menyebut 404, tanpa ada yang menyadarinya sampai release gate dijalankan ulang.
+ *
+ * Dengan satu fungsi, test dokumentasi dapat membandingkan kutipan itu dengan keluaran
+ * yang sebenarnya, bukan dengan salinan kedua yang bisa menyimpang.
+ */
+export function summaryLines(metrics: Metrics): string[] {
+  return [
+    '=== Sender-Check corpus ===',
+    `algorithmVersion : ${ALGORITHM_VERSION}`,
+    `pslVersion       : ${PSL_VERSION}`,
+    `kasus            : ${metrics.total}`,
+    `label            : legit ${metrics.byLabel.legit}, suspicious ${metrics.byLabel.suspicious}, unassessable ${metrics.byLabel.unassessable}`,
+    '',
+    `state            : ${Object.entries(metrics.byState)
+      .map(([state, count]) => `${state}=${count}`)
+      .join('  ')}`,
+    '',
+    `precision (flagged HIGH) : ${percent(metrics.precisionHigh)}  (gate >= ${percent(PRECISION_GATE)})`,
+    `precision (semua flagged): ${percent(metrics.precision)}`,
+    `recall (suspicious)      : ${percent(metrics.recall)}`,
+    `nag rate (visible)       : ${percent(metrics.nagRate)}  (gate <= ${percent(NAG_RATE_GATE)})`,
+    `nag rate (wide)          : ${percent(metrics.nagRateWide)}`,
+    '',
+  ];
 }
 
 function describe(result: CaseResult): string {

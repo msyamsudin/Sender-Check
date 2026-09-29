@@ -211,9 +211,11 @@ describe('bundel yang ditempel ke konsol Firefox', () => {
     expect(bundle.length).toBeGreaterThan(100_000);
   });
 
-  it('probe tetap kecil dan memuat pembacaan penanda via', () => {
+  it('probe tetap kecil dan tetap memuat kandidat penanda via', () => {
     const bundle = readBundledScript('sender-check.probe.js');
 
+    // `zx` sengaja dipertahankan sebagai kandidat hipotesis meski belum pernah cocok pada
+    // halaman Gmail sungguhan; penjaga ini memastikan build tidak diam-diam membuangnya.
     expect(bundle).toContain('zx');
     expect(bundle).toContain('PROBE SELECTOR');
     // Berkas ini ditempel ke konsol; ukurannya harus tetap wajar.

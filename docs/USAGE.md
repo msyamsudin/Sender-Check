@@ -95,7 +95,7 @@ interface EmailIdentity {
 | `replyTo` | tidak | `undefined` berarti **tidak diketahui**, bukan "sama dengan From" |
 | `returnPath` | tidak | Domain envelope sender, yaitu kolom "dikirim oleh" pada Show original |
 | `authenticationResults` | tidak | Nilai header `Authentication-Results` apa adanya |
-| `gmailViaHint` | tidak | **Hanya** dari indikator "via" di tampilan pesan. Baca peringatan di bawah |
+| `gmailViaHint` | tidak | **Hanya** dari indikator "via" di tampilan pesan. Baca catatan dan peringatan di bawah |
 | `gmailOwnWarning` | tidak | `true` bila webmail sendiri menampilkan peringatan pada pesan itu |
 
 #### Bagaimana `provenance` ditentukan
@@ -254,6 +254,13 @@ dilihat, jadi ini penting dipahami.
 Diambil dari DOM inbox: display name, alamat From, indikator "via", dan penanda peringatan milik
 webmail itu sendiri. Ini mencakup sebagian besar pemeriksaan.
 
+> **Catatan tentang indikator "via".** Pembacaannya **belum pernah terbukti bekerja**. Adapter
+> mencoba beberapa kandidat selector, dan pada setiap probe nyata yang tercatat semuanya
+> melaporkan 0 kecocokan; belum ada baris ber-"via" yang pernah ditemukan pada tampilan Gmail
+> yang diuji. Karena itu anggap `gmailViaHint` sebagai best-effort: bila webmail tidak merender
+> penanda itu, hasilnya `undefined` dan tidak ada rule yang terpicu. Jangan membangun pemeriksaan
+> yang **bergantung** pada medan ini.
+
 ### Tier B — perlu halaman "Show original"
 
 `Reply-To`, `Return-Path`, dan `Authentication-Results` **tidak dirender** di DOM inbox. Ketiganya
@@ -296,7 +303,7 @@ Arti keluaran:
 ```
 kasus            : 404
 label            : legit 190, suspicious 157, unassessable 57
-state            : UNCLEAR=48  CONSISTENT=131  UNASSESSABLE=103  INCONSISTENT=118
+state            : UNCLEAR=48  CONSISTENT=133  UNASSESSABLE=103  INCONSISTENT=120
 precision (flagged HIGH) : 100.0%   ← proporsi hasil flag yang memang berlabel suspicious
 recall (suspicious)      : 76.4%    ← proporsi kasus suspicious yang berhasil di-flag
 nag rate (visible)       : 0.0%     ← proporsi kasus tidak mencurigakan yang muncul di list view

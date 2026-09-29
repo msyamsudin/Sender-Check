@@ -217,13 +217,17 @@ kedua halaman**, bukan hanya di inbox.
 | Halaman Show original: "blok header tidak ditemukan" | Kirimkan keluarannya. Berarti cara Gmail menampilkan header mentah berubah, dan pencarian wadahnya perlu diperbaiki |
 | Skrip melaporkan "Halaman ini bukan Gmail" | Jalankan di `mail.google.com/mail/u/N/...`, bukan di halaman lain |
 | `pnpm console:build` gagal dengan `ERR_PNPM_IGNORED_BUILDS` | Jalankan `pnpm install` lebih dulu; esbuild perlu menjalankan postinstall |
+| `viaHint` tidak pernah terisi, `span.zx` selalu "tidak cocok" | Diharapkan, sampai ada bukti sebaliknya. Selector penanda "via" **belum pernah cocok** pada satu pun halaman Gmail yang diuji, jadi keluarannya memang `undefined`. Kalau kamu sendiri **melihat** `via <domain>` pada baris pengirim di Gmail, kirimkan keluaran probe halaman itu: hanya pengamatan seperti itu yang dapat menentukan selector mana yang benar |
 
 ## Yang masih menunggu
 
 Setelah selector terverifikasi, langkah berikutnya berurutan:
 
 1. **Adapter diuji terhadap DOM nyata.** Hasil probe dipakai untuk memperbaiki daftar
-   selector di `packages/adapters/src/gmail.ts` dan `gmail-headers.ts`.
+   selector di `packages/adapters/src/gmail.ts` dan `gmail-headers.ts`. Pertanyaan yang
+   masih terbuka: **apakah Gmail merender penanda "via" sama sekali**, dan dengan markup
+   apa. Keluaran probe pada halaman yang menampilkannya adalah satu-satunya cara
+   menjawabnya.
 2. **Snapshot DOM disimpan** di [`tools/corpus/dom-snapshots/`](../tools/corpus/dom-snapshots/README.md)
    sebagai canary test, yang gagal di CI ketika Gmail mengubah strukturnya.
 3. **Ekstensi dibangun** dengan WXT: manifest, content script, dan panel penjelasan.

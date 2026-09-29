@@ -12,6 +12,53 @@ Catatan penting tentang dua nomor versi di proyek ini:
 
 Keduanya wajib dinaikkan setiap kali rule, ambang, atau decision table berubah.
 
+## [Unreleased]
+
+Tidak ada rule, ambang, maupun decision table yang disentuh, dan tidak ada perilaku yang
+berubah. `ALGORITHM_VERSION` **tidak berubah** (tetap `0.2.0`), dan versi paket juga tidak
+dinaikkan.
+
+### Ditambahkan
+
+- **Penjaga untuk angka keluaran corpus yang dikutip dokumentasi.**
+  `tools/corpus/tests/docs.test.ts` kini membandingkan blok "Arti keluaran" di
+  `docs/USAGE.md` dengan keluaran corpus yang sebenarnya. Ringkasannya diambil dari
+  `summaryLines()` di `tools/corpus/src/harness.ts`, yaitu fungsi yang sama yang dipakai CLI,
+  sehingga tidak ada dua versi kebenaran. Sebelumnya CLI menyusun ringkasannya sendiri dan
+  dokumentasi menyalinnya dengan tangan — dan salinan itu memang menyimpang. Keluarannya
+  sudah dipastikan tidak berubah setelah pemindahan itu.
+  Dua hal dijaga: **setiap angka** yang dikutip harus sama dengan kenyataan, dan **daftar
+  kuncinya** dipatok, supaya metrik yang ditambahkan atau baris yang dihapus tidak lewat
+  tanpa disadari. `state` dibandingkan sebagai himpunan, bukan urutan, agar menata ulang
+  fixture tidak menghasilkan kegagalan palsu.
+  Penjaganya diuji dengan sengaja merusak satu angka: test gagal dan menyebutkan nilai
+  dokumen beserta nilai sebenarnya. Penjaga yang belum pernah terbukti gagal belum
+  membuktikan apa pun.
+
+### Diperbaiki
+
+- **Klaim palsu tentang selector penanda "via".** `packages/adapters/src/gmail.ts` menyatakan
+  `span.zx` "dilaporkan cocok 1 pada probe halaman inbox sungguhan". Angka 1 itu sebenarnya
+  milik `[role="alert"]` pada keluaran yang sama, dan contoh keluaran nyata di `docs/FIREFOX.md`
+  mencatat `span.zx` justru sebagai "tidak cocok". Pada setiap probe nyata yang tercatat — dua
+  halaman inbox (47 dan 12 baris), satu thread terbuka, dan satu tampilan Promotions — selector
+  itu melaporkan **0 kecocokan**. Klaimnya dicabut dan diganti keterangan bahwa pembacaan "via"
+  adalah *best-effort* yang belum pernah terbukti bekerja. Perilakunya tidak berubah, karena
+  jalur itu memang belum pernah menyala; yang berubah adalah kejujuran dokumennya. Klaim salah
+  yang tampak terverifikasi lebih berbahaya daripada tidak ada klaim, sebab ia menghentikan
+  orang berikutnya dari memeriksa.
+- Test yang membangun DOM tiruan berisi `span.zx` kini menyatakan bahwa yang diuji adalah
+  **mekanismenya, bukan asumsi kelasnya**. Sebelumnya test itu terbaca seolah membuktikan bahwa
+  Gmail memakai kelas tersebut, padahal DOM tiruannya dibangun dari asumsi itu sendiri.
+- `docs/DESIGN.md` bagian 12.1, `docs/USAGE.md`, dan `docs/FIREFOX.md` tidak lagi menyatakan
+  struktur penanda "via" sebagai fakta. Ketiganya menandainya sebagai hipotesis beserta
+  akibatnya, dan menyebutkan apa yang dibutuhkan untuk menyelesaikannya: satu pengamatan pada
+  halaman Gmail yang benar-benar menampilkan "via".
+- **Angka `state` pada contoh keluaran `pnpm corpus` di `docs/USAGE.md` sudah basi**, dan basi
+  sejak sebelum perubahan ini: angkanya berjumlah 400 sementara `kasus` di baris atasnya
+  menyebut 404. Nilainya kini disamakan dengan keluaran sebenarnya (404 kasus, jumlah barisnya
+  ikut cocok). Ketahuan saat menjalankan ulang release gate untuk perubahan ini.
+
 ## [0.3.0] — 2026-09-24
 
 Adapter webmail dan skrip konsol Firefox. `ALGORITHM_VERSION` **tidak berubah** (tetap
