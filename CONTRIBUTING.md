@@ -67,14 +67,19 @@ Beberapa hal tidak bergantung pada kebaikan hati peninjau, melainkan gagal di CI
 2. Pancarkan kode itu dari `packages/core/src/evidence/rules.ts`.
 3. Tambahkan fixture di `tools/corpus/fixtures/` yang memicunya, dan satu kasus sah yang
    hampir mirip di `adversarial.json`.
-4. Perbarui tabel di `docs/RULES.md`. Kolom turunannya dapat dihasilkan ulang:
+4. Perbarui tabel di `docs/RULES.md`. Kode dan polaritasnya dijaga test
+   (`tools/corpus/tests/docs.test.ts`), jadi rule baru membuat test gagal sampai barisnya
+   ditambahkan. Kolom "arti" ditulis manusia, dan sel `Strength` boleh menulis rentang
+   (`strong / medium`) bila bobotnya memang berubah menurut kasus.
 
    ```bash
    pnpm rules
    ```
 
-   Keluaran perintah itu adalah baris Markdown siap tempel. Kolom "arti" tetap ditulis
-   manusia.
+   Perintah itu mencetak tabel audit: kode, polaritas, strength, tier, dan contoh fixture.
+   Ia untuk membandingkan katalog dengan dokumen, **bukan** untuk ditempel ke
+   `docs/RULES.md` — bentuk kolomnya berbeda, dan alasannya ada di
+   `tools/corpus/src/rules-table.ts`.
 5. Naikkan `ALGORITHM_VERSION` di `packages/core/src/version.ts` dan catat di
    `CHANGELOG.md`.
 6. Jalankan `pnpm test` dan `pnpm corpus`.

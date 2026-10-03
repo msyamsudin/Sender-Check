@@ -1,11 +1,27 @@
 /**
- * Mencetak tabel katalog rule sebagai baris Markdown, siap ditempel ke
- * `docs/RULES.md`.
+ * Mencetak kolom turunan katalog rule sebagai tabel Markdown.
  *
- * Kolom yang dihasilkan bersifat turunan (kode, polarity, strength, tier, contoh
- * fixture), sehingga tidak boleh ditulis tangan: itulah yang membuat tabel rujukan
- * tidak dapat menyimpang dari implementasi. Kolom "arti" tetap ditulis manusia
- * karena ia menjelaskan maksud, bukan data.
+ * Keluarannya **bukan** sumber tempel untuk tabel di `docs/RULES.md`. Berkas ini dulu
+ * menyebutnya "siap ditempel", dan itu tidak benar: bentuk keduanya berbeda.
+ *
+ * ```
+ * keluaran perintah ini    Kode | Polaritas | Strength | Tier | contoh fixture
+ * tabel di docs/RULES.md   Kode | Polaritas | Strength | Arti
+ * ```
+ *
+ * Perbedaannya bukan ketidaktelitian. Tabel di dokumen memuat kolom "arti" yang ditulis
+ * manusia, dan enam sel `Strength`-nya sengaja menulis rentang (`strong / medium`,
+ * `strong / weak`, dan satu bertanda bintang dengan catatan di bawah tabel), karena rule
+ * itu memang berubah bobot menurut kasusnya. Keduanya tidak dapat dihasilkan mesin.
+ * Sebaliknya, kolom `Tier` dan contoh fixture berguna untuk meninjau katalog, dan tidak
+ * dibutuhkan pembaca dokumen.
+ *
+ * Jadi perintah ini adalah **tabel audit**: ia menjawab "apakah katalog, bobot, dan cakupan
+ * fixture masih konsisten", dan hasilnya dibandingkan dengan dokumen, bukan ditempelkan ke
+ * dalamnya. Yang menjaga keduanya tetap sejalan adalah test di
+ * `tools/corpus/tests/docs.test.ts`, yang memeriksa Kode dan Polaritas setiap rule terhadap
+ * katalog dan terhadap engine, serta memastikan sel `Strength` di dokumen memuat bobot yang
+ * benar-benar dipancarkan.
  *
  * Jalankan: pnpm rules
  */
