@@ -484,6 +484,17 @@ Dua catatan tentang panel ini:
 - Jangan pakai nama/logo Gmail·Outlook. Sebut "kompatibel dengan". Sertakan halaman privasi:
   tanpa network request, tanpa telemetry, hanya metadata pengirim dibaca.
 
+**Status implementasi.** Yang sudah berlaku di `apps/extension`: disclaimer permanen di
+setiap state, lambang yang menyertai warna sehingga warna bukan satu-satunya pembawa arti,
+tidak ada `innerHTML` di lapisan tampilan (dijaga test), dan tidak ada nama maupun logo
+webmail di dalam produk.
+
+Yang **belum**: i18n. Kalimatnya baru tersedia dalam bahasa Indonesia, dan itu disengaja —
+menerjemahkan ke bahasa yang belum ada penggunanya menghasilkan teks yang tidak pernah
+dibaca siapa pun, dan teks terjemahan yang tidak pernah dibaca akan menyimpang tanpa ada
+yang menyadarinya. Syaratnya sudah dipenuhi sejak awal: engine tidak memuat satu pun kalimat
+jadi, sehingga saat bahasa kedua dibutuhkan, hanya `packages/presentation` yang berubah.
+
 ---
 
 ## 10. Performa & privasi
@@ -496,6 +507,16 @@ Dua catatan tentang panel ini:
 - Permission minimal: `host_permissions` hanya `https://mail.google.com/*`.
   Tidak ada `<all_urls>`, tidak ada `tabs`, tidak ada `webRequest`.
 - Multi-akun: dukung `u/0`, `u/1`, `u/2`, dst — bukan hanya `u/0`.
+
+**Status implementasi.** `MutationObserver` dengan debounce 400 ms dan `requestIdleCallback`
+sudah dipakai, sesuai butir pertama. Permission minimal sudah, dan dijaga test yang menolak
+`<all_urls>`, `tabs`, `webRequest`, `cookies`, serta `history`. Multi-akun sudah: pencocokan
+host maupun pengenalan thread tidak membedakan nomor `u/N`.
+
+Yang **belum** adalah `IntersectionObserver` dan cache `storage.session`, dan keduanya
+memang belum dibutuhkan: keduanya baru bermakna ketika puluhan baris dianalisis sekaligus,
+yaitu pekerjaan list view yang belum dikerjakan. Menambahkannya sekarang berarti menulis
+cache untuk satu thread yang isinya paling banyak beberapa pengirim.
 
 ---
 
@@ -578,18 +599,30 @@ examples/                         contoh pemakaian yang dapat dijalankan
 docs/                             DESIGN.md, USAGE.md, RULES.md
 ```
 
-Yang **belum ada**:
+Struktur lengkapnya:
 
 ```
-apps/extension/                   MV3 shell: content script, service worker, UI
+apps/extension/                   ekstensi Firefox (WXT): content script + panel
+  src/entrypoints/gmail.content.ts  perekat: kapan memindai, kapan menggambar
+  src/lib/view.ts                   jenis halaman: thread, list, show-original, lain
+  src/lib/scan.ts                   adapter + engine menjadi temuan siap tampil
+  src/lib/panel-model.ts            isi panel sebagai data, tanpa DOM
+  src/lib/panel-view.ts             menuangkan model ke elemen
+  tests/                            36 test tanpa browser
 ```
 
-`packages/adapters` dan `tools/console` sudah ada sejak 0.3.0, jadi yang tersisa dari daftar
-ini hanya ekstensinya. Yang menghambatnya bukan penulisan kode, melainkan **verifikasi
-selector**: adapter tidak dapat dinyatakan benar terhadap Gmail hari ini tanpa satu pun
-pengamatan pada DOM sungguhan, dan sampai itu ada, `packages/adapters/src/gmail.ts` memuat
-kandidat selector yang sebagian belum pernah cocok sama sekali — lihat catatan pada
-`VIA_ELEMENT_CLASSES` di berkas itu.
+`packages/adapters`, `tools/console`, dan ekstensinya sudah ada. Jadi **tidak ada lagi paket
+yang belum dibuat**; yang tersisa adalah verifikasi, dan itu bukan pekerjaan menulis kode.
+Adapter tidak dapat dinyatakan benar terhadap Gmail hari ini tanpa satu pun pengamatan pada
+DOM sungguhan, dan sampai itu ada, `packages/adapters/src/gmail.ts` memuat kandidat selector
+yang sebagian belum pernah cocok sama sekali — lihat catatan pada `VIA_ELEMENT_CLASSES` di
+berkas itu.
+
+Dua batas cakupan ekstensi yang disengaja, dan keduanya dijelaskan di
+[`FIREFOX.md`](FIREFOX.md#ekstensi-firefox): panel hanya muncul pada thread yang sedang
+dibuka, dan belum ada cache maupun mode diagnostik. Yang pertama karena indikator di list
+view menuntut presisi yang belum terbukti; yang kedua karena keduanya baru dibutuhkan
+bersama list view.
 
 Adapter wajib punya `probe(): { matched, selectorUsed, confidence }`. Bila semua selector gagal,
 extension **no-op + diagnostic log** — jangan diam-diam tidak berjalan. Sertakan canary test
@@ -650,14 +683,18 @@ Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 | 4 | Similarity engine + aturan panjang token (§7) | **selesai** |
 | 5 | Evidence engine + decision table (deterministik, traceable) | **selesai** |
 | 6 | Classification + corpus harness CLI + confusion matrix | **selesai** |
-| 7 | Gmail adapter + UI mode tenang | belum — menunggu Phase 0 |
-| 8 | Perluas corpus + tuning precision-first | sebagian — 392 kasus, gate lulus |
-| 9 | Tier B: parse halaman "Show original" | sebagian — rule Tier B lengkap dan teruji, adapter halaman belum |
-| 10 | Performa, i18n, privacy policy, packaging & release | belum |
+| 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, dan panel ekstensi ada; **selectornya belum diverifikasi** dan list view belum ditangani |
+| 8 | Perluas corpus + tuning precision-first | sebagian — 404 kasus, gate lulus |
+| 9 | Tier B: parse halaman "Show original" | sebagian — rule dan adapter halaman lengkap dan teruji, belum diverifikasi terhadap halaman sungguhan |
+| 10 | Performa, i18n, privacy policy, packaging & release | belum — lihat catatan i18n di §9 |
 
 Perbedaan dari urutan awal: corpus & decision table **sebelum** UI; header auth Tier B **setelah**
 core terbukti presisi, karena tuning rule di atas sinyal yang cakupannya sebagian kecil email
 menghasilkan threshold yang salah.
+
+Phase 7 sengaja dinyatakan **sebagian**, bukan selesai, walaupun kodenya sudah ada. Yang belum
+selesai bukan penulisan kodenya melainkan pembuktiannya: sampai ada snapshot DOM nyata, tidak
+ada yang dapat mengatakan apakah panel ini benar-benar membaca Gmail hari ini.
 
 ---
 

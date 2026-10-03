@@ -392,23 +392,26 @@ akan dipakai ulang dari cache.
 
 ## Status ekstensi browser
 
-Ekstensi browser belum ada. Yang sudah selesai adalah engine dan adapter Gmail-nya, dan
-urutan pengerjaannya disengaja: memisahkan engine dari adapter membuat algoritma dapat
-diuji tanpa browser, sehingga tuning presisi menjadi iterasi hitungan detik alih-alih
-siklus reload ekstensi.
+Ekstensi Firefox sudah ada di `apps/extension` dan dapat dimuat hari ini, tetapi cakupannya
+sengaja sempit: panel penjelasan muncul hanya ketika **satu thread sedang dibuka**, atau pada
+halaman "Show original". List view belum ditangani.
 
-Namun adapter itu **sudah dapat dijalankan di Gmail-mu hari ini** lewat skrip konsol,
-tanpa manifest dan tanpa tanda tangan:
+Urutan pengerjaannya disengaja: memisahkan engine dari adapter membuat algoritma dapat diuji
+tanpa browser, sehingga tuning presisi menjadi iterasi hitungan detik alih-alih siklus reload
+ekstensi. Sampai sekarang urutan itu bertahan — 316 test berjalan di Node, dan tidak satu pun
+di antaranya membutuhkan browser.
 
 ```bash
-pnpm console:build
+pnpm extension:build
 ```
 
-Langkah lengkapnya, termasuk cara memuat ekstensi sementara lewat `about:debugging` dan
-dua jebakan khas Firefox yang sudah diketahui, ada di **[`FIREFOX.md`](FIREFOX.md)**.
+Langkah lengkapnya, termasuk cara memuat ekstensi sementara lewat `about:debugging`, apa yang
+belum dilakukan panelnya, dan jebakan khas Firefox yang sudah diketahui, ada di
+**[`FIREFOX.md`](FIREFOX.md)**.
 
-Yang menghambat langkah berikutnya adalah **verifikasi selector DOM**. Yang dibutuhkan,
-diletakkan di `tools/corpus/dom-snapshots/`:
+Yang masih menghambat adalah **verifikasi selector DOM**. Baik skrip konsol maupun ekstensi
+berjalan di atas selector yang belum pernah diperiksa terhadap Gmail sungguhan. Yang
+dibutuhkan, diletakkan di `tools/corpus/dom-snapshots/`:
 
 1. Satu baris list view (outerHTML satu baris saja, bukan seluruh halaman)
 2. Satu thread terbuka

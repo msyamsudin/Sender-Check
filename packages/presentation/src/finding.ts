@@ -75,6 +75,26 @@ export const POLARITY_LABEL: Record<string, string> = {
   neutral: 'netral',
 };
 
+/** Nama bobot bukti untuk pengguna. Engine memancarkan `strong`/`medium`/`weak`. */
+export const STRENGTH_LABEL: Record<string, string> = {
+  strong: 'kuat',
+  medium: 'sedang',
+  weak: 'lemah',
+};
+
+/**
+ * Kalimat tetap tentang arti hasil autentikasi.
+ *
+ * Wajib muncul pada kasus Reply-To, dan alasannya bukan kelengkapan: justru karena SPF,
+ * DKIM, dan DMARC semuanya lulus untuk domain pengirim, pengguna perlu tahu bahwa
+ * kelulusan itu **tidak bertentangan** dengan temuan ini. Tanpa kalimat ini, temuan
+ * "nama tidak sejalan" akan tampak bertabrakan dengan indikator keamanan yang sudah
+ * dilihat pengguna di webmailnya, dan yang paling mungkin dikorbankan pengguna adalah
+ * alat ini.
+ */
+export const AUTHENTICATION_CAVEAT =
+  'Hasil autentikasi membuktikan domain pengirim, bukan nama yang ditampilkan.';
+
 /**
  * Kode bukti yang tetap ditampilkan sebagai keterangan konteks walaupun verdiktnya bukan
  * `INCONSISTENT`.

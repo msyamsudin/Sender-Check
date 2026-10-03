@@ -1,0 +1,205 @@
+/*
+ * Gaya panel.
+ *
+ * Ditulis seolah-olah tidak ada apa pun di sekitarnya, dan itu memang keadaannya: WXT
+ * menambahkan `all: initial` pada shadow root, sehingga font, warna, dan ukuran harus
+ * dinyatakan sendiri. Perilaku itu yang diinginkan — panel ini disuntikkan ke dalam
+ * aplikasi web milik orang lain, dan tampilannya tidak boleh bergantung pada CSS halaman
+ * itu, begitu pula sebaliknya.
+ *
+ * Panel memakai `position: fixed` di sudut kanan bawah supaya tidak menggeser tata letak
+ * webmail, dan `z-index` besar supaya tetap terlihat di atas dialog webmail.
+ */
+
+.sc-card {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483000;
+
+  box-sizing: border-box;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding: 14px 16px;
+
+  border: 1px solid #d0d5dd;
+  border-left: 4px solid #667085;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(16, 24, 40, 0.18);
+
+  color: #101828;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+/* Aksen menurut state. Warnanya menyertakan lambang, bukan menggantikannya, karena warna
+   tidak boleh menjadi satu-satunya pembawa arti. */
+.sc-card--INCONSISTENT {
+  border-left-color: #b54708;
+}
+.sc-card--UNCLEAR {
+  border-left-color: #b58a08;
+}
+.sc-card--CONSISTENT {
+  border-left-color: #067647;
+}
+.sc-card--UNASSESSABLE {
+  border-left-color: #667085;
+}
+
+.sc-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.sc-mark {
+  flex: none;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.sc-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sc-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sc-subject {
+  margin: 2px 0 0;
+  color: #475467;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.sc-close {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #667085;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sc-close:hover {
+  background: #f2f4f7;
+  color: #101828;
+}
+
+.sc-fields {
+  margin: 10px 0 0;
+}
+
+.sc-field {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.sc-field-label {
+  flex: none;
+  width: 86px;
+  color: #667085;
+}
+
+.sc-field-value {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.sc-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #eaecf0;
+}
+
+.sc-h {
+  margin: 0 0 6px;
+  color: #475467;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sc-reasons,
+.sc-auth {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sc-reason {
+  display: flex;
+  gap: 6px;
+  padding: 3px 0;
+}
+
+.sc-tag {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #475467;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.sc-reason--inconsistency .sc-tag {
+  background: #fef0c7;
+  color: #b54708;
+}
+
+.sc-reason--consistency .sc-tag {
+  background: #d1fadf;
+  color: #067647;
+}
+
+.sc-reason--context .sc-tag {
+  background: #e0eaff;
+  color: #3538cd;
+}
+
+.sc-sentence {
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.sc-auth-item {
+  padding: 2px 0;
+  color: #475467;
+}
+
+.sc-empty {
+  margin: 0;
+  color: #475467;
+}
+
+.sc-disclaimer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #eaecf0;
+  color: #667085;
+  font-size: 11px;
+}
+
+.sc-disclaimer-line {
+  margin: 0;
+}

@@ -14,11 +14,13 @@ export { describeRule, RULE_TEMPLATES } from './sentences.ts';
 export type { Args, SentenceTemplate } from './sentences.ts';
 
 export {
+  AUTHENTICATION_CAVEAT,
   CONTEXT_NOTE_CODES,
   DISCLAIMER_LINES,
   MARK,
   POLARITY_LABEL,
   STATE_TITLE,
+  STRENGTH_LABEL,
   contextNotes,
   isContextNote,
   senderLabel,

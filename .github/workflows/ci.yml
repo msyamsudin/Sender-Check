@@ -42,6 +42,13 @@ jobs:
       - name: Build bundel skrip konsol
         run: pnpm console:build
 
+      # Ekstensi dibangun di sini walaupun testnya berjalan tanpa browser. Alasannya
+      # ditemukan saat mengerjakannya: impor CSS yang salah path tidak menggagalkan
+      # typecheck maupun test mana pun, dan hanya muncul sebagai kegagalan build. Berkas
+      # hasilnya (`.output/`) diabaikan git, jadi langkah ini tidak mengubah repositori.
+      - name: Build ekstensi Firefox
+        run: pnpm extension:build
+
       # Dijalankan terpisah dari test agar pesan kegagalannya menyebut tautan mana
       # yang rusak, bukan sekadar satu assertion yang gagal.
       - name: Periksa tautan dokumentasi

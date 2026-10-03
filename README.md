@@ -23,13 +23,16 @@ runtime.
 | Engine analisis (`packages/core`) | **selesai dan terukur** |
 | Adapter Gmail (`packages/adapters`) | **selesai**, selectornya belum diverifikasi terhadap Gmail hari ini |
 | Skrip konsol Firefox | **selesai** — `pnpm console:build`, lalu tempel ke konsol |
+| Ekstensi Firefox (`apps/extension`) | **dapat dimuat**, panel hanya pada thread yang dibuka; selectornya belum diverifikasi |
 | Corpus 404 kasus berlabel + release gate | **selesai** |
-| UI ekstensi browser | belum |
 
-Belum ada ekstensi yang bisa dipasang di Firefox. Yang ada sekarang: engine yang sudah
-terbukti, adapter Gmail, dan skrip konsol untuk memverifikasi selector terhadap Gmail
-sungguhan. Lihat **[`docs/FIREFOX.md`](docs/FIREFOX.md)** untuk cara memakainya di
-Firefox, dan bagian 13 pada [`docs/DESIGN.md`](docs/DESIGN.md) untuk status setiap phase.
+Ekstensi Firefox sudah ada dan dapat dimuat lewat `about:debugging`, tetapi cakupannya
+sengaja sempit: panel penjelasan muncul hanya ketika satu thread dibuka atau pada halaman
+"Show original", dan list view belum ditangani. Yang membuatnya belum dinyatakan selesai
+bukan kelengkapan kodenya, melainkan bahwa **selectornya belum pernah diverifikasi terhadap
+Gmail sungguhan** — sama seperti adapter yang mendasarinya. Lihat
+**[`docs/FIREFOX.md`](docs/FIREFOX.md)** untuk cara membangun dan memuatnya, serta bagian 13
+pada [`docs/DESIGN.md`](docs/DESIGN.md) untuk status setiap phase.
 
 ## Masalah yang dipecahkan
 
@@ -222,7 +225,8 @@ packages/core/            engine murni: tanpa DOM, tanpa chrome.*, tanpa network
 packages/adapters/        DOM webmail menjadi EmailIdentity. Bekerja pada antarmuka DOM
                           yang dipersempit, sehingga dapat diuji di Node tanpa jsdom
 packages/presentation/    code + args dari engine menjadi kalimat dan struktur tampilan;
-                          dipakai skrip konsol, contoh, generator tabel rule, dan panel
+                          dipakai skrip konsol, contoh, dan panel ekstensi
+apps/extension/           ekstensi Firefox (WXT): content script + panel penjelasan
 tools/corpus/             404 fixture berlabel + harness CLI + laporan otomatis
 tools/console/            skrip konsol Firefox: probe selector dan analisis
 tools/gen-psl/            generator PSL dari daftar resmi (build-time)
@@ -231,11 +235,18 @@ examples/                 contoh pemakaian yang dapat dijalankan
 docs/                     DESIGN.md, USAGE.md, RULES.md, FIREFOX.md
 ```
 
-Dua invariant ditegakkan oleh test yang membaca source-nya sendiri, bukan sekadar
-dijanjikan di dokumen: `packages/core` tidak boleh memuat DOM, `chrome.*`, jaringan, jam,
-RNG, atau `eval`; dan `packages/adapters` wajib bekerja pada antarmuka DOM yang
-dipersempit sehingga tidak ada satu pun berkasnya yang menyentuh `document` secara
-langsung.
+Empat invariant ditegakkan oleh test yang membaca source-nya sendiri, bukan sekadar
+dijanjikan di dokumen:
+
+- `packages/core` tidak boleh memuat DOM, `chrome.*`, jaringan, jam, RNG, atau `eval`;
+- `packages/adapters` wajib bekerja pada antarmuka DOM yang dipersempit, sehingga tidak ada
+  satu pun berkasnya yang menyentuh `document` secara langsung;
+- modul logika ekstensi (`view.ts`, `scan.ts`, `panel-model.ts`) tidak boleh menyentuh global
+  browser, supaya keputusannya tetap dapat diuji di Node tanpa browser;
+- lapisan tampilan ekstensi tidak boleh menafsirkan teks sebagai HTML. Display name dan
+  alamat berasal dari email yang dikendalikan penyerang, dan satu `innerHTML` cukup untuk
+  menjalankan markupnya di dalam sesi webmail pengguna. Manifest-nya juga dijaga: tidak ada
+  `<all_urls>`, `tabs`, atau `webRequest`, dan tidak ada network request di kodenya.
 
 ## Regenerasi data
 
