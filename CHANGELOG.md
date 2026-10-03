@@ -20,6 +20,24 @@ dinaikkan.
 
 ### Ditambahkan
 
+- **`packages/presentation`** — lapisan penyajian murni: `code` + `args` dari engine menjadi
+  kalimat dan struktur tampilan. Tanpa DOM, tanpa `chrome.*`, tanpa network, sehingga dapat
+  diuji di Node. Dipakai skrip konsol, contoh pemakaian, generator tabel rule, dan — pada
+  langkah berikutnya — panel ekstensi. Paket ini lahir karena panel ekstensi membutuhkan
+  kalimat yang sama, dan salinan yang dibuat untuknya pasti menyimpang.
+- **Penjaga argumen kalimat.** `tools/corpus/tests/presentation.test.ts` merender **setiap**
+  kode rule memakai `args` yang benar-benar dipancarkan fixture, lalu menolak kalimat yang
+  memuat `undefined`, `NaN`, `[object Object]`, atau `${`. Ini satu-satunya cara menangkap
+  template yang menyebut nama argumen yang salah: test kelengkapan hanya dapat membuktikan
+  bahwa sebuah template ada, bukan bahwa ia membaca argumen yang benar.
+- **Penjaga kutipan dokumentasi.** Test yang sama memastikan README dan `docs/USAGE.md`
+  benar-benar memuat kalimat yang dihasilkan untuk kasus Reply-To, sehingga dokumentasi tidak
+  dapat menyimpang dari keluaran tanpa ada yang gagal.
+- **Tiga kode Tier B akhirnya punya kalimat.** `RETURN_PATH_NULL_OR_MISMATCH`, `AUTH_SPF_FAIL`,
+  dan `AUTH_DKIM_FAIL` sebelumnya tidak punya template sama sekali di mana pun, sehingga
+  pengguna melihat `trace` mentah yang ditulis untuk pengembang. Untuk Return-Path, kalimatnya
+  membedakan dua keadaan yang berbeda arti: headernya tidak ada, atau domainnya berbeda.
+
 - **Penjaga untuk angka keluaran corpus yang dikutip dokumentasi.**
   `tools/corpus/tests/docs.test.ts` kini membandingkan blok "Arti keluaran" di
   `docs/USAGE.md` dengan keluaran corpus yang sebenarnya. Ringkasannya diambil dari
@@ -34,6 +52,27 @@ dinaikkan.
   Penjaganya diuji dengan sengaja merusak satu angka: test gagal dan menyebutkan nilai
   dokumen beserta nilai sebenarnya. Penjaga yang belum pernah terbukti gagal belum
   membuktikan apa pun.
+
+### Diubah
+
+- **Kalimat bukti disatukan, dan dua salinannya ternyata sudah menyimpang.** Template hidup di
+  `tools/console/src/main.ts` **dan** `examples/analyze-emails.ts`. Untuk
+  `REPLY_TO_MATCHES_NAME_BUT_FROM_DOES_NOT`, yang pertama menulis "ada di domain tujuan
+  balasan" dan yang kedua "muncul di" — sementara README dan `docs/USAGE.md` mengutip versi
+  kedua, dan test skrip konsol menuntut versi pertama. Dokumentasi repositori ini menuntut dua
+  hal yang tidak dapat benar bersamaan. Yang bertahan adalah versi yang sudah dikutip
+  dokumentasi, karena ia juga lebih informatif pada beberapa kode (mis.
+  `DISPLAY_NAME_EXACTLY_MATCHES_ADDRESS` menyertakan alamatnya, bukan hanya menyatakan bahwa
+  alamat itu ada). Akibatnya **sebelas kalimat** yang dicetak skrip konsol berubah; test
+  laporannya ikut diperbarui, dan perubahannya disengaja.
+- **`MARK`, `shortPolarity`, dan `POLARITY_LABEL` kini hanya ada satu salinannya.** Sebelumnya
+  ketiganya ada di skrip konsol dan di contoh pemakaian, dengan `POLARITY_LABEL` muncul sekali
+  lagi di generator tabel rule sebagai peta yang bentuknya berbeda untuk arti yang sama.
+  Semuanya sekarang berasal dari `packages/presentation`; keluaran `pnpm rules` dipastikan
+  tidak berubah.
+- **`docs/DESIGN.md` bagian 12 tidak lagi menyebut `packages/adapters` sebagai "belum ada".**
+  Paket itu sudah ada sejak 0.3.0. Yang benar-benar tersisa hanyalah ekstensinya, dan alasan
+  tertahannya bukan penulisan kode melainkan verifikasi selector.
 
 ### Diperbaiki
 

@@ -221,6 +221,8 @@ packages/core/            engine murni: tanpa DOM, tanpa chrome.*, tanpa network
 
 packages/adapters/        DOM webmail menjadi EmailIdentity. Bekerja pada antarmuka DOM
                           yang dipersempit, sehingga dapat diuji di Node tanpa jsdom
+packages/presentation/    code + args dari engine menjadi kalimat dan struktur tampilan;
+                          dipakai skrip konsol, contoh, generator tabel rule, dan panel
 tools/corpus/             404 fixture berlabel + harness CLI + laporan otomatis
 tools/console/            skrip konsol Firefox: probe selector dan analisis
 tools/gen-psl/            generator PSL dari daftar resmi (build-time)

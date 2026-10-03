@@ -6,7 +6,8 @@
   "description": "Harness corpus offline: menjalankan engine di Node dan menghasilkan confusion matrix tanpa browser.",
   "license": "MIT",
   "dependencies": {
-    "@sender-check/core": "workspace:*"
+    "@sender-check/core": "workspace:*",
+    "@sender-check/presentation": "workspace:*"
   },
   "scripts": {
     "corpus": "node src/cli.ts",

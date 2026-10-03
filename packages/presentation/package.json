@@ -1,0 +1,15 @@
+{
+  "name": "@sender-check/presentation",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Lapisan penyajian murni: menerjemahkan code + args dari engine menjadi kalimat dan struktur yang dapat ditampilkan skrip konsol, contoh, maupun panel ekstensi.",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@sender-check/core": "workspace:*"
+  }
+}

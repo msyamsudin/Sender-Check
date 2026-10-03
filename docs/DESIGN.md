@@ -569,6 +569,8 @@ packages/core/                    engine murni, tanpa DOM, tanpa chrome.*
   src/classification/             decision table
   src/data/                       psl + confusables (generated); freemail, esp, disposable, milis, token
   tests/                          unit, property, end-to-end, arsitektur
+packages/presentation/            code + args dari engine menjadi kalimat dan struktur
+                                  tampilan; dipakai konsol, contoh, dan panel ekstensi
 tools/corpus/                     fixture berlabel + harness CLI + laporan + test cakupan
 tools/gen-psl/                    generator build-time dari daftar PSL resmi
 tools/gen-unicode/                generator build-time dari confusables.txt
@@ -576,12 +578,18 @@ examples/                         contoh pemakaian yang dapat dijalankan
 docs/                             DESIGN.md, USAGE.md, RULES.md
 ```
 
-Yang **belum ada**, dan sengaja belum dibuat sebelum adapter terverifikasi:
+Yang **belum ada**:
 
 ```
-packages/adapters/                gmail.ts (+ outlook.ts menyusul), SelectorRegistry, probe()
 apps/extension/                   MV3 shell: content script, service worker, UI
 ```
+
+`packages/adapters` dan `tools/console` sudah ada sejak 0.3.0, jadi yang tersisa dari daftar
+ini hanya ekstensinya. Yang menghambatnya bukan penulisan kode, melainkan **verifikasi
+selector**: adapter tidak dapat dinyatakan benar terhadap Gmail hari ini tanpa satu pun
+pengamatan pada DOM sungguhan, dan sampai itu ada, `packages/adapters/src/gmail.ts` memuat
+kandidat selector yang sebagian belum pernah cocok sama sekali — lihat catatan pada
+`VIA_ELEMENT_CLASSES` di berkas itu.
 
 Adapter wajib punya `probe(): { matched, selectorUsed, confidence }`. Bila semua selector gagal,
 extension **no-op + diagnostic log** — jangan diam-diam tidak berjalan. Sertakan canary test

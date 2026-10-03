@@ -3,19 +3,12 @@
  *
  * Dipisahkan supaya kedua skrip tetap kecil dan tidak ada dua versi kebenaran tentang
  * cara melaporkan hasil.
+ *
+ * `MARK` dan `shortPolarity` **tidak lagi ada di sini**: keduanya keputusan penyajian yang
+ * sekarang dimiliki `@sender-check/presentation`, karena panel ekstensi membutuhkannya
+ * juga. Selama salinannya ada di sini, panel pasti menyalinnya lagi.
  */
 import type { SelectorProbe } from '@sender-check/adapters';
-
-export const MARK: Record<string, string> = {
-  INCONSISTENT: '⚠',
-  UNCLEAR: '·',
-  CONSISTENT: '✓',
-  UNASSESSABLE: '?',
-};
-
-export function shortPolarity(polarity: string): string {
-  return polarity.replace('supports_', '');
-}
 
 export function section(title: string): void {
   console.log(`\n--- ${title} ---`);
