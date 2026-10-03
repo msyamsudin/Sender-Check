@@ -1,6 +1,7 @@
 packages:
   - 'packages/*'
   - 'tools/*'
+  - 'apps/*'
   - 'examples'
 
 # pnpm 11 memblokir postinstall dependency secara default. esbuild (dipakai vitest)

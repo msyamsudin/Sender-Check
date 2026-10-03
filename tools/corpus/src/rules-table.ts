@@ -12,18 +12,12 @@
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ALL_RULE_CODES } from '@sender-check/core';
+import { shortPolarity } from '@sender-check/presentation';
 import { loadCases, runCases } from './harness.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const cases = loadCases(join(here, '..', 'fixtures'));
 const results = runCases(cases);
-
-const POLARITY_LABEL: Record<string, string> = {
-  supports_inconsistency: 'inconsistency',
-  supports_consistency: 'consistency',
-  context: 'context',
-  neutral: 'neutral',
-};
 
 /**
  * Memilih contoh fixture yang paling instruktif untuk sebuah kode.
@@ -48,6 +42,6 @@ for (const code of ALL_RULE_CODES) {
     continue;
   }
   console.log(
-    `| \`${code}\` | ${POLARITY_LABEL[item.polarity] ?? item.polarity} | ${item.strength} | ${item.tier} | \`${hit?.testCase.id ?? '—'}\` |`,
+    `| \`${code}\` | ${shortPolarity(item.polarity)} | ${item.strength} | ${item.tier} | \`${hit?.testCase.id ?? '—'}\` |`,
   );
 }

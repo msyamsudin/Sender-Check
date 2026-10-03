@@ -143,8 +143,14 @@ describe('laporan skrip konsol: halaman inbox', () => {
 
     // Inilah kerusakan yang dijaga test ini: keterangan konteks tidak boleh hilang
     // hanya karena pengirimnya tidak masuk state INCONSISTENT.
+    //
+    // Kalimatnya berasal dari `@sender-check/presentation`, dan itu yang membuat test ini
+    // ikut berubah ketika wording disatukan: skrip konsol dulu punya salinan sendiri yang
+    // berbunyi 'dikirim melalui "..."', sementara `examples/` dan `docs/USAGE.md` memakai
+    // 'webmail menandai pengiriman melalui "..."'. Yang bertahan adalah versi yang sudah
+    // dikutip dokumentasi.
     expect(output).toContain('keterangan pada pengirim lain');
-    expect(output).toContain('dikirim melalui "sendgrid.net"');
+    expect(output).toContain('webmail menandai pengiriman melalui "sendgrid.net"');
     expect(output).toContain('GMAIL_VIA_ESP_HINT');
   });
 
@@ -171,8 +177,12 @@ describe('laporan skrip konsol: halaman Show original', () => {
 
     // Polarity dari engine berbentuk `supports_inconsistency`; label yang dicetak
     // `menentang`. Keduanya pernah dibandingkan langsung dan seluruh bukti hilang.
+    //
+    // Kalimat buktinya sama dengan yang dikutip README dan `docs/USAGE.md` — ada test di
+    // `tools/corpus/tests/presentation.test.ts` yang menjaga kesamaan itu, sehingga
+    // dokumentasi tidak dapat menyimpang dari keluaran tanpa ada yang gagal.
     expect(output).toContain('[menentang/strong]');
-    expect(output).toContain('"rise" ada di domain tujuan balasan "riseworks.digital"');
+    expect(output).toContain('"rise" muncul di domain tujuan balasan "riseworks.digital"');
     expect(output).toContain('[mendukung/medium]');
     expect(output).toContain('[konteks/weak]');
   });

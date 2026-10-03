@@ -6,7 +6,8 @@
   "description": "Contoh pemakaian engine yang dapat dijalankan: pnpm example",
   "license": "MIT",
   "dependencies": {
-    "@sender-check/core": "workspace:*"
+    "@sender-check/core": "workspace:*",
+    "@sender-check/presentation": "workspace:*"
   },
   "scripts": {
     "start": "node analyze-emails.ts"

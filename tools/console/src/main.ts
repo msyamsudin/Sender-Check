@@ -12,7 +12,7 @@
  * Keluarannya sengaja dibuat agar dapat dikirim kembali apa adanya. Di akhir, ia
  * menyalin laporan JSON ke clipboard lewat `copy()` milik konsol Firefox.
  */
-import { analyze, type EmailIdentity, type RuleCode, type Verdict } from '@sender-check/core';
+import { analyze, type EmailIdentity } from '@sender-check/core';
 import {
   detectGmailView,
   scanGmailInbox,
@@ -24,12 +24,16 @@ import {
 } from '@sender-check/adapters';
 import {
   MARK,
-  copyToClipboard,
-  printHeaderBlock,
-  printNotes,
-  printProbeReport,
+  POLARITY_LABEL,
+  contextNotes,
+  describeRule,
+  isContextNote,
+  senderLabel,
   shortPolarity,
-} from './shared.ts';
+  toFinding,
+  type SenderFinding,
+} from '@sender-check/presentation';
+import { copyToClipboard, printHeaderBlock, printNotes, printProbeReport } from './shared.ts';
 
 /**
  * Global browser yang dipakai skrip ini, dideklarasikan secara eksplisit.
@@ -45,105 +49,9 @@ import {
 declare const document: DocumentLike;
 declare const location: LocationLike;
 
-type Args = Readonly<Record<string, string | number>>;
-
-/**
- * Kalimat untuk kode bukti.
- *
- * Engine tidak pernah menghasilkan kalimat jadi; ia menghasilkan `code` + `args`. Ini
- * contoh paling ringkas cara menerjemahkannya, dan pola yang sama yang akan dipakai UI
- * nanti. Kode yang belum punya template jatuh ke `trace`, yang selalu tersedia.
- */
-const TEMPLATES: Partial<Record<RuleCode, (args: Args) => string>> = {
-  REPLY_TO_MATCHES_NAME_BUT_FROM_DOES_NOT: (a) =>
-    `"${a['token']}" ada di domain tujuan balasan "${a['replyTo']}", tetapi tidak di domain pengirim "${a['from']}"`,
-  REPLY_TO_DOMAIN_MISMATCH: (a) =>
-    `balasan diarahkan ke "${a['replyTo']}", berbeda dari domain pengirim "${a['from']}"`,
-  REPLY_TO_FREEMAIL_WHILE_FROM_CORPORATE: (a) =>
-    `balasan diarahkan ke surel gratis "${a['replyTo']}", bukan ke domain pengirim "${a['from']}"`,
-  FREEMAIL_WITH_ORGANIZATION_DISPLAYNAME: (a) =>
-    `display name mengklaim organisasi "${a['name']}", tetapi alamatnya di "${a['domain']}"`,
-  ORGANIZATION_CLAIM_UNCORROBORATED_BY_DOMAIN: (a) =>
-    `display name mengklaim organisasi, tetapi "${a['domain']}" tidak memuat identitas itu`,
-  CONFUSABLE_MATCH_TO_TOKEN: (a) =>
-    `"${a['token']}" memakai aksara berbeda dari "${a['target']}", tetapi bentuknya sama`,
-  MIXED_SCRIPT_WITHIN_LABEL: (a) => `label "${a['label']}" mencampur aksara: ${a['scripts']}`,
-  DIGIT_SUBSTITUTION_MATCH: (a) =>
-    `"${a['token']}" meniru "${a['target']}" dengan mengganti karakter`,
-  LOOKALIKE_NEAR_MISS: (a) =>
-    `domain "${a['label']}" hampir sama dengan "${a['token']}", tetapi tidak persis`,
-  DISPLAY_NAME_TOKEN_AS_LABEL_COMPONENT: (a) =>
-    `"${a['token']}" dipakai sebagai kata tersendiri di domain "${a['label']}", bersama "${a['unexplained']}"`,
-  DISPLAY_NAME_TOKEN_IN_SUBDOMAIN_ONLY: (a) =>
-    `"${a['token']}" hanya muncul di subdomain "${a['subdomain']}", bukan di domain "${a['domain']}"`,
-  DISPLAY_NAME_EMBEDS_OTHER_ADDRESS: (a) =>
-    `display name menampilkan "${a['displayed']}", pengirim sebenarnya ${a['actual']}`,
-  DISPLAY_NAME_CLAIMS_DIFFERENT_DOMAIN: (a) =>
-    `display name mengklaim domain "${a['claimed']}", pengirim dari "${a['actual']}"`,
-  DISPLAY_NAME_MATCHES_LOCALPART_EXACT: (a) =>
-    `nama "${a['name']}" tercermin pada local-part "${a['localpart']}"`,
-  DISPLAY_NAME_TOKEN_MATCHES_REGISTRABLE_LABEL: (a) =>
-    `"${a['token']}" cocok dengan bagian identitas domain "${a['label']}"`,
-  DISPLAY_NAME_EXACTLY_MATCHES_ADDRESS: () => 'display name memuat alamat pengirim sendiri',
-  TOKEN_EMBEDDED_IN_REGISTRABLE_LABEL: (a) => `"${a['token']}" hanya tertanam di "${a['target']}"`,
-  AUTH_DMARC_FAIL: (a) => `DMARC ${a['result']} untuk domain pengirim`,
-  AUTH_ALIGNED_PASS: (a) => `DMARC lulus dan selaras dengan "${a['domain']}"`,
-  PUNYCODE_DOMAIN: (a) => `domain berpunycode; bentuk Unicode "${a['unicode']}"`,
-  DISPOSABLE_DOMAIN: (a) => `domain surel sekali pakai "${a['domain']}"`,
-  MAILING_LIST_DOMAIN: (a) => `alamat milis "${a['domain']}"`,
-  RANDOM_LOCAL_PART: (a) => `local-part "${a['localpart']}" tampak acak`,
-  GMAIL_VIA_ESP_HINT: (a) => `dikirim melalui "${a['esp']}"`,
-  NO_DISPLAY_NAME: () => 'pengirim tidak menampilkan nama apa pun',
-  GENERIC_TOKEN_ONLY_DISPLAYNAME: () => 'display name hanya berisi peran layanan tanpa identitas',
-  HUMAN_NAME_PATTERN: () => 'display name mengikuti pola nama orang',
-  GMAIL_OWN_WARNING_PRESENT: () => 'webmail sendiri menampilkan peringatan pada pesan ini',
-};
-
-function describe(code: RuleCode, args: Args, trace: string): string {
-  const template = TEMPLATES[code];
-  return template === undefined ? trace : template(args);
-}
-
 // ---------------------------------------------------------------------------
 // Pelaporan
 // ---------------------------------------------------------------------------
-
-interface SenderFinding {
-  readonly identity: EmailIdentity;
-  readonly state: string;
-  readonly confidence: string;
-  readonly gate: string;
-  readonly evidence: readonly {
-    readonly code: string;
-    readonly polarity: string;
-    readonly strength: string;
-    readonly sentence: string;
-  }[];
-}
-
-/**
- * Kode bukti yang tetap ditampilkan walaupun verdiktnya bukan INCONSISTENT.
- *
- * Keduanya penting justru ketika engine memilih tidak menilai: bila Gmail sendiri
- * menandai pesan ("via", peringatan pengirim), keterangan itu tidak boleh hilang
- * hanya karena tidak ada yang bisa dibandingkan.
- *
- * Daftar ini ada di lapisan tampilan, bukan di engine — engine tetap memancarkan
- * semua bukti dan tidak tahu apa yang ditampilkan.
- */
-const CONTEXT_NOTE_CODES: readonly string[] = ['GMAIL_VIA_ESP_HINT', 'GMAIL_OWN_WARNING_PRESENT'];
-
-const POLARITY_LABEL: Record<string, string> = {
-  consistency: 'mendukung',
-  inconsistency: 'menentang',
-  context: 'konteks',
-  neutral: 'netral',
-};
-
-/** Kode bukti yang ditampilkan sebagai keterangan konteks. */
-function isContextNote(item: SenderFinding['evidence'][number]): boolean {
-  return shortPolarity(item.polarity) === 'context' && CONTEXT_NOTE_CODES.includes(item.code);
-}
 
 /**
  * Menampilkan bukti satu pengirim.
@@ -167,16 +75,6 @@ function printFindingEvidence(evidence: SenderFinding['evidence']): void {
     const label = POLARITY_LABEL[shortPolarity(item.polarity)] ?? shortPolarity(item.polarity);
     console.log(`    [${label}/${item.strength}] ${item.sentence}`);
   }
-}
-
-function contextNotes(evidence: SenderFinding['evidence']): string[] {
-  return evidence.filter(isContextNote).map((item) => `${item.sentence} (${item.code})`);
-}
-
-/** `Nama <alamat>`, bentuk yang dipakai baik di judul blok maupun di baris ringkas. */
-function senderLabel(finding: SenderFinding): string {
-  const label = finding.identity.displayName ?? '(tanpa nama)';
-  return `${label} <${finding.identity.fromAddress}>`;
 }
 
 function reportFindings(findings: readonly SenderFinding[]): void {
@@ -278,20 +176,7 @@ function runInbox(): void {
       gmailOwnWarning: report.gmailOwnWarning,
     };
 
-    const verdict: Verdict = analyze(identity);
-
-    return {
-      identity,
-      state: verdict.state,
-      confidence: verdict.confidence,
-      gate: verdict.gate.passed ? (verdict.gate.claim ?? 'lolos') : verdict.gate.reason,
-      evidence: verdict.evidence.map((item) => ({
-        code: item.code,
-        polarity: item.polarity,
-        strength: item.strength,
-        sentence: describe(item.code, item.args, item.trace),
-      })),
-    };
+    return toFinding(identity, analyze(identity));
   });
 
   reportFindings(findings);
@@ -346,25 +231,14 @@ function runShowOriginal(): void {
 
   const verdict = analyze(identity);
 
-  const finding: SenderFinding = {
-    identity,
-    state: verdict.state,
-    confidence: verdict.confidence,
-    gate: verdict.gate.passed ? (verdict.gate.claim ?? 'lolos') : verdict.gate.reason,
-    evidence: verdict.evidence.map((item) => ({
-      code: item.code,
-      polarity: item.polarity,
-      strength: item.strength,
-      sentence: describe(item.code, item.args, item.trace),
-    })),
-  };
+  const finding: SenderFinding = toFinding(identity, verdict);
 
   reportFindings([finding]);
 
   console.log('\nbukti lengkap (termasuk konteks):');
   for (const item of verdict.evidence) {
     console.log(`  [${shortPolarity(item.polarity)}/${item.strength}] ${item.code}`);
-    console.log(`      ${describe(item.code, item.args, item.trace)}`);
+    console.log(`      ${describeRule(item.code, item.args, item.trace)}`);
   }
 
   console.log(`\nalgorithmVersion: ${verdict.algorithmVersion}`);

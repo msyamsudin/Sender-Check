@@ -33,11 +33,13 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p apps/extension/tsconfig.json",
     "corpus": "pnpm --filter @sender-check/corpus run corpus",
     "rules": "pnpm --filter @sender-check/corpus run rules",
     "docs:check": "node tools/check-docs.ts",
     "console:build": "pnpm --filter @sender-check/console run build",
+    "extension:build": "pnpm --filter @sender-check/extension run build",
+    "extension:zip": "pnpm --filter @sender-check/extension run zip",
     "example": "pnpm --filter @sender-check/examples run start"
   },
   "devDependencies": {

@@ -20,6 +20,55 @@ dinaikkan.
 
 ### Ditambahkan
 
+- **`packages/presentation`** — lapisan penyajian murni: `code` + `args` dari engine menjadi
+  kalimat dan struktur tampilan. Tanpa DOM, tanpa `chrome.*`, tanpa network, sehingga dapat
+  diuji di Node. Dipakai skrip konsol, contoh pemakaian, generator tabel rule, dan panel
+  ekstensi. Paket ini lahir karena panel ekstensi membutuhkan kalimat yang sama, dan salinan
+  yang dibuat untuknya pasti menyimpang.
+- **`apps/extension` — ekstensi Firefox, dibangun dengan WXT 0.21.** Panel penjelasan yang
+  muncul ketika satu thread sedang dibuka atau pada halaman "Show original". Isinya: state,
+  identitas pengirim, alasan yang diurutkan menurut kepentingan bagi pembaca, hasil
+  autentikasi, dan disclaimer permanen di semua state termasuk `CONSISTENT`.
+  Batasnya disengaja dan ditulis di `docs/FIREFOX.md`: satu panel per thread (memetakan tiap
+  temuan ke elemen pesannya sendiri menuntut adapter mengembalikan elemen DOM, dan adapter
+  sengaja hanya mengembalikan data), tanpa cache, tanpa mode diagnostik, dan list view belum
+  ditangani karena indikator di sana menuntut presisi yang belum terbukti.
+  Manifestnya MV3, **tanpa satu pun permission**, `host_permissions` hanya
+  `https://mail.google.com/*`, dan `data_collection_permissions: { required: ['none'] }` —
+  pernyataan resmi bahwa tidak ada data yang dikumpulkan, yang harus tetap cocok dengan
+  kodenya.
+- **36 test ekstensi, seluruhnya tanpa browser.** Logikanya dipisahkan dari DOM supaya dapat
+  diuji di Node: `view.ts` (mengenali thread dari bentuk URL), `scan.ts` (adapter + engine
+  menjadi temuan), dan `panel-model.ts` (isi panel sebagai data). Yang tidak diuji adalah
+  perekatnya, dan itu memang tidak dapat diuji tanpa browser — karena itu perekatnya dibuat
+  setipis mungkin.
+- **Penjaga arsitektur khusus ekstensi.** Ia berjalan di dalam halaman milik orang lain,
+  dengan sesi webmail pengguna, sehingga dua hal diperiksa pada source-nya: modul logika tidak
+  menyentuh global browser, dan lapisan tampilan tidak pernah memakai `innerHTML`,
+  `insertAdjacentHTML`, `outerHTML`, `document.write`, atau `eval`. Ditambah dua penjaga
+  manifes: tidak ada `<all_urls>`/`tabs`/`webRequest`, dan tidak ada network request di kode.
+  Penjaga ini **sempat hampa, dan ketahuan sebelum dipakai**. Versi pertamanya membuang
+  komentar dengan `replace(/\/\*[\s\S]*?\*\//g, '')`, dan regex itu menelan kode:
+  `matches: ['https://mail.google.com/*']` memuat `/*` di dalam string, sehingga dari situ
+  sampai `*/` berikutnya — dua ribu karakter, termasuk baris yang justru diperiksa — dianggap
+  komentar dan hilang sebelum diperiksa. Penjaganya tidak menemukan pelanggaran karena ia
+  kehilangan buktinya. Penggantinya mengurai baris per baris, dan batasnya ditulis apa adanya:
+  komentar di ujung baris kode tidak dibuang.
+- `packages/presentation` bertambah `STRENGTH_LABEL` dan `AUTHENTICATION_CAVEAT`. Yang kedua
+  wajib muncul pada kasus Reply-To: justru karena SPF, DKIM, dan DMARC semuanya lulus,
+  pengguna perlu tahu bahwa kelulusan itu tidak bertentangan dengan temuannya.
+- **Penjaga argumen kalimat.** `tools/corpus/tests/presentation.test.ts` merender **setiap**
+  kode rule memakai `args` yang benar-benar dipancarkan fixture, lalu menolak kalimat yang
+  memuat `undefined`, `NaN`, `[object Object]`, atau `${`. Ini satu-satunya cara menangkap
+  template yang menyebut nama argumen yang salah: test kelengkapan hanya dapat membuktikan
+  bahwa sebuah template ada, bukan bahwa ia membaca argumen yang benar.
+- **Penjaga kutipan dokumentasi.** Test yang sama memastikan README dan `docs/USAGE.md`
+  benar-benar memuat kalimat yang dihasilkan untuk kasus Reply-To, sehingga dokumentasi tidak
+  dapat menyimpang dari keluaran tanpa ada yang gagal.
+- **Tiga kode Tier B akhirnya punya kalimat.** `RETURN_PATH_NULL_OR_MISMATCH`, `AUTH_SPF_FAIL`,
+  dan `AUTH_DKIM_FAIL` sebelumnya tidak punya template sama sekali di mana pun, sehingga
+  pengguna melihat `trace` mentah yang ditulis untuk pengembang. Untuk Return-Path, kalimatnya
+  membedakan dua keadaan yang berbeda arti: headernya tidak ada, atau domainnya berbeda.
 - **Penjaga untuk angka keluaran corpus yang dikutip dokumentasi.**
   `tools/corpus/tests/docs.test.ts` kini membandingkan blok "Arti keluaran" di
   `docs/USAGE.md` dengan keluaran corpus yang sebenarnya. Ringkasannya diambil dari
@@ -34,6 +83,27 @@ dinaikkan.
   Penjaganya diuji dengan sengaja merusak satu angka: test gagal dan menyebutkan nilai
   dokumen beserta nilai sebenarnya. Penjaga yang belum pernah terbukti gagal belum
   membuktikan apa pun.
+
+### Diubah
+
+- **Kalimat bukti disatukan, dan dua salinannya ternyata sudah menyimpang.** Template hidup di
+  `tools/console/src/main.ts` **dan** `examples/analyze-emails.ts`. Untuk
+  `REPLY_TO_MATCHES_NAME_BUT_FROM_DOES_NOT`, yang pertama menulis "ada di domain tujuan
+  balasan" dan yang kedua "muncul di" — sementara README dan `docs/USAGE.md` mengutip versi
+  kedua, dan test skrip konsol menuntut versi pertama. Dokumentasi repositori ini menuntut dua
+  hal yang tidak dapat benar bersamaan. Yang bertahan adalah versi yang sudah dikutip
+  dokumentasi, karena ia juga lebih informatif pada beberapa kode (mis.
+  `DISPLAY_NAME_EXACTLY_MATCHES_ADDRESS` menyertakan alamatnya, bukan hanya menyatakan bahwa
+  alamat itu ada). Akibatnya **sebelas kalimat** yang dicetak skrip konsol berubah; test
+  laporannya ikut diperbarui, dan perubahannya disengaja.
+- **`MARK`, `shortPolarity`, dan `POLARITY_LABEL` kini hanya ada satu salinannya.** Sebelumnya
+  ketiganya ada di skrip konsol dan di contoh pemakaian, dengan `POLARITY_LABEL` muncul sekali
+  lagi di generator tabel rule sebagai peta yang bentuknya berbeda untuk arti yang sama.
+  Semuanya sekarang berasal dari `packages/presentation`; keluaran `pnpm rules` dipastikan
+  tidak berubah.
+- **`docs/DESIGN.md` bagian 12 tidak lagi menyebut `packages/adapters` sebagai "belum ada".**
+  Paket itu sudah ada sejak 0.3.0. Yang benar-benar tersisa hanyalah ekstensinya, dan alasan
+  tertahannya bukan penulisan kode melainkan verifikasi selector.
 
 ### Diperbaiki
 

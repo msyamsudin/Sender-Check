@@ -7,7 +7,8 @@
   "license": "MIT",
   "dependencies": {
     "@sender-check/adapters": "workspace:*",
-    "@sender-check/core": "workspace:*"
+    "@sender-check/core": "workspace:*",
+    "@sender-check/presentation": "workspace:*"
   },
   "devDependencies": {
     "esbuild": "^0.28.2"
