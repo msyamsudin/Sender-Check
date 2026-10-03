@@ -69,6 +69,20 @@ dinaikkan.
   dan `AUTH_DKIM_FAIL` sebelumnya tidak punya template sama sekali di mana pun, sehingga
   pengguna melihat `trace` mentah yang ditulis untuk pengembang. Untuk Return-Path, kalimatnya
   membedakan dua keadaan yang berbeda arti: headernya tidak ada, atau domainnya berbeda.
+- **Penjaga untuk tabel rule di `docs/RULES.md`.** `tools/corpus/tests/docs.test.ts` juga
+  memeriksa bahwa setiap kode
+  di `ALL_RULE_CODES` punya barisnya, tidak ada kode di dokumen yang sudah tidak ada di
+  katalog, polaritas di dokumen sama dengan yang dipancarkan engine, dan sel `Strength`-nya
+  memuat bobot yang sebenarnya. Kolom "arti", dan rentang seperti `strong / medium` yang
+  sengaja ditulis pada enam sel, tetap urusan manusia. Sebelumnya tidak ada apa pun yang
+  menghubungkan tabel rujukan itu dengan katalog.
+- **Klaim "siap tempel" pada `pnpm rules` dicabut.** `tools/corpus/src/rules-table.ts` dan
+  `CONTRIBUTING.md` menyatakan keluarannya dapat langsung ditempel ke `docs/RULES.md`,
+  padahal bentuk kolomnya berbeda: perintah itu menghasilkan `Kode | Polaritas | Strength |
+  Tier | contoh fixture`, sedangkan tabel di dokumen `Kode | Polaritas | Strength | Arti`.
+  Bedanya bukan ketidaktelitian — kolom "arti" dan rentang bobot tidak dapat dihasilkan
+  mesin, sedangkan `Tier` dan contoh fixture tidak dibutuhkan pembaca dokumen. Perintah itu
+  kini disebut apa adanya: **tabel audit** untuk membandingkan katalog dengan dokumen.
 - **Penjaga untuk angka keluaran corpus yang dikutip dokumentasi.**
   `tools/corpus/tests/docs.test.ts` kini membandingkan blok "Arti keluaran" di
   `docs/USAGE.md` dengan keluaran corpus yang sebenarnya. Ringkasannya diambil dari
