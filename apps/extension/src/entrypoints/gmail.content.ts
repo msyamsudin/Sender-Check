@@ -31,9 +31,9 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 import type { ShadowRootContentScriptUi } from 'wxt/utils/content-script-ui/shadow-root';
-import { analyzePage } from '../lib/scan.ts';
+import { analyzePage, diagnosticSourceFor } from '../lib/scan.ts';
 import { buildPanelModel } from '../lib/panel-model.ts';
-import { renderPanel } from '../lib/panel-view.ts';
+import { renderPanel, type PanelActions } from '../lib/panel-view.ts';
 import '../lib/panel.css';
 
 /**
@@ -43,6 +43,21 @@ import '../lib/panel.css';
  * panel terasa muncul bersamaan dengan pesannya.
  */
 const DEBOUNCE_MS = 400;
+
+/**
+ * Pintasan mode diagnostik: `Alt+Shift+D`.
+ *
+ * Dipilih karena tiga hal: Gmail tidak memakainya (ia memakai `d` sendirian untuk menghapus),
+ * ia tidak bentrok dengan pintasan penyunting teks mana pun yang saya ketahui, dan ia dapat
+ * ditekan dengan satu tangan.
+ *
+ * Mode ini sengaja **tidak** disimpan ke storage dan tidak bertahan antar pemuatan halaman.
+ * Ia menyajikan istilah internal dan bukti mentah; keadaan yang menempel berarti pengguna
+ * dapat menemukannya aktif di kemudian hari tanpa pernah memintanya, dan lupa mengapa
+ * panelnya berubah. Karena itu ia juga tidak punya jalan masuk dari daftar pengaturan: satu
+ * kombinasi tombol, dan satu tombol kecil di panel — keduanya tindakan yang disengaja.
+ */
+const DIAGNOSTIC_SHORTCUT_KEY = 'd';
 
 export default defineContentScript({
   matches: ['https://mail.google.com/*'],
@@ -74,6 +89,17 @@ export default defineContentScript({
      */
     let dismissedAt = '';
 
+    /**
+     * Mode diagnostik sedang aktif.
+     *
+     * Disimpan di sini, bukan di `panel-view.ts`, supaya lapisan tampilan tetap tidak punya
+     * keadaan: ia menggambar apa yang diberikan model, dan model yang menentukan apakah
+     * bagian diagnostiknya ada. Konsekuensinya setiap perubahan mode memicu penggambaran
+     * ulang — dan itu memang yang terjadi, lewat jalur pemindaian yang sama dengan perubahan
+     * DOM.
+     */
+    let diagnostic = false;
+
     async function hide(): Promise<void> {
       if (uiPromise === null) return;
       (await uiPromise).remove();
@@ -104,10 +130,22 @@ export default defineContentScript({
       const container = ui.mounted;
       if (container === undefined) return;
 
-      renderPanel(container, model, () => {
-        dismissedAt = location.href;
-        void hide();
-      });
+      const actions: PanelActions = {
+        onClose: () => {
+          dismissedAt = location.href;
+          void hide();
+        },
+        onToggleDiagnostic: () => {
+          diagnostic = !diagnostic;
+          // Digambar ulang lewat jalur yang sama dengan pemindaian biasa, bukan dengan
+          // menggambar langsung dari sini: hanya `refresh` yang tahu temuan mana yang
+          // ditampilkan, dan menggambar dari dua tempat akan membuat keduanya dapat
+          // menyimpang.
+          schedule();
+        },
+      };
+
+      renderPanel(container, model, actions);
     }
 
     async function refresh(): Promise<void> {
@@ -120,7 +158,17 @@ export default defineContentScript({
       }
 
       try {
-        await show(buildPanelModel(finding));
+        // Sumber diagnostik hanya diambil ketika mode itu aktif. `diagnosticSourceFor`
+        // mengembalikan verdikt mentah, dan tidak ada alasan menyentuhnya pada pemakaian
+        // biasa.
+        const source = diagnostic ? diagnosticSourceFor(analysis, finding) : null;
+
+        await show(
+          buildPanelModel(finding, {
+            diagnostic: diagnostic && source !== null,
+            ...(source !== null ? { source } : {}),
+          }),
+        );
       } catch (error) {
         // Halaman web adalah input yang tidak dapat dipercaya: bila body belum ada atau
         // sudah diganti, yang benar adalah tidak menampilkan apa pun dan mencatatnya,
@@ -147,6 +195,32 @@ export default defineContentScript({
     const observer = new MutationObserver(schedule);
     observer.observe(document.body, { childList: true, subtree: true });
     ctx.onInvalidated(() => observer.disconnect());
+
+    /**
+     * Pintasan mode diagnostik.
+     *
+     * Didaftarkan pada `window` dengan `capture`, bukan pada `document` tanpa capture: papan
+     * tikus webmail menangani tombolnya pada fase bubbling, dan pendengar capture berjalan
+     * lebih dulu — sehingga `preventDefault` di sini benar-benar mencegah pintasan webmail
+     * ikut berjalan.
+     *
+     * `event.repeat` dibuang supaya menahan tombol tidak membalik-balik mode itu berkali-kali
+     * per detik.
+     */
+    ctx.addEventListener(
+      window,
+      'keydown',
+      (event) => {
+        if (event.repeat) return;
+        if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+        if (event.key.toLowerCase() !== DIAGNOSTIC_SHORTCUT_KEY) return;
+
+        event.preventDefault();
+        diagnostic = !diagnostic;
+        schedule();
+      },
+      { capture: true },
+    );
 
     // Webmail berpindah halaman tanpa memuat ulang dokumen, sehingga `MutationObserver`
     // saja tidak cukup: panel yang sudah ditutup harus dapat muncul lagi di pesan lain.

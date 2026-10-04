@@ -186,7 +186,8 @@ dan `neutral` tidak pernah memengaruhi state; ia ada untuk menjelaskan situasi.
 | `reason` | Alasan bila tidak dinilai, mis. `personal_name_on_personal_domain` |
 
 `gate` berguna untuk mode diagnostik, dan untuk menjawab pertanyaan "kenapa email ini tidak
-ditandai apa-apa?" tanpa menebak.
+ditandai apa-apa?" tanpa menebak. Panel ekstensi menampilkan ketiga medan itu apa adanya bila
+mode diagnostiknya dibuka — lihat [`FIREFOX.md`](FIREFOX.md#mode-diagnostik).
 
 ### Membentuk teks dari kode bukti
 

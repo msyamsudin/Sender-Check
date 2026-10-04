@@ -241,7 +241,7 @@ penggunanya.
 
 ### Yang belum dilakukannya
 
-Tiga hal, dan ketiganya disengaja agar batas kemampuannya jelas:
+Dua hal, dan keduanya disengaja agar batas kemampuannya jelas:
 
 1. **Satu panel per thread, bukan per pesan.** Pengirim dibaca satu per pesan (lihat
    [di atas](#yang-dibaca-panel-satu-pengirim-per-pesan)), tetapi bila sebuah thread memuat
@@ -251,8 +251,32 @@ Tiga hal, dan ketiganya disengaja agar batas kemampuannya jelas:
 2. **Tanpa cache.** `docs/DESIGN.md` merencanakan cache `storage.session` bersama list view.
    Selama panel hanya bekerja pada satu thread, cache belum dibutuhkan, dan permission
    `storage` belum diminta.
-3. **Tanpa mode diagnostik.** Selector yang bekerja, jumlah elemen yang cocok, dan versi
-   algoritma masih hanya ada di keluaran skrip konsol.
+
+### Mode diagnostik
+
+Panel biasa menjelaskan **apa** yang ditemukan. Mode diagnostik menjelaskan **atas dasar apa**,
+dan ia ada karena nilai-nilainya sudah dihitung engine sejak awal tetapi tidak punya jalur ke
+layar: `confidence` keseluruhan, keputusan `gate`, seluruh baris decision table, versi
+algoritma dan PSL, `provenance`, dan setiap bukti apa adanya — termasuk `args` dan `trace`
+mentahnya.
+
+Ada dua cara membukanya, dan keduanya tindakan yang disengaja:
+
+| Cara | Keterangan |
+|---|---|
+| `Alt+Shift+D` | Pintasan, berlaku selama halaman itu terbuka |
+| Tombol **diagnostik** | Tombol kecil di kepala panel, sebelah tombol tutup |
+
+Modenya **tidak** mengubah penilaian apa pun: kepala kartu, medan identitas, dan disclaimer
+tetap sama, dan yang berganti hanya bagian tengahnya. Isinya diberi tipografi monospace dan
+latar gelap supaya sekali pandang terlihat sebagai bahan mentah, bukan sebagai temuan. Modenya
+juga tidak disimpan: berpindah halaman atau menutup tab berarti kembali ke panel biasa.
+
+Satu hal yang paling sering berguna dari bagian ini adalah pertanyaan "kenapa email ini tidak
+ditandai apa-apa?". Jawabannya ada di baris `gate` — mis. `no_display_name` berarti webmail
+tidak merender nama sama sekali, sedangkan `personal_name_on_personal_domain` berarti namanya
+ada, tetapi ia nama orang di alamat perorangan, dan itu bukan anomali. Keduanya dulu tampil
+sebagai satu kalimat yang sama di panel biasa.
 
 ### Membangun dan memuatnya
 

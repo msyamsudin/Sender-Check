@@ -100,6 +100,38 @@
   color: #101828;
 }
 
+.sc-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Tombol mode diagnostik. Sengaja kecil dan tanpa warna aksen: ia alat pengembang, dan
+   pengguna biasa tidak boleh tergoda menekannya lalu melihat istilah internal. */
+.sc-diag-toggle {
+  padding: 1px 6px;
+  border: 1px solid #d0d5dd;
+  border-radius: 5px;
+  background: transparent;
+  color: #667085;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.sc-diag-toggle:hover {
+  background: #f2f4f7;
+  color: #101828;
+}
+
+.sc-diag-toggle[aria-pressed="true"] {
+  border-color: #3538cd;
+  background: #e0eaff;
+  color: #3538cd;
+}
+
 .sc-fields {
   margin: 10px 0 0;
 }
@@ -218,4 +250,97 @@
 
 .sc-disclaimer-line {
   margin: 0;
+}
+
+/* --- Mode diagnostik --------------------------------------------------------------
+   Isinya nilai mentah engine, jadi tampilannya dibuat berbeda dengan sekali pandang:
+   monospace dan latar gelap. Yang dibaca pengguna sebagai penilaian tetap memakai
+   tipografi biasa di atasnya, sehingga kesalahan membaca "ini bukti, bukan temuan"
+   tidak terjadi karena gaya. */
+
+.sc-section--diag {
+  border-top-color: #344054;
+}
+
+.sc-diag-note {
+  margin: 0 0 8px;
+  color: #475467;
+}
+
+.sc-diag-section {
+  margin-top: 10px;
+}
+
+.sc-diag-h {
+  margin: 0 0 4px;
+  color: #344054;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sc-diag-rows {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #101828;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+
+.sc-diag-row {
+  display: flex;
+  gap: 8px;
+  padding: 1px 0;
+}
+
+.sc-diag-label {
+  flex: none;
+  width: 108px;
+  color: #98a2b3;
+}
+
+.sc-diag-value,
+.sc-diag-row-value {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  color: #d0d5dd;
+  word-break: break-word;
+}
+
+.sc-diag-winner {
+  margin: 0 0 4px;
+  color: #3538cd;
+  font-weight: 600;
+}
+
+.sc-diag-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sc-diag-item,
+.sc-diag-mono {
+  margin: 0;
+  color: #475467;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  word-break: break-word;
+}
+
+.sc-diag-evidence {
+  margin-top: 8px;
+  padding: 6px 8px;
+  border-left: 2px solid #d0d5dd;
+  background: #f9fafb;
+}
+
+.sc-diag-code {
+  margin: 0 0 2px;
+  color: #101828;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  word-break: break-word;
 }

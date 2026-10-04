@@ -14,6 +14,24 @@ export { describeRule, RULE_TEMPLATES } from './sentences.ts';
 export type { Args, SentenceTemplate } from './sentences.ts';
 
 export {
+  CLAIM_LABEL,
+  GATE_REASON_LABEL,
+  POLARITY_CODE,
+  PROVENANCE_LABEL,
+  STATE_CODE,
+  STRENGTH_CODE,
+  diagnosticFrom,
+  formatArgs,
+} from './diagnostic.ts';
+export type {
+  DiagnosticEvidenceRow,
+  DiagnosticRow,
+  DiagnosticSource,
+  DiagnosticTraceRow,
+  FindingDiagnostic,
+} from './diagnostic.ts';
+
+export {
   AUTHENTICATION_CAVEAT,
   CONTEXT_NOTE_CODES,
   DISCLAIMER_LINES,
