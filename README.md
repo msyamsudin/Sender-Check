@@ -21,16 +21,18 @@ runtime.
 | Bagian | Status |
 |---|---|
 | Engine analisis (`packages/core`) | **selesai dan terukur** |
-| Adapter Gmail (`packages/adapters`) | **selesai**, selectornya belum diverifikasi terhadap Gmail hari ini |
+| Adapter Gmail (`packages/adapters`) | **selesai**; jalur yang dipakai panel sudah diverifikasi pada Gmail sungguhan (list, thread, Show original) |
 | Skrip konsol Firefox | **selesai** — `pnpm console:build`, lalu tempel ke konsol |
-| Ekstensi Firefox (`apps/extension`) | **dapat dimuat**, panel hanya pada thread yang dibuka; selectornya belum diverifikasi |
+| Ekstensi Firefox (`apps/extension`) | **dapat dimuat**; panel pada thread yang dibuka dan pada halaman "Show original", keduanya sudah diverifikasi pada Gmail sungguhan |
 | Corpus 404 kasus berlabel + release gate | **selesai** |
 
 Ekstensi Firefox sudah ada dan dapat dimuat lewat `about:debugging`, tetapi cakupannya
 sengaja sempit: panel penjelasan muncul hanya ketika satu thread dibuka atau pada halaman
-"Show original", dan list view belum ditangani. Yang membuatnya belum dinyatakan selesai
-bukan kelengkapan kodenya, melainkan bahwa **selectornya belum pernah diverifikasi terhadap
-Gmail sungguhan** — sama seperti adapter yang mendasarinya. Lihat
+"Show original", dan list view belum ditangani. Jalur yang dipakainya sudah **diverifikasi
+pada Gmail sungguhan** — list view, thread terbuka (batas percakapan `data-message-id`, satu
+pengirim per pesan), dan halaman Show original (blok header mentah, termasuk `Reply-To`) —
+pada satu akun dan satu varian antarmuka. Yang belum: snapshot DOM yang disimpan sebagai
+canary, dan penanda "via" yang belum pernah ditemukan. Lihat
 **[`docs/FIREFOX.md`](docs/FIREFOX.md)** untuk cara membangun dan memuatnya, serta bagian 13
 pada [`docs/DESIGN.md`](docs/DESIGN.md) untuk status setiap phase.
 
@@ -131,7 +133,7 @@ berkas TypeScript langsung tanpa langkah build, memanfaatkan type stripping bawa
 
 ```bash
 pnpm example        # contoh pemakaian engine, dengan keluaran yang dapat dibaca
-pnpm test           # 238 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
+pnpm test           # 328 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
 pnpm typecheck      # tsc, termasuk test arsitektur
 pnpm corpus         # jalankan corpus + release gate, tulis laporan markdown
 pnpm rules          # cetak tabel katalog rule sebagai baris Markdown
@@ -182,8 +184,12 @@ Menghasilkan dua berkas di `tools/console/dist/`:
 
 | Berkas | Ukuran | Kegunaan |
 |---|---|---|
-| `sender-check.probe.js` | 13 KB | Melaporkan selector mana yang bekerja pada Gmail hari ini |
-| `sender-check.console.js` | 281 KB | Probe + analisis lengkap untuk inbox nyata |
+| `sender-check.probe.js` | sekitar 16 KB | Melaporkan selector mana yang bekerja pada Gmail hari ini |
+| `sender-check.console.js` | sekitar 285 KB | Probe + analisis lengkap untuk inbox nyata |
+
+Angkanya disebut "sekitar" dengan sengaja: `pnpm console:build` mencetak ukuran sebenarnya, dan
+angka pasti di dokumen akan tertinggal begitu kodenya berubah. Alasan lengkapnya ada di
+[`docs/FIREFOX.md`](docs/FIREFOX.md).
 
 Tempel ke konsol Firefox saat Gmail terbuka. Firefox memblokir penempelan kode secara
 default, jadi ketik `allow pasting` lebih dulu. Skrip ini tidak mengirim apa pun ke mana
@@ -231,8 +237,9 @@ tools/corpus/             404 fixture berlabel + harness CLI + laporan otomatis
 tools/console/            skrip konsol Firefox: probe selector dan analisis
 tools/gen-psl/            generator PSL dari daftar resmi (build-time)
 tools/gen-unicode/        generator tabel confusable dari confusables.txt (build-time)
+tools/release/            rilis otomatis: versi, versi algoritma, catatan rilis, baris indeks
 examples/                 contoh pemakaian yang dapat dijalankan
-docs/                     DESIGN.md, USAGE.md, RULES.md, FIREFOX.md
+docs/                     DESIGN.md, USAGE.md, RULES.md, FIREFOX.md, CHANGELOG-0.x.md
 ```
 
 Empat invariant ditegakkan oleh test yang membaca source-nya sendiri, bukan sekadar
@@ -246,12 +253,13 @@ dijanjikan di dokumen:
 - lapisan tampilan ekstensi tidak boleh menafsirkan teks sebagai HTML. Display name dan
   alamat berasal dari email yang dikendalikan penyerang, dan satu `innerHTML` cukup untuk
   menjalankan markupnya di dalam sesi webmail pengguna. Manifest-nya juga dijaga: tidak ada
-  `<all_urls>`, `tabs`, atau `webRequest`, dan tidak ada network request di kodenya.
+  `<all_urls>`, `tabs`, atau `webRequest`, dan **tidak ada permintaan jaringan** di seluruh
+  berkas `src` — berkas baru ikut diperiksa otomatis, bukan hanya yang terdaftar namanya.
 
 ## Regenerasi data
 
 Dua berkas di `packages/core/src/data/*.generated.ts` dihasilkan dari sumber resmi dan **tidak boleh
-diedit manual**. Keduanya build-time saja; extension tidak pernah melakukan network request.
+diedit manual**. Keduanya build-time saja; tidak ada satu pun yang diunduh saat ekstensi berjalan.
 
 ```bash
 # PSL — https://publicsuffix.org/list/public_suffix_list.dat
@@ -274,8 +282,9 @@ data tidak pernah membuat hasil lama menghantui.
 | [`docs/USAGE.md`](docs/USAGE.md) | Cara memakai, arti keluaran, cara menambah fixture, pemecahan masalah |
 | [`docs/RULES.md`](docs/RULES.md) | Referensi seluruh kode rule beserta contoh fixture yang memicunya |
 | [`docs/DESIGN.md`](docs/DESIGN.md) | Design record: keputusan, alasan, dan catatan implementasi |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Cara berkontribusi, termasuk alur adversarial-first |
-| [`CHANGELOG.md`](CHANGELOG.md) | Riwayat perubahan |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Cara berkontribusi, alur adversarial-first, dan rilis otomatis |
+| [`CHANGELOG.md`](CHANGELOG.md) | Indeks versi: satu baris per rilis. Catatan rilis penuhnya ada di pesan tag |
+| [`docs/CHANGELOG-0.x.md`](docs/CHANGELOG-0.x.md) | Riwayat terperinci 0.1.0–0.3.0, dibekukan sebelum tag dipakai |
 | [`THIRD_PARTY.md`](THIRD_PARTY.md) | Lisensi data pihak ketiga yang dibundel |
 
 ## Kontribusi

@@ -160,8 +160,30 @@ export function contextNotes(evidence: readonly FindingEvidence[]): string[] {
   return evidence.filter(isContextNote).map((item) => `${item.sentence} (${item.code})`);
 }
 
+/**
+ * Sebutan untuk pengirim yang tidak menampilkan nama sama sekali.
+ *
+ * Satu konstanta, bukan literal di tiap tempat. Sebelumnya ada dua bunyi untuk satu keadaan
+ * yang sama: medan `Nama` di panel menulis `(tidak ditampilkan)`, sedangkan baris subjek di
+ * atasnya menulis `(tanpa nama)` — sehingga satu email yang sama dapat memuat dua sebutan
+ * berbeda untuk hal yang sama, dan pengguna tidak punya cara tahu keduanya berarti identik.
+ * Kalimat yang disalin pasti menyimpang; itu sudah terjadi pada kalimat bukti, dan itu sebabnya
+ * teks ini hanya ada di sini.
+ *
+ * Bunyinya sengaja "tidak ditampilkan", bukan "tanpa nama": arti `displayName: null` di engine
+ * adalah **sumbernya tidak merender nama** (lihat `EmailIdentity` di `packages/core/src/types.ts`
+ * dan `docs/USAGE.md`), bukan bahwa pengirimnya tidak punya nama. Sebutan yang menyiratkan
+ * pilihan pengirim akan membuat alat ini terbaca seperti menuduh.
+ *
+ * Namanya `NO_NAME_LABEL`, bukan `NO_DISPLAY_NAME`, dan itu disengaja: `NO_DISPLAY_NAME` sudah
+ * menjadi **kode rule** di engine (`ALL_RULE_CODES`). Dua arti berbeda dengan satu nama akan
+ * lolos dari typecheck — keduanya string — dan sebuah test yang bermaksud memeriksa kode rule
+ * akan memeriksa label ini tanpa gagal.
+ */
+export const NO_NAME_LABEL = '(tidak ditampilkan)';
+
 /** `Nama <alamat>`, bentuk yang dipakai baik di judul blok maupun di baris ringkas. */
 export function senderLabel(finding: SenderFinding): string {
-  const label = finding.identity.displayName ?? '(tanpa nama)';
+  const label = finding.identity.displayName ?? NO_NAME_LABEL;
   return `${label} <${finding.identity.fromAddress}>`;
 }

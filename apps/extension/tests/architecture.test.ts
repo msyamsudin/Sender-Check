@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -19,9 +19,16 @@ import { describe, expect, it } from 'vitest';
  * dan subjek yang ditampilkan berasal dari email yang dikendalikan penyerang. Satu
  * `innerHTML` saja cukup untuk menjalankan markupnya di dalam sesi webmail pengguna.
  *
- * Keduanya diperiksa pada **source**, bukan pada perilaku, karena pelanggarannya justru
+ * **3. Tidak ada permintaan jaringan sama sekali.** Ini janji yang membuat ekstensi boleh
+ * menyentuh kotak masuk orang, dan ia pernah dilonggarkan lalu dicabut kembali — lihat
+ * catatan keputusan di `docs/DESIGN.md` D1. Aturan ini berlaku untuk **seluruh** berkas di
+ * `src`, bukan hanya daftar berkas yang disebut namanya, supaya berkas baru tidak lolos
+ * hanya karena belum terdaftar.
+ *
+ * Ketiganya diperiksa pada **source**, bukan pada perilaku, karena pelanggarannya justru
  * tidak akan terlihat di test perilaku: kode yang menyentuh `document` hanya gagal di Node,
- * dan kode yang memakai `innerHTML` hanya berbahaya di browser.
+ * kode yang memakai `innerHTML` hanya berbahaya di browser, dan permintaan jaringan hanya
+ * terlihat di log jaringan milik orang lain.
  */
 const here = dirname(fileURLToPath(import.meta.url));
 const srcDir = join(here, '..', 'src');
@@ -79,6 +86,25 @@ function stripComments(source: string): string {
 
 function readSource(relativePath: string): string {
   return readFileSync(join(srcDir, relativePath), 'utf8');
+}
+
+/**
+ * Seluruh berkas TypeScript di `src`, relatif terhadap `srcDir`.
+ *
+ * Dipakai penjaga jaringan supaya berkas baru tidak lolos hanya karena namanya belum
+ * terdaftar pada daftar yang diperiksa.
+ */
+function sourceFiles(directory = ''): string[] {
+  const absolute = join(srcDir, directory);
+  const out: string[] = [];
+
+  for (const entry of readdirSync(absolute, { withFileTypes: true })) {
+    const relative = directory.length === 0 ? entry.name : `${directory}/${entry.name}`;
+    if (entry.isDirectory()) out.push(...sourceFiles(relative));
+    else if (entry.name.endsWith('.ts')) out.push(relative);
+  }
+
+  return out;
 }
 
 const PURE_MODULES = ['lib/view.ts', 'lib/scan.ts', 'lib/panel-model.ts'] as const;
@@ -167,10 +193,35 @@ describe('arsitektur ekstensi', () => {
   });
 
   it('kode ekstensi tidak melakukan network request', () => {
+    // Aturan ini sempat dilonggarkan: panel pernah punya tombol yang mengambil halaman
+    // header pesan dari Gmail. Percobaan itu dicabut kembali, dan alasannya dicatat di
+    // `docs/DESIGN.md` D1 — janji "tanpa permintaan jaringan" adalah alasan utama alat ini
+    // boleh menyentuh kotak masuk orang, dan menukarnya dengan satu tombol tidak sebanding.
+    // Yang menggantikannya bukan pengecualian, melainkan kalimat yang lebih preventif pada
+    // panel state `UNASSESSABLE`: alasan mengapa tidak dinilai, dan langkah aman yang dapat
+    // dikerjakan pengguna.
     const network = [/\bfetch\s*\(/, /\bXMLHttpRequest\b/, /\bWebSocket\b/, /\bsendBeacon\b/];
     const violations: string[] = [];
 
-    for (const file of ['lib/view.ts', 'lib/scan.ts', 'lib/panel-model.ts', 'lib/panel-view.ts', 'entrypoints/gmail.content.ts']) {
+    const files = [
+      'lib/view.ts',
+      'lib/scan.ts',
+      'lib/panel-model.ts',
+      'lib/panel-view.ts',
+      'entrypoints/gmail.content.ts',
+    ];
+
+    for (const file of files) {
+      const code = stripComments(readSource(file));
+      for (const pattern of network) {
+        if (pattern.test(code)) violations.push(`${file}: ${String(pattern)}`);
+      }
+    }
+
+    // Berkas apa pun di `src` juga diperiksa, supaya berkas baru tidak lolos hanya karena
+    // namanya belum terdaftar di atas.
+    for (const file of sourceFiles()) {
+      if (files.includes(file)) continue;
       const code = stripComments(readSource(file));
       for (const pattern of network) {
         if (pattern.test(code)) violations.push(`${file}: ${String(pattern)}`);

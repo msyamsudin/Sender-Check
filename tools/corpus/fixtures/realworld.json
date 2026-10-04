@@ -3,12 +3,13 @@
     "id": "suspicious-realworld-001",
     "label": "suspicious",
     "category": "reply-to-asserts-identity",
-    "note": "Laporan pengguna: display name 'Rise' dengan From no-reply@mngl.in yang tidak memuat 'rise' sama sekali, tetapi Reply-To support@riseworks.digital memuatnya. SPF/DKIM/DMARC semuanya selaras dengan mngl.in sehingga autentikasi tidak memberi sinyal apa pun. Nilai authenticationResults tidak disertakan karena tangkapan layar Show original hanya menampilkan TLS.",
+    "note": "Laporan pengguna: display name 'Rise' dengan From no-reply@mngl.in yang tidak memuat 'rise' sama sekali, tetapi Reply-To support@riseworks.digital memuatnya. Nilai authenticationResults di bawah ini berasal dari blok header mentah halaman Show original yang sama (bukan dari tabel ringkasan): seluruh rantai lulus UNTUK mngl.in — dkim=pass header.i=@mngl.in, spf=pass smtp.mailfrom=no-reply@mngl.in, dmarc=pass header.from=mngl.in — dan itu memang benar, karena domain pengirim menandatangani pesannya sendiri. Itulah sebabnya webmail tidak menampilkan peringatan apa pun, dan itulah satu-satunya alasan rule Reply-To ada. Header aslinya juga memuat 'X-Google-Original-From: Rise <no-reply@uat-mngl.staqo.com>' (From sebelum ditulis ulang Gmail) dan 'dara=pass header.i=@gmail.com'; keduanya belum dipakai rule mana pun.",
     "identity": {
       "displayName": "Rise",
       "fromAddress": "no-reply@mngl.in",
       "replyTo": "support@riseworks.digital",
-      "returnPath": "no-reply@mngl.in"
+      "returnPath": "no-reply@mngl.in",
+      "authenticationResults": "mx.google.com; dkim=pass header.i=@mngl.in header.s=google header.b=dT0ubBxT; spf=pass (google.com: domain of no-reply@mngl.in designates 209.85.220.41 as permitted sender) smtp.mailfrom=no-reply@mngl.in; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=mngl.in; dara=pass header.i=@gmail.com"
     }
   },
   {

@@ -8,18 +8,41 @@ sesuatu yang tidak ada.
 
 | Cara | Bisa dipakai sekarang? | Catatan |
 |---|---|---|
-| Skrip konsol — probe selector | ✅ | Sekitar 15 KB, ditempel ke konsol. Menjawab: selector mana yang bekerja |
-| Skrip konsol — probe + analisis | ✅ | Sekitar 283 KB, ditempel ke konsol. Menampilkan verdikt untuk inbox nyata |
+| Skrip konsol — probe selector | ✅ | Sekitar 16 KB, ditempel ke konsol. Menjawab: selector mana yang bekerja |
+| Skrip konsol — probe + analisis | ✅ | Sekitar 285 KB, ditempel ke konsol. Menampilkan verdikt untuk inbox nyata |
 | Pustaka dari kode Node/TypeScript | ✅ | Lihat [`USAGE.md`](USAGE.md) |
-| Ekstensi Firefox | ⚠️ | Ada dan dapat dimuat, tetapi **hanya di thread yang sedang dibuka**, dan selectornya belum diverifikasi. Lihat [bagian ekstensi](#ekstensi-firefox) |
+| Ekstensi Firefox | ✅ | Ada dan dapat dimuat; panel muncul pada thread yang sedang dibuka dan pada halaman "Show original". Jalan baca pengirim, batas percakapan, dan blok header Tier B **sudah diverifikasi pada Gmail sungguhan** (lihat di bawah) |
 
-Ekstensi itu kini ada di `apps/extension`, dibangun dengan WXT, dan dapat dimuat ke
-`about:debugging` hari ini. Yang membuatnya belum dinyatakan selesai bukan kelengkapan
-kodenya, melainkan satu hal yang tidak dapat dikerjakan dari sini: **selectornya belum
-pernah diverifikasi terhadap Gmail sungguhan** — sama seperti adapter yang mendasarinya.
-Selector yang bekerja pada hari ini dapat berubah kapan saja, dan sampai ada snapshot DOM
-nyata di [`tools/corpus/dom-snapshots/`](../tools/corpus/dom-snapshots/README.md), tidak ada
-yang memberi tahu kita kalau itu terjadi.
+Ekstensi itu ada di `apps/extension`, dibangun dengan WXT, dan dapat dimuat ke
+`about:debugging`. Yang membuatnya belum dinyatakan selesai bukan lagi selector jalur
+utamanya, melainkan dua hal yang tidak dapat dikerjakan dari sini: **belum ada snapshot DOM
+yang disimpan** sebagai canary, sehingga perubahan Gmail hanya ketahuan kalau ada yang
+melaporkannya (cara mengambil snapshot ada di
+[`tools/corpus/dom-snapshots/`](../tools/corpus/dom-snapshots/README.md)), dan **penanda
+"via" masih belum pernah terbukti bekerja** — lihat catatan di `packages/adapters/src/gmail.ts`.
+
+### Yang sudah terverifikasi pada Gmail sungguhan
+
+Semuanya dari probe yang dijalankan pengguna pada halaman aslinya. Yang tercatat di sini
+adalah **bentuk**, bukan isi pesan.
+
+| Halaman | Yang diamati | Dipakai oleh |
+|---|---|---|
+| List view | `span[email][name]` cocok 103 kali pada satu inbox; `[data-hovercard-id]` 109; tidak ada `data-message-id` | Probe selector. Panel sengaja tidak memindai halaman ini |
+| Thread terbuka | setiap pesan dibungkus `[data-message-id]`; baris pengirim (`span.gD`, `email` + `name`) mendahului chip penerima (`span.g2`, `name="saya"`) | lingkup percakapan, satu pengirim per pesan |
+| Show original (`view=om`) | blok header mentah ada di `pre.raw_message_text` (di dalam `div.raw_message` / `div.bottom-area`), 23 header terbaca, termasuk `Reply-To`, `Return-Path`, `Authentication-Results` | Tier B: rule Reply-To |
+
+Halaman Show original juga memuat **tabel ringkasan berlabel** yang sudah dilokalisasi
+("Dari:", "Kepada:", "SPF:", "DKIM:", "DMARC:"). Adapter sengaja tidak membacanya: header
+mentah di halaman yang sama selalu berbahasa Inggris, sehingga tidak ada gunanya mengikat
+diri pada satu bahasa antarmuka.
+
+Satu hal yang ditemukan dan sengaja **tidak** dipakai: header `X-Google-Original-From`.
+Padanya terlihat From asli sebelum ditulis ulang Gmail, dan pada kasus phishing yang
+diperiksa isinya domain yang berbeda dari `From`. Tetapi Gmail menambahkan header itu juga
+pada pemakaian sah "kirim sebagai" alias domain sendiri, dan biaya false positive-nya belum
+diukur terhadap corpus. Ia sudah terbaca dan tersedia di `headers`; yang belum ada adalah
+rule-nya, dan rule dibuat dari pengukuran, bukan dari tebakan.
 
 ## Skrip konsol
 
@@ -27,8 +50,8 @@ yang memberi tahu kita kalau itu terjadi.
 
 | Berkas | Ukuran | Menjawab |
 |---|---|---|
-| `sender-check.probe.js` | sekitar 15 KB | Selector mana yang bekerja? |
-| `sender-check.console.js` | sekitar 283 KB | Apa hasil analisisnya? |
+| `sender-check.probe.js` | sekitar 16 KB | Selector mana yang bekerja? |
+| `sender-check.console.js` | sekitar 285 KB | Apa hasil analisisnya? |
 
 Ukurannya disebut "sekitar" dengan sengaja: angka pastinya berubah setiap kali kode
 berubah, dan `pnpm console:build` mencetak ukuran sebenarnya. Dokumentasi yang menyebut
@@ -36,7 +59,7 @@ angka pasti akan tertinggal — itu sudah pernah terjadi di sini, ketika probe m
 13 KB setelah ia menjadi 15 KB.
 
 Perbedaannya besar karena tabel Public Suffix List berukuran 211 KB, dan hanya
-`analyze()` yang membutuhkannya. Menempelkan 283 KB ke konsol hanya untuk menjawab
+`analyze()` yang membutuhkannya. Menempelkan 285 KB ke konsol hanya untuk menjawab
 pertanyaan tentang selector adalah pemborosan sekaligus menambah risiko penempelan gagal.
 **Mulai dari yang kecil.**
 
@@ -150,14 +173,81 @@ muncul tanpa diminta pada puluhan baris sekaligus, dan itu menuntut presisi yang
 dimiliki alat ini. Panel yang muncul saat pengguna memang sedang memeriksa satu pesan jauh
 lebih mudah dipertanggungjawabkan.
 
+### Yang dibaca panel: satu pengirim per pesan
+
+Halaman Gmail memuat **lebih dari satu elemen beralamat**, dan tidak semuanya pengirim. Pada
+satu percakapan yang terbuka, probe nyata menemukan: avatar pengirim (`data-hovercard-id`
+saja), baris pengirim (`email` + `name`), chip penerima yang ditulis Gmail sebagai "to saya"
+(`email` + `name`), dan avatar akun di luar pesan mana pun. Karena panel memilih temuan
+terberat, membaca semuanya berarti panel dapat menjelaskan pengirim yang salah — termasuk
+alamat pengguna sendiri — untuk setiap email yang dibuka.
+
+Karena itu panel membaca dengan dua batas:
+
+| Batas | Caranya | Alasannya |
+|---|---|---|
+| Hanya pesan di dalam percakapan yang terbuka | elemen ber-`data-message-id` | baris list view membawa `data-legacy-thread-id`, bukan `data-message-id`, sehingga daftar inbox tidak ikut terbaca |
+| Hanya satu pengirim per pesan | elemen beralamat **pertama** di dalam pesan itu | pada header Gmail, baris pengirim mendahului baris penerima; urutan dokumen yang membedakannya, bukan nama kelas |
+
+**Bila kedua batas itu tidak dapat ditegakkan, panel tidak muncul sama sekali — dan itu
+disengaja.** URL Gmail dapat menunjuk sebuah thread sementara DOM-nya masih berisi daftar
+inbox: satu probe nyata pada keadaan itu menemukan **103 elemen pengirim**, termasuk alamat
+penerima (alias masking milik pengguna sendiri) yang Gmail render di baris daftar. Membaca
+seluruh halaman di keadaan itu berarti menjelaskan pengirim yang temuannya paling berat,
+bukan pengirim pesan yang sedang dibaca. Panel kosong lebih baik daripada panel yang salah.
+
+Konsekuensinya perlu diketahui: pada halaman Gmail yang bentuk DOM-nya benar-benar berubah
+sehingga `data-message-id` hilang dari percakapan, panelnya akan diam. Itu terlihat di
+`notes` bila Anda menjalankan `sender-check.probe.js` di halaman tersebut, dan itulah yang
+perlu dikirimkan supaya adapter dapat disesuaikan.
+
+Skrip konsol sengaja **tidak** memakai lingkup ini: probe memang harus membaca seluruh
+halaman, karena pertanyaannya "selector mana yang cocok di halaman ini". Karena itu probe
+pada halaman thread akan tetap menampilkan chip penerima maupun alamat penerima pada daftar
+`senders` — keduanya bukan pengirim, dan sekarang Anda tahu mengapa ia ada di sana.
+
+### Tombol "Periksa header asli" — dicoba, lalu dicabut
+
+`Reply-To` dan hasil autentikasi **tidak pernah dirender** Gmail di DOM thread, sehingga dari
+halaman itu panel hanya dapat berhenti pada "tidak ada dasar untuk menilai pengirim ini".
+Panel sempat menawarkan tombol yang mengambil halaman header pesan itu sendiri (`fetch` ke
+origin Gmail yang sama, dengan kredensial sesi, hanya setelah diklik) lalu menampilkan
+verdikt Tier B di panel yang sama.
+
+Tombol itu **sudah tidak ada lagi**, dan alasannya bukan teknis: janji "tanpa permintaan
+jaringan" adalah alasan utama alat ini boleh menyentuh kotak masuk orang, dan menukarnya
+dengan satu tombol tidak sebanding. Yang menggantikannya memperbaiki masalah yang sama di
+sisi lain — lihat bagian berikutnya. Batas itu kembali ditegakkan
+`apps/extension/tests/architecture.test.ts`: tidak ada `fetch`, `XMLHttpRequest`, `WebSocket`,
+maupun `sendBeacon` di **seluruh** berkas `src`, dan berkas baru ikut diperiksa otomatis
+supaya tidak lolos hanya karena namanya belum terdaftar.
+
+### Yang preventif pada state "belum dapat dinilai"
+
+Panel yang hanya berkata "tidak ada dasar untuk menilai pengirim ini" terbaca seperti "tidak
+ada yang perlu dikhawatirkan", padahal artinya kebalikan: **belum ada yang diperiksa**. Pada
+state itu panel sekarang menampilkan dua kalimat:
+
+1. **Mengapa ia tidak menilai** — nama yang ditampilkan tidak memuat klaim yang dapat diuji
+   terhadap alamatnya, sehingga pengirimnya belum dapat dipastikan dari tampilan pesan.
+2. **Langkah aman** — sebelum menekan tautan atau mengisi data di email itu, periksa header
+   aslinya: menu ⋮ → **Tampilkan aslinya**. Di halaman itu panel menilai ulang memakai
+   `balas ke` dan hasil autentikasi.
+
+Bagian ini sengaja **tidak** diwarnai seperti peringatan. `UNASSESSABLE` berarti belum dapat
+dipastikan, bukan mencurigakan, dan mewarnainya sebagai temuan akan membuat setiap email
+dengan nama orang biasa tampak berbahaya — persis yang membuat alat seperti ini dimatikan
+penggunanya.
+
 ### Yang belum dilakukannya
 
 Tiga hal, dan ketiganya disengaja agar batas kemampuannya jelas:
 
-1. **Satu panel per thread, bukan per pesan.** Bila sebuah thread memuat beberapa pengirim,
-   yang ditampilkan adalah temuan yang paling perlu diperiksa. Memetakan tiap temuan ke
-   elemen pesannya sendiri menuntut adapter mengembalikan elemen DOM, dan adapter sengaja
-   hanya mengembalikan data.
+1. **Satu panel per thread, bukan per pesan.** Pengirim dibaca satu per pesan (lihat
+   [di atas](#yang-dibaca-panel-satu-pengirim-per-pesan)), tetapi bila sebuah thread memuat
+   beberapa pengirim, yang ditampilkan tetap hanya satu: temuan yang paling perlu diperiksa.
+   Menampilkan satu panel per pesan menuntut adapter mengembalikan elemen DOM, dan adapter
+   sengaja hanya mengembalikan data.
 2. **Tanpa cache.** `docs/DESIGN.md` merencanakan cache `storage.session` bersama list view.
    Selama panel hanya bekerja pada satu thread, cache belum dibutuhkan, dan permission
    `storage` belum diminta.
@@ -252,26 +342,29 @@ kedua halaman**, bukan hanya di inbox.
 | Gejala | Sebab dan penanganan |
 |---|---|
 | Konsol menolak penempelan, muncul peringatan | Ketik `allow pasting` lalu Enter lebih dulu. Kata kuncinya literal, tidak diterjemahkan |
-| Penempelan 283 KB terasa berat atau terpotong | Pakai `sender-check.probe.js` (sekitar 15 KB). Itu sudah cukup untuk pertanyaan selector |
+| Penempelan 285 KB terasa berat atau terpotong | Pakai `sender-check.probe.js` (sekitar 16 KB). Itu sudah cukup untuk pertanyaan selector |
 | Semua selector melaporkan "tidak cocok" | Justru inilah hasil yang berguna: kirimkan keluarannya. Berarti Gmail mengubah DOM-nya, dan adapter perlu disesuaikan dengan data nyata, bukan dengan tebakan |
 | `copy()` tidak tersedia | Laporan JSON tetap dicetak ke konsol; salin manual |
 | Halaman Show original: "blok header tidak ditemukan" | Kirimkan keluarannya. Berarti cara Gmail menampilkan header mentah berubah, dan pencarian wadahnya perlu diperbaiki |
 | Skrip melaporkan "Halaman ini bukan Gmail" | Jalankan di `mail.google.com/mail/u/N/...`, bukan di halaman lain |
 | `pnpm console:build` gagal dengan `ERR_PNPM_IGNORED_BUILDS` | Jalankan `pnpm install` lebih dulu; esbuild perlu menjalankan postinstall |
 | `viaHint` tidak pernah terisi, `span.zx` selalu "tidak cocok" | Diharapkan, sampai ada bukti sebaliknya. Selector penanda "via" **belum pernah cocok** pada satu pun halaman Gmail yang diuji, jadi keluarannya memang `undefined`. Kalau kamu sendiri **melihat** `via <domain>` pada baris pengirim di Gmail, kirimkan keluaran probe halaman itu: hanya pengamatan seperti itu yang dapat menentukan selector mana yang benar |
-| Panel ekstensi tidak muncul | Tiga sebab yang mungkin, berurutan dari yang paling sering: halamannya bukan thread yang terbuka (list view memang tidak menampilkan panel), tidak ada pengirim yang terbaca sehingga tidak ada yang ditampilkan, atau URL-nya tidak dikenali sebagai thread. Buka konsol halaman dan cari pesan berawalan `[Sender-Check]` |
+| Panel ekstensi tidak muncul | Empat sebab yang mungkin, berurutan dari yang paling sering: halamannya bukan thread yang terbuka (list view memang tidak menampilkan panel), halaman itu belum memuat wadah percakapan (`[data-message-id]`) sehingga panel sengaja diam, tidak ada pengirim yang terbaca, atau URL-nya tidak dikenali sebagai thread. Jalankan `sender-check.probe.js` di halaman itu: `notes` menyebutkan batas mana yang gagal |
 | Panel muncul di halaman yang bukan thread | Kirimkan URL-nya. Pengenalan thread memakai bentuk hash URL, dan halaman Gmail yang tidak lazim dapat salah dikenali. Aturannya ada di `apps/extension/src/lib/view.ts` beserta testnya |
 | Panel muncul tetapi isinya kosong | Kirimkan tangkapan layarnya. Kemungkinan besar ada elemen yang gagal dibuat, dan itu kesalahan di lapisan tampilan, bukan di analisis |
+| Panel menampilkan alamat yang sama — misalnya alamat Anda sendiri — untuk setiap email yang dibuka | Sebelum lingkup percakapan ada, chip penerima ("to saya") di dalam pesan yang sama ikut dibaca sebagai pengirim, dan `pickPrimary` memilihnya karena temuan terberat. Sekarang yang dibaca hanya elemen beralamat pertama pada baris pengirim. Bila masih terjadi, jalankan `sender-check.probe.js` di halaman itu dan kirimkan keluarannya: probe sengaja membaca seluruh halaman, sehingga ia menunjukkan elemen mana yang cocok |
+| Panel menampilkan pengirim yang benar, tetapi panelnya tidak berubah setelah berpindah email | Berbeda dari baris di atas: yang salah bukan yang dibaca, melainkan apakah panel digambar ulang. Buka konsol halaman, cari pesan berawalan `[Sender-Check]`, lalu kirimkan keluaran `console.warn` yang muncul beserta URL tiap email |
+| Tombol "Periksa header asli" tidak ada | Benar: tombol itu dicabut. Yang tersedia adalah langkah manual di bagian "Yang preventif pada state 'belum dapat dinilai'" — menu ⋮ → "Tampilkan aslinya", dan panel menilai ulang di halaman itu |
 
 ## Yang masih menunggu
 
 Langkah berikutnya, berurutan menurut apa yang menghambat:
 
-1. **Adapter diuji terhadap DOM nyata.** Hasil probe dipakai untuk memperbaiki daftar
-   selector di `packages/adapters/src/gmail.ts` dan `gmail-headers.ts`. Pertanyaan yang
-   masih terbuka: **apakah Gmail merender penanda "via" sama sekali**, dan dengan markup
-   apa. Keluaran probe pada halaman yang menampilkannya adalah satu-satunya cara
-   menjawabnya.
+1. **Adapter diuji terhadap DOM nyata.** Jalur yang dipakai panel sudah terverifikasi pada
+   Gmail sungguhan — lihat [tabel di atas](#yang-sudah-terverifikasi-pada-gmail-sungguhan).
+   Pertanyaan yang masih terbuka: **apakah Gmail merender penanda "via" sama sekali**, dan
+   dengan markup apa. Keluaran probe pada halaman yang menampilkannya adalah satu-satunya
+   cara menjawabnya.
 2. **Snapshot DOM disimpan** di [`tools/corpus/dom-snapshots/`](../tools/corpus/dom-snapshots/README.md)
    sebagai canary test, yang gagal di CI ketika Gmail mengubah strukturnya.
 3. **Panel diverifikasi di thread sungguhan.** Bentuk panelnya sudah ada dan logikanya

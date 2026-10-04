@@ -3,6 +3,10 @@ name: CI
 on:
   push:
     branches: [main]
+    # Tag ikut memicu CI supaya job `release-check` dapat memeriksa tag itu sendiri. Tanpa ini,
+    # mendorong tag tidak menjalankan apa pun: tag yang salah label tidak akan ketahuan, dan tag
+    # adalah tempat catatan rilis hidup sekarang.
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
@@ -72,3 +76,120 @@ jobs:
           path: tools/corpus/reports/corpus-report.md
           if-no-files-found: warn
           retention-days: 30
+
+  # Catatan rilis proyek ini hidup di pesan tag, bukan di berkas di dalam repositori. Karena itu
+  # tag harus diperiksa seperti artefak lain: ia menyebut versi paket dan versi algoritma yang
+  # benar-benar dirilis, dan keduanya tidak dapat direkonstruksi dari kode setelah tag tersebar.
+  release-check:
+    name: Tag cocok dengan versi paket dan versi algoritma
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Pesan tag yang dianotasi hanya ada bila seluruh riwayat dan tag ikut diambil.
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Tag harus sama dengan v + version di package.json
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::tag $GITHUB_REF_NAME tidak cocok dengan versi package.json $version"
+            exit 1
+          fi
+
+      # Pesan tag adalah satu-satunya catatan rilis, jadi ia wajib menyebut versi algoritma yang
+      # benar-benar ikut dirilis. Angka yang salah di sini tidak akan pernah terlihat dari kode.
+      - name: Pesan tag harus menyebut ALGORITHM_VERSION yang benar
+        run: |
+          algorithm=$(sed -n "s/^export const ALGORITHM_VERSION = '\(.*\)';/\1/p" packages/core/src/version.ts)
+          if [ -z "$algorithm" ]; then
+            echo "::error::ALGORITHM_VERSION tidak terbaca dari packages/core/src/version.ts"
+            exit 1
+          fi
+
+          message=$(git tag -l --format='%(contents)' "$GITHUB_REF_NAME")
+          if ! printf '%s' "$message" | grep -qF "ALGORITHM_VERSION: $algorithm"; then
+            echo "::error::pesan tag harus memuat baris 'ALGORITHM_VERSION: $algorithm'"
+            printf '%s\n' "$message"
+            exit 1
+          fi
+
+  # Rilis otomatis: tidak ada langkah manual, dan itu memang tujuannya — yang tidak dikerjakan
+  # manusia tidak dapat terlupa. Yang diputuskan mesin ada di `tools/release/src/version.ts`, dan
+  # aturannya dijaga test, karena tidak ada mata manusia yang memeriksanya lagi.
+  release:
+    name: Rilis otomatis
+    # `needs` inilah yang menggantikan pemeriksaan manual sebelum merilis: tag hanya dibuat
+    # setelah typecheck, test, dan release gate corpus lulus pada commit yang sama.
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    # Job ini satu-satunya yang menulis ke repositori: ia mendorong commit versi dan tag.
+    permissions:
+      contents: write
+
+    # Dua push berturut-turut tidak boleh menghitung versi dari keadaan yang sama.
+    concurrency:
+      group: release-main
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Butuh seluruh riwayat dan tag: versi dihitung dari commit sejak tag terakhir, dan
+          # catatan rilis dibentuk dari badan commit hasil squash merge.
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Menghitung versi paket dan versi algoritma, menjalankan release gate, lalu menulis
+      # package.json, version.ts, baris indeks CHANGELOG.md, dan catatan rilis di luar repositori.
+      - name: Hitung versi dan susun catatan rilis
+        id: prepare
+        env:
+          RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
+        run: node tools/release/src/prepare.ts
+
+      # Pesan tag adalah catatan rilisnya, jadi `-F` dipakai alih-alih `-m`: tidak ada teks yang
+      # perlu dikutip ulang, dan tidak ada salinan kedua yang bisa menyimpang.
+      - name: Commit, tag, dan dorong
+        if: steps.prepare.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.prepare.outputs.version }}
+          NOTES_PATH: ${{ runner.temp }}/release-notes.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore(release): $VERSION"
+          git tag -a "v$VERSION" -F "$NOTES_PATH"
+          git push origin main
+          git push origin "v$VERSION"
+
+      # `--notes-from-tag` menjadikan pesan tag satu-satunya sumber catatan, sehingga GitHub
+      # Release dan tag tidak dapat menceritakan hal yang berbeda.
+      - name: Buat GitHub Release
+        if: steps.prepare.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.prepare.outputs.version }}
+        run: gh release create "v$VERSION" --verify-tag --notes-from-tag

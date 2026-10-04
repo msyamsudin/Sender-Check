@@ -22,7 +22,8 @@ Setiap perubahan pada angka threshold atau decision table wajib menaikkan `algor
 
 ### Prinsip
 
-1. Client-side, tanpa network request, tanpa AI/ML, tanpa database brand runtime.
+1. Client-side, tanpa network request, tanpa AI/ML, tanpa database brand runtime. Janji ini
+   pernah dilonggarkan untuk satu tombol di panel, lalu **dicabut kembali** — lihat D1.
 2. Tidak ada satu `phishing_score`. Hanya rule eksplisit + decision table.
 3. `UNASSESSABLE` dipakai saat dasar penilaian tidak cukup — **bukan** dianggap mismatch.
 4. Detector berperan sebagai *second pair of eyes*, bukan antivirus.
@@ -39,11 +40,28 @@ Karena itu:
 - **Tier A** — selalu, tanpa network request. Sumber: DOM list/thread Gmail
   (atribut `name`, `email`, `data-hovercard-id`, indikator `via`, banner peringatan Gmail).
   Menghasilkan: display name, From address, kelas domain, info ESP dari teks `via`.
-- **Tier B** — hanya saat user membuka halaman **"Show original"**
-  (`mail.google.com/mail/u/N/?...&view=om&th=...`). Content script juga di-inject ke halaman itu
-  dan mem-parse raw header dari DOM-nya. **Nol network request dari extension** — user yang membuka
-  halamannya, extension hanya membaca.
+- **Tier B** — dari header asli, yang hanya dirender Gmail di halaman **"Show original"**
+  (`mail.google.com/mail/u/N/?...&view=om&permmsgid=msg-f:...`). Content script juga di-inject ke
+  halaman itu dan mem-parse raw header dari DOM-nya. **Nol network request dari extension** — user
+  yang membuka halamannya, extension hanya membaca.
   Menambah: `Reply-To`, `Return-Path`, `Authentication-Results`, `Received-SPF`.
+
+  **Dicoba, lalu dicabut: extension mengambil halaman header sendiri.** Harga dari aturan
+  "hanya user yang membuka" ternyata terasa: kelas penipuan yang paling perlu ditangkap —
+  display name yang ditegakkan domain tujuan balasan — tidak pernah terlihat oleh pengguna
+  yang tidak tahu harus membuka apa. Karena itu panel sempat punya tombol "Periksa header
+  asli" yang mengambil halaman itu dengan `fetch`, menilainya ulang, dan menampilkan
+  verdiktnya di panel yang sama; batasnya ditegakkan test arsitektur (satu berkas, tanpa
+  literal host, wajib berkredensial, tidak dipanggil dari jalur pemindaian).
+
+  Tombol itu **dicabut kembali**, dan alasannya bukan teknis: janji "tanpa permintaan
+  jaringan" adalah alasan utama alat yang menyentuh kotak masuk orang ini boleh dipercaya,
+  dan menukarnya dengan satu tombol tidak sebanding. Yang menggantikannya justru memperbaiki
+  masalah aslinya di sisi yang selama ini lemah: state `UNASSESSABLE` kini **menjelaskan
+  mengapa** ia tidak menilai dan **menyebut langkah aman** yang dapat dikerjakan pengguna
+  (menu ⋮ → "Tampilkan aslinya", tempat panel menilai ulang dengan header lengkap). Panel
+  yang berkata "belum dapat dipastikan" disertai jalan keluarnya lebih jujur daripada panel
+  yang diam-diam mengambil apa yang tidak pernah ia janjikan untuk ambil.
 
 Tidak ada Tier C (Gmail API + OAuth) di v1: biaya consent/verifikasi Google tidak sepadan.
 
@@ -427,7 +445,14 @@ sebuah pesan yang punya konsistensi kuat sekaligus inkonsistensi menengah akan d
 
 - **List view:** indikator halus **hanya** untuk `INCONSISTENT` + `strength: strong`.
   Tidak ada badge untuk `UNASSESSABLE`/`UNCLEAR`.
-- **Thread terbuka:** panel penuh, evidence-first, dengan tombol "Copy report".
+- **Thread terbuka:** panel penuh, evidence-first, dengan tombol "Copy report" (belum
+  diimplementasikan). Pada state `UNASSESSABLE` panel **menjelaskan mengapa** ia tidak
+  menilai dan **menyebut langkah aman** yang dapat dikerjakan pengguna: periksa header asli
+  lewat menu ⋮ → "Tampilkan aslinya", tempat panel menilai ulang dengan `Reply-To` dan hasil
+  autentikasi. Ekstensi tidak mengambil halaman itu sendiri (D1), dan bagian ini sengaja
+  tidak diwarnai seperti peringatan: `UNASSESSABLE` berarti belum dapat dipastikan, bukan
+  mencurigakan — mewarnainya akan membuat setiap email dengan nama orang biasa tampak
+  berbahaya.
 - **Popup:** analisis pesan aktif + tombol "Analisis header lengkap" (mengarahkan/membuka Tier B).
 - **Mode diagnostik:** menampilkan `provenance`, selector yang match, `ruleTrace`, versi algoritma/PSL.
 
@@ -556,8 +581,13 @@ dinilai, dan itu hasil yang benar.
 |---|---|---|
 | Precision `INCONSISTENT`+HIGH | **≥ 95%** | **100%** |
 | `nagRate` visible (state `INCONSISTENT` pada non-suspicious) | **≤ 3%** | **0,0%** |
-| Recall (suspicious) | sekunder | 76,1% |
-| `nagRate` wide (sinyal apa pun, termasuk tak terlihat) | dipantau | 11,8% |
+| Recall (suspicious) | sekunder | 76,4% |
+| `nagRate` wide (sinyal apa pun, termasuk tak terlihat) | dipantau | 11,7% |
+
+Angka di tabel ini adalah keluaran `pnpm corpus` pada saat dokumen ini diperbarui; yang harus
+dipercaya kalau keduanya berbeda adalah keluarannya, dan `docs/USAGE.md` memuat contoh
+keluaran yang sama. Nilai sebelumnya (76,1% dan 11,8%) tertinggal dari corpus yang sudah
+berubah.
 
 Artifact: laporan markdown otomatis di `tools/corpus/reports/corpus-report.md`, memuat confusion
 matrix, rincian per kategori, dan daftar lengkap false positive serta false negative.
@@ -608,7 +638,7 @@ apps/extension/                   ekstensi Firefox (WXT): content script + panel
   src/lib/scan.ts                   adapter + engine menjadi temuan siap tampil
   src/lib/panel-model.ts            isi panel sebagai data, tanpa DOM
   src/lib/panel-view.ts             menuangkan model ke elemen
-  tests/                            36 test tanpa browser
+  tests/                            39 test tanpa browser
 ```
 
 `packages/adapters`, `tools/console`, dan ekstensinya sudah ada. Jadi **tidak ada lagi paket
@@ -624,11 +654,15 @@ dibuka, dan belum ada cache maupun mode diagnostik. Yang pertama karena indikato
 view menuntut presisi yang belum terbukti; yang kedua karena keduanya baru dibutuhkan
 bersama list view.
 
+Satu batas yang **bukan** pilihan melainkan syarat kebenaran: panel hanya membaca pesan di
+dalam percakapan yang terbuka, satu pengirim per pesan. Alasannya ada di bagian 12.1 butir 5,
+dan akibat mengabaikannya bukan panel kosong melainkan panel yang salah dengan yakin.
+
 Adapter wajib punya `probe(): { matched, selectorUsed, confidence }`. Bila semua selector gagal,
 extension **no-op + diagnostic log** — jangan diam-diam tidak berjalan. Sertakan canary test
 berbasis snapshot DOM yang gagal di CI ketika Gmail mengubah struktur.
 
-### 12.1 Kontrak adapter: dua hal yang mudah salah dan berakibat serius
+### 12.1 Kontrak adapter: hal-hal yang mudah salah dan berakibat serius
 
 1. **`gmailViaHint` hanya boleh diisi dari indikator "via" di tampilan pesan, BUKAN dari kolom
    "dikirim oleh" pada halaman Show original.** Keduanya berbeda arti. "Via" muncul ketika domain
@@ -659,6 +693,26 @@ berbasis snapshot DOM yang gagal di CI ketika Gmail mengubah struktur.
    diandalkan. Bila Gmail tidak merender penanda itu sama sekali, hasilnya `undefined` dan tidak ada
    rule yang terpicu — itu keadaan yang benar, bukan bug.
 
+5. **Panel hanya boleh menilai pengirim di dalam percakapan yang sedang terbuka, satu per
+   pesan — dan bila batas itu tidak dapat ditegakkan, panel tidak muncul.** Dokumen Gmail
+   memuat lebih dari satu elemen beralamat: chip penerima ("to saya"), alamat penerima pada
+   baris daftar inbox, avatar akun, dan hovercard sama-sama membawa
+   `email`/`data-hovercard-id`, dan tidak satu pun pengirim pesan yang dibaca. Karena panel
+   memilih temuan terberat (`pickPrimary`), satu calon yang salah dapat menang atas pengirim
+   yang benar dan bertahan untuk **setiap** email yang dibuka. Karena itu `scanGmailInbox`
+   menerima `scope: 'conversation'` — batas percakapan dari `[data-message-id]`, dan di
+   dalam tiap pesan hanya elemen beralamat **pertama** (baris pengirim mendahului baris
+   penerima). `scope: 'page'` tetap default untuk skrip konsol, yang memang harus membaca
+   seluruh halaman.
+
+   Versi pertama lingkup ini jatuh kembali ke seluruh halaman bila penanda pesan tidak
+   ditemukan, dengan alasan "kegagalan mengenali bentuk halaman tidak boleh berarti panel
+   kosong". Probe nyata membuktikan alasan itu salah: pada halaman yang URL-nya menunjuk
+   sebuah thread, DOM dapat berisi daftar inbox — 103 elemen pengirim pada satu probe —
+   sehingga jatuh kembali berarti panel menjelaskan pengirim mana pun yang temuannya paling
+   berat. **Panel kosong lebih baik daripada panel yang salah**; itu sudah aturan di
+   `apps/extension/src/lib/scan.ts`, dan sekarang ditegakkan di adapter juga.
+
 Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 
 | Kolom Show original | Field | Catatan |
@@ -683,9 +737,9 @@ Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 | 4 | Similarity engine + aturan panjang token (§7) | **selesai** |
 | 5 | Evidence engine + decision table (deterministik, traceable) | **selesai** |
 | 6 | Classification + corpus harness CLI + confusion matrix | **selesai** |
-| 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, dan panel ekstensi ada; **selectornya belum diverifikasi** dan list view belum ditangani |
+| 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, dan panel ekstensi ada; **selectornya sudah diverifikasi pada Gmail sungguhan** untuk list view, thread terbuka, dan halaman Show original (satu akun, satu varian antarmuka); list view belum ditangani |
 | 8 | Perluas corpus + tuning precision-first | sebagian — 404 kasus, gate lulus |
-| 9 | Tier B: parse halaman "Show original" | sebagian — rule dan adapter halaman lengkap dan teruji, belum diverifikasi terhadap halaman sungguhan |
+| 9 | Tier B: parse halaman "Show original" | sebagian — rule dan adapter halaman lengkap dan teruji, **dan sudah diverifikasi pada halaman sungguhan** (blok header mentah di `pre.raw_message_text`, 23 header, termasuk `Reply-To`); yang belum adalah snapshot DOM sebagai canary |
 | 10 | Performa, i18n, privacy policy, packaging & release | belum — lihat catatan i18n di §9 |
 
 Perbedaan dari urutan awal: corpus & decision table **sebelum** UI; header auth Tier B **setelah**

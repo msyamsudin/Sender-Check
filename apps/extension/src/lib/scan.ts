@@ -69,7 +69,12 @@ export function pickPrimary(findings: readonly SenderFinding[]): SenderFinding |
 
 /** Menganalisis halaman list view atau thread. */
 function fromInbox(doc: DocumentLike): Omit<PageAnalysis, 'kind'> {
-  const report = scanGmailInbox(doc);
+  // `conversation` adalah inti kebenaran panel ini. Panel hanya muncul pada thread yang
+  // terbuka, sehingga yang boleh dinilai hanyalah pengirim pesan di dalam percakapan itu.
+  // Tanpa lingkup ini, chip penerima ("to saya"), avatar akun, dan sisa DOM lain di halaman
+  // yang sama ikut menjadi calon pengirim — dan karena `pickPrimary` memilih temuan
+  // terberat, panel dapat menampilkan orang yang sama untuk setiap email yang dibuka.
+  const report = scanGmailInbox(doc, { scope: 'conversation' });
 
   const findings = report.senders.map((sender) => {
     // `viaHint` diteruskan apa adanya, dan `gmailOwnWarning` berada di tingkat halaman
@@ -84,10 +89,12 @@ function fromInbox(doc: DocumentLike): Omit<PageAnalysis, 'kind'> {
     return toFinding(identity, analyze(identity));
   });
 
+  const primary = pickPrimary(findings);
+
   return {
     matched: report.matched,
     findings,
-    primary: pickPrimary(findings),
+    primary,
     selectorUsed: report.selectorUsed,
     notes: report.notes,
   };
@@ -144,5 +151,12 @@ export function analyzePage(doc: DocumentLike, page: LocationLike): PageAnalysis
 
   // List view dan halaman lain sengaja tidak menampilkan panel. Mengembalikan hasil kosong
   // lebih baik daripada menampilkan sesuatu yang tidak diminta pengguna.
-  return { kind, matched: false, findings: [], primary: null, selectorUsed: null, notes: [] };
+  return {
+    kind,
+    matched: false,
+    findings: [],
+    primary: null,
+    selectorUsed: null,
+    notes: [],
+  };
 }

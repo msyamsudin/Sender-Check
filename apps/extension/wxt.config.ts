@@ -8,7 +8,8 @@ import { defineConfig } from 'wxt';
  *
  * **1. `host_permissions` hanya `https://mail.google.com/*`.** Bukan `<all_urls>`, bukan
  * `tabs`, bukan `webRequest`. Ekstensi ini membaca metadata pengirim dari halaman yang
- * sudah dibuka pengguna, dan tidak pernah melakukan network request. `docs/DESIGN.md`
+ * sudah dibuka pengguna, dan **tidak pernah melakukan permintaan jaringan** — batas itu
+ * ditegakkan `tests/architecture.test.ts` untuk seluruh berkas di `src`. `docs/DESIGN.md`
  * bagian 10 menetapkan batas itu; permission yang tidak dibutuhkan adalah permission yang
  * tidak boleh diminta, terutama bagi ekstensi yang menyentuh kotak masuk orang.
  *

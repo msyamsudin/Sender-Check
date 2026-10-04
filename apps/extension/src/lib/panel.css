@@ -192,6 +192,22 @@
   color: #475467;
 }
 
+/* Bagian "apa yang belum diperiksa, dan apa yang sebaiknya dilakukan". Sengaja bukan warna
+   peringatan: UNASSESSABLE berarti belum dapat dipastikan, bukan mencurigakan. */
+.sc-basis {
+  margin: 0;
+  color: #475467;
+}
+
+.sc-guidance {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-left: 3px solid #98a2b3;
+  border-radius: 0 6px 6px 0;
+  background: #f9fafb;
+  color: #344054;
+}
+
 .sc-disclaimer {
   margin-top: 12px;
   padding-top: 10px;

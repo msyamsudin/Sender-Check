@@ -17,7 +17,7 @@ const U = 'https://mail.google.com/mail/u/0/';
 
 const at = (href: string): { href: string } => ({ href });
 
-/** Satu baris pengirim seperti yang dirender list view dan thread. */
+/** Satu baris pada list view. Panel tidak pernah memindai halaman ini; ia dipakai test URL. */
 function senderRow(displayName: string, address: string): ElementInit {
   return {
     tag: 'tr',
@@ -31,6 +31,22 @@ function senderRow(displayName: string, address: string): ElementInit {
         children: [{ tag: 'span', attrs: { class: 'y2' }, text: 'Cuplikan pesan yang tidak dibaca adapter.' }],
       },
     ],
+  };
+}
+
+/**
+ * Satu pesan pada percakapan yang terbuka.
+ *
+ * Wadah `data-message-id` bukan hiasan: panel memakai lingkup percakapan, dan probe
+ * halaman thread sungguhan menunjukkan bahwa setiap pesan dibungkus penanda itu. Test yang
+ * membangun pengirim tanpa wadah menguji bentuk DOM yang tidak pernah ada di Gmail, dan
+ * karena itu tidak lagi menggambarkan perilaku panel.
+ */
+function conversationMessage(messageId: string, displayName: string, address: string): ElementInit {
+  return {
+    tag: 'div',
+    attrs: { 'data-message-id': messageId },
+    children: [senderRow(displayName, address)],
   };
 }
 
@@ -55,12 +71,12 @@ function showOriginalPage(fromLine: string, withReplyTo: boolean): FakeDocument 
 
 describe('analisis thread terbuka', () => {
   it('menghasilkan temuan untuk pengirim yang terbaca', () => {
-    const doc = fakeDocument(senderRow('Bank BCA', 'bcaindonesia@gmail.com'));
+    const doc = fakeDocument(conversationMessage('#msg-f:1', 'Bank BCA', 'bcaindonesia@gmail.com'));
     const analysis = analyzePage(doc, at(`${U}#inbox/${THREAD_ID}`));
 
     expect(analysis.kind).toBe('thread');
     expect(analysis.matched).toBe(true);
-    expect(analysis.selectorUsed).toBe('span[email][name]');
+    expect(analysis.selectorUsed).toBe('[email]');
     expect(analysis.findings).toHaveLength(1);
     expect(analysis.primary?.state).toBe('INCONSISTENT');
   });
@@ -69,13 +85,21 @@ describe('analisis thread terbuka', () => {
     const doc = fakeDocument(
       { tag: 'div', attrs: { role: 'alert' }, text: 'Be careful with this message' },
       {
-        tag: 'tr',
+        tag: 'div',
+        attrs: { 'data-message-id': '#msg-f:2' },
         children: [
           {
-            tag: 'td',
-            children: [{ tag: 'span', attrs: { email: 'no-reply@shopify.com', name: 'Shopify' }, text: 'Shopify' }],
+            tag: 'tr',
+            children: [
+              {
+                tag: 'td',
+                children: [
+                  { tag: 'span', attrs: { email: 'no-reply@shopify.com', name: 'Shopify' }, text: 'Shopify' },
+                ],
+              },
+              { tag: 'td', children: [{ tag: 'span', attrs: { class: 'zx' }, text: 'via sendgrid.net' }] },
+            ],
           },
-          { tag: 'td', children: [{ tag: 'span', attrs: { class: 'zx' }, text: 'via sendgrid.net' }] },
         ],
       },
     );
@@ -89,8 +113,8 @@ describe('analisis thread terbuka', () => {
 
   it('memilih temuan yang paling perlu diperiksa, bukan yang pertama', () => {
     const doc = fakeDocument(
-      senderRow('Budi Santoso', 'x7k2@randomisp.co.id'),
-      senderRow('Bank BCA', 'bcaindonesia@gmail.com'),
+      conversationMessage('#msg-f:3', 'Budi Santoso', 'x7k2@randomisp.co.id'),
+      conversationMessage('#msg-f:4', 'Bank BCA', 'bcaindonesia@gmail.com'),
     );
 
     const analysis = analyzePage(doc, at(`${U}#inbox/${THREAD_ID}`));
@@ -100,6 +124,65 @@ describe('analisis thread terbuka', () => {
     // satu-satunya temuan yang punya isi.
     expect(analysis.findings[0]?.state).toBe('UNASSESSABLE');
     expect(analysis.primary?.identity.displayName).toBe('Bank BCA');
+  });
+
+  it('tidak menampilkan apa pun ketika wadah percakapan tidak ada', () => {
+    // Halaman ber-URL thread dapat berisi daftar inbox saja — mis. saat berpindah atau
+    // sebelum percakapan selesai digambar. Probe nyata menemukan 103 elemen pengirim di
+    // keadaan itu, termasuk alamat penerima. Membaca seluruh halaman di sana berarti
+    // menjelaskan pengirim yang salah dengan yakin, jadi yang benar adalah diam.
+    const doc = fakeDocument(senderRow('Bank BCA', 'bcaindonesia@gmail.com'));
+
+    const analysis = analyzePage(doc, at(`${U}#inbox/${THREAD_ID}`));
+
+    expect(analysis.kind).toBe('thread');
+    expect(analysis.matched).toBe(false);
+    expect(analysis.findings).toHaveLength(0);
+    expect(analysis.primary).toBeNull();
+  });
+
+  it('membaca pengirim dari wadah pesan, bukan dari daftar di halaman yang sama', () => {
+    const doc = fakeDocument(
+      senderRow('The5ers', 'help@the5ers.com'),
+      conversationMessage('#msg-f:1876976281163979898', 'Rise', 'no-reply@mngl.in'),
+    );
+
+    const analysis = analyzePage(doc, at(`${U}#inbox/${THREAD_ID}`));
+
+    expect(analysis.findings).toHaveLength(1);
+    expect(analysis.primary?.identity.fromAddress).toBe('no-reply@mngl.in');
+  });
+
+  it('menilai pengirim pesan, bukan chip penerima di dalam pesan yang sama', () => {
+    // Bentuk ini berasal dari probe halaman thread sungguhan: di dalam satu pesan ada dua
+    // elemen beralamat — baris pengirim dan chip penerima ("to saya"). Chip itu bukan
+    // pengirim, dan karena `pickPrimary` memilih temuan terberat, membacanya berarti panel
+    // menjelaskan alamat pengguna sendiri untuk setiap email yang dibuka.
+    const doc = fakeDocument({
+      tag: 'div',
+      attrs: { 'data-message-id': '#msg-f:1877944133024641448' },
+      children: [
+        { tag: 'img', attrs: { class: 'ajn ajo', 'data-hovercard-id': 'kirim@contoh-mail.com' } },
+        {
+          tag: 'span',
+          attrs: { class: 'gD', email: 'kirim@contoh-mail.com', name: 'Buletin Contoh' },
+          text: 'Buletin Contoh',
+        },
+        {
+          tag: 'span',
+          attrs: { class: 'g2', email: 'saya@example.com', name: 'saya' },
+          text: 'saya',
+        },
+      ],
+    });
+
+    const analysis = analyzePage(doc, at(`${U}#inbox/${THREAD_ID}`));
+
+    expect(analysis.findings).toHaveLength(1);
+    expect(analysis.primary?.identity.fromAddress).toBe('kirim@contoh-mail.com');
+    expect(analysis.findings.some((finding) => finding.identity.fromAddress === 'saya@example.com')).toBe(
+      false,
+    );
   });
 });
 
@@ -130,7 +213,10 @@ describe('analisis halaman Show original', () => {
     // Kasus yang sama, dua tingkat bukti, dua kesimpulan berbeda. Perbedaan inilah yang
     // membuat halaman Show original bukan pelengkap, melainkan satu-satunya sumber sinyal
     // untuk kelas serangan Reply-To.
-    const tierA = analyzePage(fakeDocument(senderRow('Rise', 'no-reply@mngl.in')), at(`${U}#inbox/${THREAD_ID}`));
+    const tierA = analyzePage(
+      fakeDocument(conversationMessage('#msg-f:5', 'Rise', 'no-reply@mngl.in')),
+      at(`${U}#inbox/${THREAD_ID}`),
+    );
 
     expect(tierA.primary?.state).toBe('UNASSESSABLE');
   });

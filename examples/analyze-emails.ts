@@ -16,7 +16,13 @@
  *     teks dapat diubah tanpa menyentuh engine.
  */
 import { analyze, type EmailIdentity, type Verdict } from '@sender-check/core';
-import { MARK, POLARITY_LABEL, describeRule, shortPolarity } from '@sender-check/presentation';
+import {
+  MARK,
+  NO_NAME_LABEL,
+  POLARITY_LABEL,
+  describeRule,
+  shortPolarity,
+} from '@sender-check/presentation';
 
 /**
  * Kalimat bukti **tidak lagi disusun di berkas ini**.
@@ -32,7 +38,7 @@ function render(identity: EmailIdentity, verdict: Verdict): void {
   const replyTo = identity.replyTo === undefined ? '' : `  reply-to: ${identity.replyTo}`;
 
   console.log(`${mark} ${verdict.state} (${verdict.confidence})`);
-  console.log(`  ${identity.displayName ?? '(tanpa nama)'} <${identity.fromAddress}>${replyTo}`);
+  console.log(`  ${identity.displayName ?? NO_NAME_LABEL} <${identity.fromAddress}>${replyTo}`);
   console.log(`  dinilai: ${verdict.gate.passed ? `ya (${verdict.gate.claim})` : `tidak (${verdict.gate.reason})`}`);
   console.log(`  psl: ${verdict.pslVersion}   algoritma: ${verdict.algorithmVersion}`);
 
