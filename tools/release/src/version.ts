@@ -193,6 +193,13 @@ export interface NotesInput {
   readonly corpus: string;
   /** Tag pembanding, atau `null` bila repositori belum punya tag sama sekali. */
   readonly baseline: string | null;
+  /**
+   * Commit pada rentang, **terbaru lebih dulu** — sama seperti keluaran `git log`.
+   *
+   * Urutannya bagian dari kontrak, bukan kebetulan: tanpa tag rujukan, yang dianggap milik rilis
+   * ini adalah elemen **pertama**, dan urutan yang terbalik akan membawa badan commit paling tua.
+   * Itu pernah terjadi, dan test-nya ikut salah karena menuliskan urutannya terbalik.
+   */
   readonly commits: readonly Commit[];
 }
 
@@ -262,6 +269,23 @@ export function renderNotes(input: NotesInput): string {
         ? `ALGORITHM_VERSION: ${input.algorithm} (naik; belum ada tag rujukan, sehingga seluruh riwayat dihitung)`
         : `ALGORITHM_VERSION: ${input.algorithm} (naik dari ${input.previousAlgorithm})`;
 
+  /**
+   * Commit yang badannya boleh dibawa.
+   *
+   * Badan pull request bicara tentang **perubahannya sendiri**, bukan tentang rilis ini. Begitu
+   * rentangnya tidak lagi sama dengan satu perubahan — dan itulah yang terjadi ketika repositori
+   * belum punya tag rujukan — badan lama ikut terbawa, lalu berdiri di sebelah klaim yang sudah
+   * tidak berlaku. Itu benar-benar terjadi pada `v0.4.0`: catatannya memuat badan pull request
+   * lama yang berbunyi "ALGORITHM_VERSION tetap 0.2.0", tepat di bawah baris kepala yang
+   * menyebut `0.2.1`.
+   *
+   * Tanpa tag rujukan, satu-satunya commit yang dapat dipastikan milik rilis ini adalah commit
+   * yang memicunya — yaitu yang **pertama**, karena `commits` datang dari `git log` dan karena itu
+   * terbaru lebih dulu. Judul sisanya tetap ditampilkan; yang dibuang hanya penjelasannya.
+   */
+  const bodyOwners =
+    input.baseline === null ? new Set(input.commits.slice(0, 1)) : new Set(input.commits);
+
   const lines: string[] = [
     `Rilis ${input.version} — ${input.date}`,
     '',
@@ -285,7 +309,7 @@ export function renderNotes(input: NotesInput): string {
     lines.push(`### ${KIND_TITLE[kind]}`, '');
     for (const commit of bucket) {
       lines.push(`- ${commit.subject.trim()}`);
-      for (const line of bodyFor(commit)) {
+      for (const line of bodyOwners.has(commit) ? bodyFor(commit) : []) {
         lines.push(line.length === 0 ? '' : `  ${line}`);
       }
     }
@@ -297,8 +321,17 @@ export function renderNotes(input: NotesInput): string {
     `Disusun otomatis dari ${input.commits.length} commit pada rentang ${scope}.`,
     'Perubahan yang perlu dijelaskan — klaim yang dicabut, angka yang dikoreksi, alasan sebuah',
     'keputusan berubah — ditulis di badan pull request, dan ikut ke sini apa adanya.',
-    '',
   );
 
+  if (input.baseline === null) {
+    lines.push(
+      '',
+      'Badan pull request hanya dibawa untuk commit yang memicu rilis ini: tanpa tag rujukan,',
+      'commit yang lebih lama tidak dapat dipisahkan per versi, sehingga penjelasannya tidak',
+      'diklaim sebagai bagian rilis ini. Riwayat terperincinya ada di `docs/CHANGELOG-0.x.md`.',
+    );
+  }
+
+  lines.push('');
   return lines.join('\n');
 }
