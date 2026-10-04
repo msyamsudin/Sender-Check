@@ -12,6 +12,20 @@
  * Selector kelas tetap disertakan di daftar probe sebagai pembanding, supaya mode
  * diagnostik menunjukkan mana yang masih bekerja.
  *
+ * ## Dua lingkup pembacaan
+ *
+ * `scanGmailInbox` dapat dipanggil dengan `scope: 'page'` (default) atau `'conversation'`.
+ * Yang pertama membaca seluruh dokumen dan itu yang dibutuhkan skrip konsol — ia memang
+ * ingin tahu apa saja yang cocok di halaman itu. Yang kedua hanya membaca pesan-pesan pada
+ * percakapan yang sedang terbuka, dan itu yang dibutuhkan panel.
+ *
+ * Pembedaan ini ada karena satu temuan dari probe halaman sungguhan: **dokumen Gmail
+ * memuat lebih dari satu elemen beralamat**, dan tidak semuanya pengirim. Di dalam satu
+ * pesan, chip penerima ("to saya") sama-sama membawa `email` dan `name`. Di luar pesan,
+ * ada avatar akun dan sisa DOM lain. Membaca seluruh dokumen lalu memilih temuan terberat
+ * berarti panel dapat menjelaskan orang lain daripada yang sedang dibaca pengguna —
+ * dan itu pernah terjadi.
+ *
  * ## Yang tidak dilakukan modul ini
  *
  * Ia tidak memanggil `analyze()` dan tidak tahu apa pun tentang rule. Ia hanya
@@ -25,6 +39,7 @@ import type {
   ElementLike,
   GmailView,
   LocationLike,
+  ScanOptions,
   SelectorProbe,
   SenderCandidate,
 } from './types.ts';
@@ -61,6 +76,44 @@ const SENDER_SELECTORS: readonly SenderSelector[] = [
   {
     selector: '[data-hovercard-id]',
     purpose: 'atribut hovercard Gmail, berisi alamat tanpa nama',
+  },
+];
+
+/**
+ * Penanda satu pesan di dalam percakapan Gmail.
+ *
+ * Pada percakapan yang terbuka, setiap pesan berada di dalam satu elemen yang membawa
+ * `data-message-id`, dengan nilai berbentuk `#msg-f:<angka>`. Itu **pengamatan dari probe
+ * halaman thread sungguhan**, bukan tebakan: nilai yang sama juga terjawab oleh
+ * `closest('[data-message-id]')` dari elemen pengirim, chip penerima, dan avatar pesan.
+ *
+ * Atribut ini yang membuat batas percakapan dapat ditentukan tanpa menyebut satu pun nama
+ * kelas: baris list view membawa `data-legacy-thread-id`, bukan `data-message-id`, sehingga
+ * daftar inbox tidak ikut terbaca sebagai percakapan.
+ */
+const MESSAGE_CONTAINER_SELECTOR = '[data-message-id]';
+
+/**
+ * Kandidat pembaca pengirim **di dalam satu pesan**, berurutan dari yang paling informatif.
+ *
+ * Urutannya berbeda dari `SENDER_SELECTORS`, dan alasannya adalah temuan dari halaman
+ * sungguhan: di dalam satu pesan ada **lebih dari satu** elemen beralamat. Baris pengirim
+ * dan chip penerima sama-sama membawa `email` dan `name` — pada probe nyata, chip itu
+ * berbentuk `<span class="g2" email="..." name="saya">`, yaitu cara Gmail menulis "to me".
+ *
+ * Yang menentukan pengirim bukan ada-tidaknya atribut `name`, melainkan **urutan dokumen**:
+ * pada header Gmail, baris pengirim selalu mendahului baris penerima. Karena itu
+ * `[email]` didahulukan daripada `[email][name]` — bentuk terakhir akan memilih chip
+ * penerima justru ketika pengirim tidak menampilkan nama, dan itu kebalikan dari yang benar.
+ */
+const MESSAGE_SENDER_SELECTORS: readonly SenderSelector[] = [
+  {
+    selector: '[email]',
+    purpose: 'elemen beralamat pertama di dalam satu pesan, yaitu baris pengirim',
+  },
+  {
+    selector: '[data-hovercard-id]',
+    purpose: 'avatar pengirim, membawa alamat tanpa atribut email',
   },
 ];
 
@@ -328,6 +381,140 @@ export function looksLikeGmailWarning(element: ElementLike): boolean {
   return WARNING_MESSAGES.some((message) => text.includes(message));
 }
 
+interface MessageSender {
+  readonly address: string;
+  readonly displayName: string | null;
+  /** `true` bila nama diambil dari teks elemen, bukan dari atribut `name`. */
+  readonly fromText: boolean;
+  readonly selector: string;
+  readonly viaHint?: string;
+}
+
+/**
+ * Membaca nama pengirim dari elemen jangkar di dalam satu pesan.
+ *
+ * Atribut `name` pada jangkar sendiri adalah sumber pertama. Bila tidak ada, nama dicari
+ * pada keturunan jangkar — Gmail kadang membungkus baris pengirim dengan elemen yang juga
+ * membawa `email` tetapi tanpa `name`. Teks jangkar diperiksa **paling akhir**, karena pada
+ * elemen pembungkus teks itu memuat seluruh baris header, termasuk bagian penerima.
+ */
+function readSenderName(anchor: ElementLike, address: string): NameReading {
+  const own = readDisplayName(anchor, address);
+  if (own.displayName !== null && !own.fromText) return own;
+
+  for (const inner of queryWithin(anchor, '[name]')) {
+    const reading = readDisplayName(inner, address);
+    if (reading.displayName !== null && !reading.fromText) return reading;
+  }
+
+  return own;
+}
+
+/**
+ * Membaca pengirim dari satu wadah pesan.
+ *
+ * Mengembalikan elemen **pertama** yang alamatnya dapat diurai, mengikuti urutan
+ * `MESSAGE_SENDER_SELECTORS` lalu urutan dokumen. Elemen kedua dan seterusnya di dalam
+ * wadah yang sama sengaja diabaikan: pada header Gmail, yang datang setelah baris pengirim
+ * adalah penerima, dan penerima bukan pengirim.
+ *
+ * `null` berarti pesan ini tidak menyediakan pengirim yang dapat dibaca. Itu bukan
+ * kesalahan; pesan yang sedang dilipat, atau bentuk DOM yang belum dikenal, memang
+ * menghasilkan itu.
+ */
+function readMessageSender(container: ElementLike): MessageSender | null {
+  for (const candidate of MESSAGE_SENDER_SELECTORS) {
+    for (const element of queryWithin(container, candidate.selector)) {
+      const address = readAddress(element);
+      if (address === null) continue;
+
+      const reading = readSenderName(element, address);
+      const viaHint = readViaHint(element) ?? undefined;
+
+      return {
+        address,
+        displayName: reading.displayName,
+        fromText: reading.fromText,
+        selector: candidate.selector,
+        ...(viaHint !== undefined ? { viaHint } : {}),
+      };
+    }
+  }
+
+  return null;
+}
+
+interface ConversationReading {
+  readonly senders: readonly SenderCandidate[];
+  readonly selectorUsed: string | null;
+}
+
+/**
+ * Pengirim dari percakapan yang sedang terbuka, satu per pesan.
+ *
+ * Daftar kosong berarti lingkup percakapan **tidak dapat ditegakkan** — tidak ada penanda
+ * pesan, atau penandanya ada tetapi tidak satu pun pesannya menyediakan pengirim.
+ *
+ * Yang **tidak** dilakukan fungsi ini adalah jatuh kembali ke seluruh halaman. Versi
+ * pertamanya melakukannya, dengan alasan "kegagalan mengenali bentuk halaman tidak boleh
+ * berarti panel kosong". Probe pada halaman Gmail sungguhan membuktikan alasan itu salah:
+ * pada halaman yang URL-nya menunjuk sebuah thread, DOM dapat berisi **daftar inbox**
+ * (103 elemen pengirim pada satu probe, termasuk alamat penerima) sementara percakapannya
+ * belum ada. Jatuh kembali ke seluruh halaman di keadaan itu berarti panel menjelaskan
+ * pengirim mana pun yang temuannya paling berat — persis bug yang membuat panel ini
+ * pernah menampilkan orang yang sama untuk setiap email. Panel kosong lebih baik daripada
+ * panel yang salah, dan itu aturan yang sudah tertulis di perekat ekstensinya.
+ */
+function collectConversationSenders(doc: DocumentLike, notes: string[]): ConversationReading {
+  const containers = toArray(safeQuery(doc, MESSAGE_CONTAINER_SELECTOR));
+
+  if (containers.length === 0) {
+    notes.push(
+      `lingkup percakapan diminta, tetapi tidak ada ${MESSAGE_CONTAINER_SELECTOR} di halaman; tidak ada pengirim yang ditampilkan, dan pemindaian **tidak** jatuh kembali ke seluruh halaman`,
+    );
+    return { senders: [], selectorUsed: null };
+  }
+
+  const byAddress = new Map<string, SenderCandidate>();
+  const contributedBy = new Set<string>();
+
+  for (const container of containers) {
+    const sender = readMessageSender(container);
+    if (sender === null) continue;
+
+    const key = sender.address.trim().toLowerCase();
+    if (byAddress.has(key)) continue;
+
+    if (sender.fromText) {
+      notes.push(
+        `display name "${sender.displayName}" dibaca dari teks, bukan atribut name (${sender.selector}, di dalam pesan)`,
+      );
+    }
+
+    byAddress.set(key, {
+      displayName: sender.displayName,
+      fromAddress: sender.address.trim(),
+      sourceSelector: sender.selector,
+      ...(sender.viaHint !== undefined ? { viaHint: sender.viaHint } : {}),
+    });
+    contributedBy.add(sender.selector);
+  }
+
+  if (byAddress.size === 0) {
+    notes.push(
+      'penanda pesan ditemukan, tetapi tidak ada pengirim yang terbaca di dalamnya; tidak ada pengirim yang ditampilkan',
+    );
+    return { senders: [], selectorUsed: null };
+  }
+
+  return {
+    senders: [...byAddress.values()],
+    selectorUsed:
+      MESSAGE_SENDER_SELECTORS.find((candidate) => contributedBy.has(candidate.selector))
+        ?.selector ?? null,
+  };
+}
+
 /**
  * Memindai halaman Gmail dan menghasilkan laporan lengkap.
  *
@@ -335,7 +522,7 @@ export function looksLikeGmailWarning(element: ElementLike): boolean {
  * adapter yang melempar akan mematikan extension pada halaman yang paling tidak
  * terduga.
  */
-export function scanGmailInbox(doc: DocumentLike): AdapterReport {
+export function scanGmailInbox(doc: DocumentLike, options: ScanOptions = {}): AdapterReport {
   const probes: SelectorProbe[] = [];
   const notes: string[] = [];
   const byAddress = new Map<string, SenderCandidate>();
@@ -442,9 +629,17 @@ export function scanGmailInbox(doc: DocumentLike): AdapterReport {
     );
   }
 
-  const senders = [...byAddress.values()];
+  // Lingkup percakapan dihitung setelah probe: probe tetap melaporkan kecocokan pada
+  // seluruh halaman, karena justru itulah yang diperiksa mode diagnostik. Yang dipersempit
+  // hanya daftar pengirim yang diserahkan ke pemanggil.
+  const conversation =
+    (options.scope ?? 'page') === 'conversation' ? collectConversationSenders(doc, notes) : null;
+
+  const senders = conversation?.senders ?? [...byAddress.values()];
   const selectorUsed =
-    SENDER_SELECTORS.find((candidate) => contributedBy.has(candidate.selector))?.selector ?? null;
+    conversation === null
+      ? (SENDER_SELECTORS.find((candidate) => contributedBy.has(candidate.selector))?.selector ?? null)
+      : conversation.selectorUsed;
 
   if (senders.length === 0) {
     notes.push(

@@ -80,12 +80,81 @@ Beberapa hal tidak bergantung pada kebaikan hati peninjau, melainkan gagal di CI
    Ia untuk membandingkan katalog dengan dokumen, **bukan** untuk ditempel ke
    `docs/RULES.md` — bentuk kolomnya berbeda, dan alasannya ada di
    `tools/corpus/src/rules-table.ts`.
-5. Naikkan `ALGORITHM_VERSION` di `packages/core/src/version.ts` dan catat di
-   `CHANGELOG.md`.
+5. `ALGORITHM_VERSION` **tidak perlu disentuh**: rilis otomatis menaikkannya sendiri bila ada
+   berkas di `packages/core/src` yang berubah. Lihat "Merilis versi" di bawah.
 6. Jalankan `pnpm test` dan `pnpm corpus`.
 
 Kalau sebuah kode tidak dapat dipicu oleh fixture mana pun, test kelengkapan katalog akan
 gagal. Itu disengaja: rule yang tidak punya kasus nyata adalah rule yang belum dipahami.
+
+## Merilis versi
+
+**Rilis berjalan otomatis, dan tidak ada langkah manual.** Itu disengaja: yang tidak dikerjakan
+manusia tidak dapat terlupa, dan versi yang tertinggal adalah kegagalan yang tidak terlihat —
+tidak ada yang gagal, hanya ada perubahan yang tidak pernah sampai ke pengguna.
+
+Catatan rilis **tidak** ditulis di berkas mana pun di repositori ini. Ia hidup di **pesan tag** dan
+GitHub Release, sehingga hanya dibaca saat ditanya, dan tidak ada salinan kedua yang bisa
+menyimpang. `CHANGELOG.md` hanya indeks: satu baris per versi, ditambahkan otomatis. Riwayat
+0.1.0–0.3.0, yang dirilis sebelum tag dan rilis otomatis dipakai, dibekukan di
+`docs/CHANGELOG-0.x.md`.
+
+### Apa yang terjadi saat `main` menerima push
+
+1. Job `verify` menjalankan typecheck, test, build ekstensi, pemeriksaan dokumentasi, dan release
+   gate corpus.
+2. Kalau lulus, job `release` menjalankan `node tools/release/src/prepare.ts`, yang:
+
+   - menghitung versi paket dari tipe commit sejak tag terakhir: `feat` → minor, perubahan yang
+     merusak (`!` atau `BREAKING CHANGE:`) → major, selebihnya patch;
+   - menaikkan `ALGORITHM_VERSION` satu patch bila ada berkas di `packages/core/src` yang berubah.
+     Aturan itu lebih luas daripada definisi "rule, ambang, atau decision table", dan sengaja
+     begitu: menaikkannya terlalu sering hanya membuang cache verdikt pengguna, sedangkan
+     melewatkannya membuat hasil analisis lama terus dipakai. Alasannya ada di komentar
+     `tools/release/src/version.ts`;
+   - memperbarui `DATA_UPDATED_AT` bila data non-generated berubah;
+   - menyusun catatan rilis dari judul **dan badan** commit, lalu menulisnya di luar repositori;
+   - menambahkan satu baris di tabel indeks `CHANGELOG.md`.
+
+3. Commit `chore(release): <versi>` didorong, tag `v<versi>` dibuat dengan catatan rilis sebagai
+   pesannya, lalu GitHub Release dibuat dari pesan tag itu.
+
+Job `release` bergantung pada `verify` (`needs: verify`), sehingga tag tidak pernah dibuat untuk
+commit yang gagal. Perhatikan juga: commit yang didorong `GITHUB_TOKEN` **tidak memicu workflow
+lain**, jadi tag yang dibuat otomatis tidak menjalankan job `release-check` — job itu ada untuk tag
+yang ditandai tangan, dan job `release` sudah memeriksa hal yang sama lewat `needs`.
+
+### Yang tersisa untuk manusia
+
+Dua hal saja, dan keduanya sudah dikerjakan sambil menulis perubahannya:
+
+- **Judul pull request** menentukan jenis kenaikan versi. Judul yang tidak mengikuti bentuk
+  konvensional tetap menghasilkan rilis `patch`: perubahan yang tidak pernah dirilis lebih buruk
+  daripada rilis yang nomornya kurang tepat.
+- **Badan pull request** menjadi isi catatan rilis. Di situlah kalimat yang tidak dapat dihasilkan
+  mesin ditulis — klaim yang dicabut, angka yang dikoreksi, alasan sebuah keputusan berubah. Pada
+  squash merge, badan itu ikut ke badan commit, sehingga tidak ada catatan kedua yang harus
+  diperbarui.
+
+### Memeriksa dan menghentikan
+
+Untuk melihat apa yang **akan** dirilis, tanpa membuat tag dan tanpa mengubah berkas apa pun:
+
+```bash
+node tools/release/src/prepare.ts --dry-run
+```
+
+Untuk menghentikan rilis sementara, matikan job `release` di `.github/workflows/ci.yml`. Menandai
+versi secara manual tetap mungkin, dan tetap diperiksa job `release-check`: tag harus sama dengan
+`v` + versi di `package.json`, dan pesan tag harus memuat baris `ALGORITHM_VERSION: <nilai>` yang
+cocok dengan `packages/core/src/version.ts`.
+
+### Satu prasyarat, sekali
+
+Job `release` meminta `permissions: contents: write` untuk mendorong commit dan tag. GitHub
+membatasinya lewat pengaturan repositori: **Settings → Actions → General → Workflow permissions**
+harus "Read and write permissions". Tanpa itu, `needs: verify` tetap lulus tetapi langkah
+`git push` gagal — dan kegagalannya adalah satu-satunya cara rilis otomatis ini diam.
 
 ## Gaya penulisan
 

@@ -18,6 +18,10 @@ import {
   type DocumentLike,
   type LocationLike,
 } from '@sender-check/adapters';
+// Satu sebutan dari lapisan penyajian, bukan analisis: probe ini sengaja tidak memuat engine,
+// tetapi teks untuk nama yang tidak ada tidak boleh punya salinan kedua di sini — salinan
+// seperti itu sudah pernah menyimpang dari panel, dan itulah alasan konstanta ini ada.
+import { NO_NAME_LABEL } from '@sender-check/presentation';
 import { copyToClipboard, printHeaderBlock, printNotes, printProbeReport, section } from './shared.ts';
 
 // Hanya dua global browser yang dipakai, dideklarasikan eksplisit supaya tidak perlu
@@ -63,7 +67,7 @@ if (view === 'show-original') {
 
   section(`pengirim terbaca (${report.senders.length})`);
   for (const sender of report.senders.slice(0, 40)) {
-    const name = sender.displayName ?? '(tanpa nama)';
+    const name = sender.displayName ?? NO_NAME_LABEL;
     const via = sender.viaHint === undefined ? '' : `   via ${sender.viaHint}`;
     console.log(`  ${name} <${sender.fromAddress}>${via}`);
   }

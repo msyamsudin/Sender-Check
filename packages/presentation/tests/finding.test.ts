@@ -3,6 +3,7 @@ import { analyze, type State } from '@sender-check/core';
 import {
   DISCLAIMER_LINES,
   MARK,
+  NO_NAME_LABEL,
   STATE_TITLE,
   contextNotes,
   senderLabel,
@@ -137,6 +138,8 @@ describe('model penyajian verdikt', () => {
     );
 
     expect(senderLabel(named)).toBe('Rise <no-reply@mngl.in>');
-    expect(senderLabel(unnamed)).toBe('(tanpa nama) <no-reply@shopify.com>');
+    // Sebutannya diambil dari konstanta, bukan ditulis ulang di test: test yang menyalin
+    // teksnya sendiri akan tetap hijau walaupun panel memakai bunyi yang berbeda.
+    expect(senderLabel(unnamed)).toBe(`${NO_NAME_LABEL} <no-reply@shopify.com>`);
   });
 });

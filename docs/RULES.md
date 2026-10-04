@@ -172,7 +172,9 @@ Ringkasnya, dan selengkapnya di [`CONTRIBUTING.md`](../CONTRIBUTING.md):
 3. Tambahkan fixture yang memicunya, **dan** satu kasus sah yang hampir mirip di
    `tools/corpus/fixtures/adversarial.json`.
 4. Perbarui tabel di dokumen ini. Kolom turunannya dari `pnpm rules`; kolom arti ditulis manusia.
-5. Naikkan `ALGORITHM_VERSION` dan catat di `CHANGELOG.md`.
+5. `ALGORITHM_VERSION` di `packages/core/src/version.ts` **tidak perlu disentuh**: rilis otomatis
+   menaikkannya sendiri bila ada berkas di `packages/core/src` yang berubah. Rinciannya di
+   "Merilis versi" pada [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 
 Test kelengkapan katalog akan gagal bila sebuah kode tidak dapat dipicu fixture mana pun. Itu
 disengaja: rule yang tidak punya kasus nyata adalah rule yang belum dipahami.

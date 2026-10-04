@@ -23,6 +23,8 @@ export type {
   GmailView,
   HeaderReport,
   LocationLike,
+  ScanOptions,
+  ScanScope,
   SelectorProbe,
   SenderCandidate,
 } from './types.ts';

@@ -116,16 +116,36 @@ function renderDisclaimer(model: PanelModel): HTMLElement {
 }
 
 /**
+ * Bagian "apa yang belum diperiksa, dan apa yang sebaiknya dilakukan".
+ *
+ * `null` bila tidak ada yang perlu dikatakan — dan itu keadaan normal pada state yang sudah
+ * punya penilaian. Bagian ini sengaja tidak memakai warna peringatan: `UNASSESSABLE` berarti
+ * belum dapat dipastikan, bukan mencurigakan, dan mewarnainya seperti temuan akan membuat
+ * setiap email dengan nama orang biasa tampak berbahaya.
+ */
+function renderBasis(model: PanelModel): HTMLElement | null {
+  if (model.basis === null && model.guidance === null) return null;
+
+  const section = element('section', 'sc-section sc-section--basis');
+
+  if (model.basis !== null) {
+    section.append(element('p', 'sc-basis', model.basis));
+  }
+
+  if (model.guidance !== null) {
+    section.append(element('p', 'sc-guidance', model.guidance));
+  }
+
+  return section;
+}
+
+/**
  * Menggambar panel ke dalam `container`.
  *
  * Isi lama dibuang lebih dulu supaya pemanggilan berulang tidak menumpuk panel — dan
  * pemanggilan berulang itu normal: setiap perubahan DOM Gmail memicu pemindaian ulang.
  */
-export function renderPanel(
-  container: HTMLElement,
-  model: PanelModel,
-  onClose: () => void,
-): void {
+export function renderPanel(container: HTMLElement, model: PanelModel, onClose: () => void): void {
   container.replaceChildren();
 
   const card = element('section', `${PANEL_CLASS} ${PANEL_CLASS}--${model.state}`);
@@ -141,6 +161,9 @@ export function renderPanel(
 
   const auth = renderAuthentication(model);
   if (auth !== null) card.append(auth);
+
+  const basis = renderBasis(model);
+  if (basis !== null) card.append(basis);
 
   card.append(renderDisclaimer(model));
   container.append(card);

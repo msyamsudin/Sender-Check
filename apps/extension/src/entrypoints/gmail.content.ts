@@ -18,6 +18,15 @@
  * pada setiap mutasi akan berjalan puluhan kali per detik di halaman yang sibuk, dan
  * `docs/DESIGN.md` bagian 10 melarang memblokir main thread. Karena itu setiap mutasi hanya
  * **menjadwalkan** satu pemindaian, dan pemindaiannya sendiri dijalankan pada waktu idle.
+ *
+ * ## Yang tidak dilakukan berkas ini: mengambil header sendiri
+ *
+ * `Reply-To` hanya ada di halaman "Show original", dan halaman itu **tidak** diambil sendiri
+ * oleh ekstensi. Keputusan itu diambil ulang secara sadar setelah sempat dicoba: janji
+ * "tanpa permintaan jaringan" adalah alasan utama alat ini boleh menyentuh kotak masuk orang,
+ * dan menukarnya dengan satu tombol tidak sebanding. Yang dilakukan panel adalah menyebutkan
+ * bahwa pengirimnya belum dapat dipastikan dan menunjukkan halaman mana yang memuat dasarnya
+ * — pengguna yang membukanya, dan panel menilai ulang di sana. Lihat `docs/DESIGN.md` D1.
  */
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
@@ -42,7 +51,20 @@ export default defineContentScript({
   // halaman. Tanpa itu, gaya panel akan bocor ke webmail dan sebaliknya.
   cssInjectionMode: 'ui',
   async main(ctx) {
-    let ui: ShadowRootContentScriptUi<HTMLElement> | null = null;
+    /**
+     * UI panel, dibuat **satu kali** dan disimpan sebagai promise.
+     *
+     * Sebelumnya UI dibuat malas di dalam `show()` dengan pemeriksaan `ui === null`. Itu
+     * meninggalkan celah: `createShadowRootUi` menunggu satu permintaan CSS, dan pemindaian
+     * kedua yang dimulai sebelum permintaan pertama selesai akan melihat `ui` masih `null`
+     * lalu membuat panel kedua. Panel pertama tidak pernah dibuang oleh siapa pun, sehingga
+     * yang tertinggal adalah panel yatim — terlihat, tetapi tidak lagi diperbarui.
+     *
+     * Menyimpan promise-nya menutup celah itu tanpa mengunci apa pun: pembuatan tetap
+     * terjadi saat panel pertama kali dibutuhkan, dan setelah itu semua pemanggil menunggu
+     * objek yang sama.
+     */
+    let uiPromise: Promise<ShadowRootContentScriptUi<HTMLElement>> | null = null;
     let pending: number | null = null;
     /**
      * URL tempat pengguna menutup panel.
@@ -53,25 +75,26 @@ export default defineContentScript({
     let dismissedAt = '';
 
     async function hide(): Promise<void> {
-      if (ui !== null) ui.remove();
+      if (uiPromise === null) return;
+      (await uiPromise).remove();
     }
 
     async function show(model: ReturnType<typeof buildPanelModel>): Promise<void> {
-      if (ui === null) {
-        ui = await createShadowRootUi<HTMLElement>(ctx, {
-          name: 'sender-check-panel',
-          // `inline` berarti WXT tidak mengatur posisi sama sekali; kartunya memposisikan
-          // dirinya sendiri sebagai `fixed` di dalam CSS-nya. Mode `overlay`/`modal` akan
-          // membuat kontainer menutupi viewport, dan itu menghalangi klik ke webmail.
-          position: 'inline',
-          anchor: 'body',
-          append: 'last',
-          // Panel punya tombol; tanpa ini, menekan spasi atau Enter saat tombol itu fokus
-          // akan sampai juga ke pintasan papan tikus webmail.
-          isolateEvents: true,
-          onMount: (container) => container,
-        });
-      }
+      uiPromise ??= createShadowRootUi<HTMLElement>(ctx, {
+        name: 'sender-check-panel',
+        // `inline` berarti WXT tidak mengatur posisi sama sekali; kartunya memposisikan
+        // dirinya sendiri sebagai `fixed` di dalam CSS-nya. Mode `overlay`/`modal` akan
+        // membuat kontainer menutupi viewport, dan itu menghalangi klik ke webmail.
+        position: 'inline',
+        anchor: 'body',
+        append: 'last',
+        // Panel punya tombol; tanpa ini, menekan spasi atau Enter saat tombol itu fokus
+        // akan sampai juga ke pintasan papan tikus webmail.
+        isolateEvents: true,
+        onMount: (container) => container,
+      });
+
+      const ui = await uiPromise;
 
       // Dibersihkan lebih dulu, karena `ui` yang sama dipakai ulang setiap kali pesan
       // berganti. Tanpa ini, setiap pemindaian ulang akan menumpuk panel.

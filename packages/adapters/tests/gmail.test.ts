@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { detectGmailView, scanGmailInbox } from '../src/gmail.ts';
-import { fakeDocument } from './fake-dom.ts';
+import { fakeDocument, type ElementInit } from './fake-dom.ts';
 
 /**
  * Test ini menguji **logika** adapter: urutan prioritas selector, penggabungan elemen
@@ -307,5 +307,131 @@ describe('pemindaian inbox: strategi selector', () => {
       });
 
     expect(scanGmailInbox(build())).toEqual(scanGmailInbox(build()));
+  });
+});
+
+/**
+ * Lingkup percakapan.
+ *
+ * Bentuk DOM di bawah ini disusun dari probe halaman thread Gmail sungguhan: wadah pesan
+ * membawa `data-message-id`, di dalamnya berurutan avatar pengirim (hanya
+ * `data-hovercard-id`), baris pengirim (`email` + `name`), dan chip penerima
+ * (`email` + `name`, dengan nama "saya"). Di luar wadah itu ada avatar akun, yang juga
+ * membawa alamat tetapi bukan pengirim pesan mana pun.
+ *
+ * Yang dibuktikan test ini adalah **logikanya**: dengan lingkup percakapan, yang terbaca
+ * hanya pengirim pesan, bukan chip penerima dan bukan avatar akun. Yang tidak dibuktikan
+ * test ini tetap sama seperti sebelumnya: apakah bentuk DOM itu masih berlaku di Gmail
+ * hari ini.
+ */
+describe('lingkup percakapan: satu pengirim per pesan', () => {
+  const ACCOUNT_AVATAR: ElementInit = {
+    tag: 'img',
+    attrs: { class: 'ajn bofPge', 'data-hovercard-id': 'akun@example.com' },
+  };
+
+  /** Satu pesan pada percakapan, lengkap dengan chip penerima seperti di Gmail. */
+  function message(
+    messageId: string,
+    from: { readonly name: string | null; readonly address: string },
+    recipient: string,
+  ): ElementInit {
+    const senderAttrs: Record<string, string> = {
+      class: 'gD',
+      email: from.address,
+      'data-hovercard-id': from.address,
+      ...(from.name !== null ? { name: from.name } : {}),
+    };
+
+    return {
+      tag: 'div',
+      attrs: { 'data-message-id': messageId },
+      children: [
+        { tag: 'img', attrs: { class: 'ajn ajo', 'data-hovercard-id': from.address } },
+        { tag: 'span', attrs: senderAttrs, text: from.name ?? from.address },
+        {
+          tag: 'span',
+          attrs: { class: 'g2', email: recipient, name: 'saya', 'data-hovercard-id': recipient },
+          text: 'saya',
+        },
+      ],
+    };
+  }
+
+  it('mengabaikan chip penerima yang muncul setelah baris pengirim', () => {
+    const doc = fakeDocument(message('#msg-f:1', { name: 'Buletin Contoh', address: 'kirim@contoh-mail.com' }, 'saya@example.com'));
+
+    // Lingkup halaman membaca keduanya — inilah yang membuat panel pernah menjelaskan
+    // alamat pengguna sendiri alih-alih pengirim pesan yang sedang dibuka.
+    const page = scanGmailInbox(doc);
+    expect(page.senders.map((sender) => sender.fromAddress)).toEqual([
+      'kirim@contoh-mail.com',
+      'saya@example.com',
+    ]);
+
+    const conversation = scanGmailInbox(doc, { scope: 'conversation' });
+    expect(conversation.senders).toHaveLength(1);
+    expect(conversation.senders[0]?.fromAddress).toBe('kirim@contoh-mail.com');
+    expect(conversation.senders[0]?.displayName).toBe('Buletin Contoh');
+    expect(conversation.selectorUsed).toBe('[email]');
+  });
+
+  it('tetap memilih baris pengirim ketika pengirim tidak menampilkan nama', () => {
+    // Chip penerima punya atribut `name`, pengirim tidak. Aturan yang mendahulukan
+    // `[email][name]` akan memilih penerima justru pada kasus ini.
+    const doc = fakeDocument(message('#msg-f:2', { name: null, address: 'tanpa-nama@contoh-mail.com' }, 'saya@example.com'));
+
+    const report = scanGmailInbox(doc, { scope: 'conversation' });
+    expect(report.senders).toHaveLength(1);
+    expect(report.senders[0]?.fromAddress).toBe('tanpa-nama@contoh-mail.com');
+    expect(report.senders[0]?.displayName).toBeNull();
+  });
+
+  it('mengabaikan elemen beralamat di luar wadah pesan', () => {
+    const doc = fakeDocument(
+      ACCOUNT_AVATAR,
+      message('#msg-f:3', { name: 'Buletin Contoh', address: 'kirim@contoh-mail.com' }, 'saya@example.com'),
+    );
+
+    const report = scanGmailInbox(doc, { scope: 'conversation' });
+    expect(report.senders.map((sender) => sender.fromAddress)).toEqual(['kirim@contoh-mail.com']);
+  });
+
+  it('membaca satu pengirim per pesan pada percakapan berbalas', () => {
+    const doc = fakeDocument(
+      message('#msg-f:4', { name: 'Buletin Contoh', address: 'kirim@contoh-mail.com' }, 'saya@example.com'),
+      message('#msg-f:5', { name: 'Saya', address: 'saya@example.com' }, 'kirim@contoh-mail.com'),
+    );
+
+    const report = scanGmailInbox(doc, { scope: 'conversation' });
+    expect(report.senders.map((sender) => sender.fromAddress)).toEqual([
+      'kirim@contoh-mail.com',
+      'saya@example.com',
+    ]);
+  });
+
+  it('tidak menampilkan pengirim bila penanda pesan tidak ada, dan mencatatnya', () => {
+    // Jatuh kembali ke seluruh halaman pernah dianggap benar di sini. Probe halaman
+    // sungguhan membuktikan sebaliknya: pada halaman ber-URL thread, DOM dapat berisi
+    // daftar inbox, dan membaca seluruh halaman saat itu berarti menjelaskan pengirim
+    // mana pun yang temuannya paling berat. Panel kosong lebih baik daripada panel salah.
+    const doc = fakeDocument({ tag: 'span', attrs: { email: 'a@b.com', name: 'A' }, text: 'A' });
+
+    const report = scanGmailInbox(doc, { scope: 'conversation' });
+    expect(report.matched).toBe(false);
+    expect(report.senders).toHaveLength(0);
+    expect(report.notes.some((note) => note.includes('tidak ada pengirim yang ditampilkan'))).toBe(
+      true,
+    );
+  });
+
+  it('mengabaikan wadah pesan yang tidak menyediakan pengirim', () => {
+    const doc = fakeDocument(
+      { tag: 'div', attrs: { 'data-message-id': '#msg-f:6' }, children: [{ tag: 'div', text: 'belum dimuat' }] },
+      message('#msg-f:7', { name: 'Buletin Contoh', address: 'kirim@contoh-mail.com' }, 'saya@example.com'),
+    );
+
+    const report = scanGmailInbox(doc, { scope: 'conversation' });
+    expect(report.senders.map((sender) => sender.fromAddress)).toEqual(['kirim@contoh-mail.com']);
   });
 });

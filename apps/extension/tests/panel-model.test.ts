@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { analyze, type State } from '@sender-check/core';
-import { AUTHENTICATION_CAVEAT, DISCLAIMER_LINES, toFinding } from '@sender-check/presentation';
-import { buildPanelModel } from '../src/lib/panel-model.ts';
+import {
+  AUTHENTICATION_CAVEAT,
+  DISCLAIMER_LINES,
+  NO_NAME_LABEL,
+  toFinding,
+} from '@sender-check/presentation';
+import { buildPanelModel, UNASSESSABLE_BASIS, UNASSESSABLE_GUIDANCE } from '../src/lib/panel-model.ts';
 
 const findingFor = (identity: Parameters<typeof analyze>[0]) => toFinding(identity, analyze(identity));
 
@@ -49,10 +54,18 @@ describe('isi panel', () => {
     );
   });
 
-  it('nama yang tidak ditampilkan webmail ditulis apa adanya', () => {
-    const model = buildPanelModel(findingFor({ displayName: null, fromAddress: 'no-reply@shopify.com' }));
+  it('nama yang tidak ditampilkan webmail ditulis apa adanya, dengan satu sebutan saja', () => {
+    // Dua tempat menuliskan keadaan yang sama: baris subjek di atas panel dan medan `Nama` di
+    // dalamnya. Keduanya pernah memakai bunyi yang berbeda — `(tanpa nama)` dan
+    // `(tidak ditampilkan)` — sehingga satu email yang sama memuat dua sebutan untuk hal yang
+    // sama. Test ini membandingkan keduanya satu sama lain, bukan dengan teks yang disalin ke
+    // sini, supaya perbedaan itu tidak dapat kembali tanpa ada yang gagal.
+    const model = buildPanelModel(
+      findingFor({ displayName: null, fromAddress: 'no-reply@shopify.com' }),
+    );
 
-    expect(model.fields[0]?.value).toBe('(tidak ditampilkan)');
+    expect(model.fields[0]?.value).toBe(NO_NAME_LABEL);
+    expect(model.subject).toBe(`${NO_NAME_LABEL} <no-reply@shopify.com>`);
   });
 
   it('mengurutkan bukti menurut kepentingan bagi pembaca', () => {
@@ -132,5 +145,37 @@ describe('isi panel', () => {
       // Istilah internal tidak boleh bocor ke panel.
       expect(model.title, state).not.toContain(model.state);
     }
+  });
+});
+
+/**
+ * Bagian "apa yang belum diperiksa, dan apa yang sebaiknya dilakukan".
+ *
+ * State `UNASSESSABLE` berarti "belum dapat dipastikan", dan panel yang hanya menyatakan itu
+ * terbaca seperti "tidak ada yang perlu dikhawatirkan". Dua kalimat di bawah ini yang
+ * membedakannya: satu menjelaskan mengapa tidak ada penilaian, satu menyebut langkah aman
+ * yang dapat dikerjakan pengguna — tanpa ekstensi itu sendiri mengambil apa pun dari jaringan.
+ */
+describe('bagian yang preventif pada state belum dapat dinilai', () => {
+  const UNASSESSABLE = findingFor({ displayName: 'Budi Santoso', fromAddress: 'x7k2@randomisp.co.id' });
+
+  it('menyebut alasan dan langkah aman hanya pada state yang belum dapat dinilai', () => {
+    const model = buildPanelModel(UNASSESSABLE);
+
+    expect(model.basis).toBe(UNASSESSABLE_BASIS);
+    expect(model.guidance).toBe(UNASSESSABLE_GUIDANCE);
+
+    expect(buildPanelModel(TIER_A).basis).toBeNull();
+    expect(buildPanelModel(TIER_A).guidance).toBeNull();
+    expect(buildPanelModel(TIER_B).guidance).toBeNull();
+  });
+
+  it('mengarahkan ke halaman header, dan tidak menjanjikan apa pun yang tidak dapat dilakukan', () => {
+    // Halaman itu dirender Gmail, dan panel menilai ulang di sana. Ekstensi ini tidak
+    // mengambilnya sendiri — keputusan itu dicatat di `docs/DESIGN.md` D1.
+    expect(UNASSESSABLE_GUIDANCE).toContain('Tampilkan aslinya');
+    expect(UNASSESSABLE_GUIDANCE).toContain('panel menilai ulang');
+    // Tanpa kata-kata yang menyiratkan "aman": yang benar adalah belum diperiksa.
+    expect(UNASSESSABLE_BASIS).toContain('belum dapat dipastikan');
   });
 });

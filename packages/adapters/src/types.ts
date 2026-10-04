@@ -92,6 +92,29 @@ export interface AdapterReport {
   readonly notes: readonly string[];
 }
 
+/**
+ * Lingkup pembacaan pengirim dari halaman Gmail.
+ *
+ * `page` memindai seluruh dokumen. Itu yang dibutuhkan skrip konsol: ia ingin tahu selector
+ * mana yang bekerja pada halaman apa pun, termasuk list view dengan puluhan barisnya.
+ *
+ * `conversation` hanya membaca pesan-pesan pada percakapan yang sedang terbuka. Itu yang
+ * dibutuhkan panel: panel harus menjelaskan pesan yang sedang dibaca, bukan pengirim lain
+ * yang kebetulan berada di dokumen yang sama — misalnya chip penerima ("to saya"), avatar
+ * akun di sudut halaman, atau sisa percakapan yang masih tertinggal di DOM.
+ */
+export type ScanScope = 'page' | 'conversation';
+
+export interface ScanOptions {
+  /**
+   * Default `page`, yaitu perilaku yang sudah berlaku sebelum opsi ini ada.
+   *
+   * Defaultnya sengaja bukan `conversation`: pemanggil yang tidak menyebutkan apa pun
+   * mendapat arti lama, sehingga perubahan ini tidak diam-diam mengubah hasil skrip konsol.
+   */
+  readonly scope?: ScanScope;
+}
+
 /** Hasil pembacaan halaman "Show original". */
 export interface HeaderReport {
   readonly matched: boolean;

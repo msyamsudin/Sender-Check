@@ -28,6 +28,7 @@ const DOC_FILES = [
   'docs/USAGE.md',
   'docs/RULES.md',
   'docs/FIREFOX.md',
+  'docs/CHANGELOG-0.x.md',
 ];
 
 export interface DocProblem {
