@@ -11,8 +11,14 @@ Konsekuensinya, adapter tidak dapat dibangun dari ingatan atau dugaan: ia harus
 diverifikasi terhadap DOM yang sebenarnya.
 
 Selector Gmail berbasis nama kelas yang berubah secara berkala. Snapshot di direktori ini
-menjadi **canary test**: ketika Gmail mengubah strukturnya, test gagal di CI alih-alih
-extension diam-diam berhenti bekerja.
+menjadi **regression fixture**: `packages/adapters/tests/gmail-snapshots.test.ts` mengurainya
+lewat `linkedom`, sehingga selector terbukti cocok dengan markup sungguhan, dan perubahan
+adapter yang mematahkan pembacaan itu gagal di CI.
+
+Batasnya perlu disebut supaya tidak diandalkan secara keliru: snapshot yang tersimpan
+**tidak berubah** ketika Gmail berubah, jadi test ini tidak akan gagal karena Gmail. Yang
+memberi tahu bahwa Gmail sudah berubah adalah `sender-check.probe.js` yang dijalankan di
+halaman sungguhan — dan snapshot baru diambil ketika itu terjadi.
 
 ## Yang dibutuhkan
 
@@ -25,6 +31,25 @@ halaman.
 | `thread-open.html` | Elemen pengirim pada thread yang dibuka | Tempat panel penjelasan akan dipasang |
 | `thread-no-name.html` | Satu thread **tanpa** display name | Memastikan tidak ada yang crash saat nama tidak ada |
 | `show-original.html` | Halaman "Show original" | Verifikasi selector Tier B |
+
+**Satu berkas belum dapat diambil, dan alasannya dicatat di sini.** `thread-no-name.html` kosong
+karena Gmail tidak merender pengirim tanpa nama pada akun pemelihara: di inbox maupun Spam, tidak
+ada satu pun `span[email]` yang kehilangan atribut `name`, dan tidak ada yang atribut `name`-nya
+berisi alamatnya sendiri. Slotnya sengaja dibiarkan — siapa pun yang menemukan pesan seperti itu
+dapat mengisinya, dan assertion-nya menyala sendiri tanpa perubahan kode.
+
+Perilaku yang dijaganya sudah tercakup pada tingkat logika oleh tiga test di
+`packages/adapters/tests/gmail.test.ts`: *membaca nama dari teks bila atribut name tidak ada, dan
+mencatatnya*, *memperlakukan teks yang sama dengan alamat sebagai tanpa nama*, dan *tetap memilih
+baris pengirim ketika pengirim tidak menampilkan nama*. Yang belum terbukti hanyalah bentuk
+markupnya. Bila berkas ini suatu saat diisi, bentuk yang benar adalah **teks elemennya sama dengan
+alamatnya**, bukan sekadar atribut `name` yang dihapus: tanpa mengubah teks, adapter akan membaca
+teks itu sebagai nama, dan berkasnya tidak akan menguji keadaan yang dimaksud.
+
+Satu pertanyaan sengaja dibiarkan terbuka, tanpa dijawab dengan tebakan: apakah Gmail pernah
+mengisi atribut `name` dengan alamatnya sendiri. Bila ya, `readDisplayName` akan melaporkan alamat
+itu sebagai display name, karena perbandingan terhadap alamat hanya ada di jalur cadangan teks —
+bukan di jalur atribut. Tidak ada bukti ke arah mana pun dari akun ini, jadi kodenya tidak diubah.
 
 Untuk yang terakhir, Gmail menyediakan halaman itu lewat menu **⋮ → Show original**
 (atau **Tampilkan aslinya**). Alamatnya berbentuk
@@ -51,7 +76,8 @@ keduanya yang dibaca adapter.
 Empat berkas ini menjadi:
 
 - dasar `probe(): { matched, selectorUsed, confidence }` pada adapter;
-- canary test yang gagal ketika Gmail mengubah struktur DOM;
+- regression test di `packages/adapters/tests/gmail-snapshots.test.ts`, yang gagal ketika
+  adapter berhenti cocok dengan markup yang terekam;
 - fixture untuk memverifikasi pemetaan kolom Show original ke `EmailIdentity`.
 
 Kontrak pemetaan itu, termasuk satu jebakan yang mudah terlewat, ada di

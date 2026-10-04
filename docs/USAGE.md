@@ -399,8 +399,9 @@ halaman "Show original". List view belum ditangani.
 
 Urutan pengerjaannya disengaja: memisahkan engine dari adapter membuat algoritma dapat diuji
 tanpa browser, sehingga tuning presisi menjadi iterasi hitungan detik alih-alih siklus reload
-ekstensi. Sampai sekarang urutan itu bertahan — 316 test berjalan di Node, dan tidak satu pun
-di antaranya membutuhkan browser.
+ekstensi. Sampai sekarang urutan itu bertahan — 398 test berjalan di Node, dan tidak satu pun
+di antaranya membutuhkan browser; 2 di antaranya di-skip karena menunggu satu snapshot DOM yang
+belum dapat diambil.
 
 ```bash
 pnpm extension:build
@@ -410,16 +411,17 @@ Langkah lengkapnya, termasuk cara memuat ekstensi sementara lewat `about:debuggi
 belum dilakukan panelnya, dan jebakan khas Firefox yang sudah diketahui, ada di
 **[`FIREFOX.md`](FIREFOX.md)**.
 
-Yang masih menghambat adalah **verifikasi selector DOM**. Baik skrip konsol maupun ekstensi
-berjalan di atas selector yang belum pernah diperiksa terhadap Gmail sungguhan. Yang
-dibutuhkan, diletakkan di `tools/corpus/dom-snapshots/`:
+Yang masih menghambat adalah **snapshot DOM**. Selector adapter sudah diperiksa terhadap Gmail
+sungguhan pada satu akun dan satu varian antarmuka, tetapi markup itu tidak disimpan, sehingga
+tidak ada yang menjaganya di CI. Yang dibutuhkan, diletakkan di `tools/corpus/dom-snapshots/`:
 
 1. Satu baris list view (outerHTML satu baris saja, bukan seluruh halaman)
 2. Satu thread terbuka
 3. Satu thread **tanpa** display name
 4. Satu halaman **"Show original"**
 
-Empat berkas itu menjadi canary test di CI sekaligus tempat selector adapter diverifikasi.
-Cara mengambilnya, termasuk cara menyamarkan isi pesannya, ada di
+Empat berkas itu menjadi regression test di CI sekaligus tempat selector adapter diverifikasi:
+`packages/adapters/tests/gmail-snapshots.test.ts` sudah menunggunya, dan assertion-nya baru
+menyala setelah berkasnya ada. Cara mengambilnya, termasuk cara menyamarkan isi pesannya, ada di
 [`tools/corpus/dom-snapshots/README.md`](../tools/corpus/dom-snapshots/README.md). Status
 setiap phase ada di [`DESIGN.md`](DESIGN.md) bagian 13.

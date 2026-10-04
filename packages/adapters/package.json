@@ -11,5 +11,8 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@sender-check/core": "workspace:*"
+  },
+  "devDependencies": {
+    "linkedom": "0.18.13"
   }
 }

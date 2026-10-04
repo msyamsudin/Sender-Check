@@ -31,8 +31,9 @@ sengaja sempit: panel penjelasan muncul hanya ketika satu thread dibuka atau pad
 "Show original", dan list view belum ditangani. Jalur yang dipakainya sudah **diverifikasi
 pada Gmail sungguhan** — list view, thread terbuka (batas percakapan `data-message-id`, satu
 pengirim per pesan), dan halaman Show original (blok header mentah, termasuk `Reply-To`) —
-pada satu akun dan satu varian antarmuka. Yang belum: snapshot DOM yang disimpan sebagai
-canary, dan penanda "via" yang belum pernah ditemukan. Lihat
+pada satu akun dan satu varian antarmuka. Tiga dari empat snapshot DOM-nya kini tersimpan sebagai
+regression fixture di `tools/corpus/dom-snapshots/`; yang belum adalah snapshot pengirim tanpa
+display name, dan penanda "via" yang belum pernah ditemukan. Lihat
 **[`docs/FIREFOX.md`](docs/FIREFOX.md)** untuk cara membangun dan memuatnya, serta bagian 13
 pada [`docs/DESIGN.md`](docs/DESIGN.md) untuk status setiap phase.
 

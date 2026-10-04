@@ -444,7 +444,9 @@ sebuah pesan yang punya konsistensi kuat sekaligus inkonsistensi menengah akan d
 ## 9. Spesifikasi UI
 
 - **List view:** indikator halus **hanya** untuk `INCONSISTENT` + `strength: strong`.
-  Tidak ada badge untuk `UNASSESSABLE`/`UNCLEAR`.
+  Tidak ada badge untuk `UNASSESSABLE`/`UNCLEAR`. Satu hal yang harus diputuskan sebelum
+  indikator ini dikerjakan: nama pengirim di list view **dipotong Gmail**, sehingga ia bukan
+  nama yang sama dengan yang dinilai panel saat thread dibuka — lihat §12.1 butir 6.
 - **Thread terbuka:** panel penuh, evidence-first, dengan tombol "Copy report" (belum
   diimplementasikan). Pada state `UNASSESSABLE` panel **menjelaskan mengapa** ia tidak
   menilai dan **menyebut langkah aman** yang dapat dikerjakan pengguna: periksa header asli
@@ -581,7 +583,10 @@ tools/corpus/fixtures/
   edge.json          56 kasus  (nama kosong, milis, CJK/Arab/Devanagari, token generik)
   adversarial.json   18 kasus  (ditulis tangan untuk menyerang rule lookalike)
   realworld.json      8 kasus  (pola serangan yang dilaporkan pengguna, plus varian sahnya)
+  coverage.json       4 kasus  (dituntut test kelengkapan katalog; lihat catatan di bawah)
 ```
+
+Keenam berkas itu berjumlah **404 kasus** — angka yang dikutip §13, README, dan laporan corpus.
 
 Kategori wajib: personal, corporate, freemail, nama tunggal Indonesia, nama terbalik, inisial, ESP,
 alias, mailing list, support/billing, typo domain, lookalike, homoglyph Unicode, punycode,
@@ -600,6 +605,13 @@ mirip dengannya. Berkas ini penting karena berisi satu fixture berlabel `unasses
 dipakai untuk **mengunci batas Tier A/Tier B**: varian tanpa header Show original memang tidak dapat
 dinilai, dan itu hasil yang benar.
 
+`coverage.json` bukan kumpulan kasus yang dipilih manusia, melainkan hasil
+`tools/corpus/tests/rule-coverage.test.ts`: setiap kali sebuah kode rule tidak pernah terpicu oleh
+corpus mana pun, test itu menuntut satu fixture yang memicunya. Empat kasusnya menutup
+`DISPLAY_NAME_EXACTLY_MATCHES_ADDRESS` dan seluruh kelas domain `disposable`, yang sebelumnya tidak
+terwakili sama sekali. Karena itu ia ikut di-gate: fixture yang lahir dari kelengkapan katalog sama
+sahnya dengan fixture yang ditulis tangan.
+
 **Release gate (precision-first):**
 
 | Gate | Ambang | Hasil terukur |
@@ -617,7 +629,9 @@ berubah.
 Artifact: laporan markdown otomatis di `tools/corpus/reports/corpus-report.md`, memuat confusion
 matrix, rincian per kategori, dan daftar lengkap false positive serta false negative.
 
-Property tests (semuanya terimplementasi, 145 test):
+Property tests (semuanya terimplementasi). Yang dapat dihitung mesin adalah keluaran `pnpm test`:
+**398 test di 23 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
+menunggu satu snapshot DOM yang belum dapat diambil (§12):
 
 - `normalize(normalize(x)) === normalize(x)` untuk seluruh sampel sulit
 - `skeleton(skeleton(x)) === skeleton(x)`
@@ -663,29 +677,40 @@ apps/extension/                   ekstensi Firefox (WXT): content script + panel
   src/lib/scan.ts                   adapter + engine menjadi temuan siap tampil
   src/lib/panel-model.ts            isi panel sebagai data, tanpa DOM
   src/lib/panel-view.ts             menuangkan model ke elemen
-  tests/                            39 test tanpa browser
+  tests/                            60 test tanpa browser
 ```
 
 `packages/adapters`, `tools/console`, dan ekstensinya sudah ada. Jadi **tidak ada lagi paket
-yang belum dibuat**; yang tersisa adalah verifikasi, dan itu bukan pekerjaan menulis kode.
-Adapter tidak dapat dinyatakan benar terhadap Gmail hari ini tanpa satu pun pengamatan pada
-DOM sungguhan, dan sampai itu ada, `packages/adapters/src/gmail.ts` memuat kandidat selector
-yang sebagian belum pernah cocok sama sekali — lihat catatan pada `VIA_ELEMENT_CLASSES` di
-berkas itu.
+yang belum dibuat**. Satu kandidat selector masih disebut apa adanya sebagai hipotesis:
+`VIA_ELEMENT_CLASSES` di `packages/adapters/src/gmail.ts` belum pernah cocok pada probe nyata mana
+pun, dan catatan di berkas itu menjelaskan mengapa klaim lama tentangnya dicabut alih-alih
+dibiarkan tampak terverifikasi.
 
 Dua batas cakupan ekstensi yang disengaja, dan keduanya dijelaskan di
 [`FIREFOX.md`](FIREFOX.md#ekstensi-firefox): panel hanya muncul pada thread yang sedang
-dibuka, dan belum ada cache maupun mode diagnostik. Yang pertama karena indikator di list
-view menuntut presisi yang belum terbukti; yang kedua karena keduanya baru dibutuhkan
-bersama list view.
+dibuka, dan belum ada cache. Yang pertama karena indikator di list view menuntut presisi yang
+belum terbukti; yang kedua karena cache baru bermakna bersama list view, dan meminta permission
+`storage` sebelum ia dipakai akan membuat tinjauan izin menanyakan sesuatu yang belum dapat
+dijelaskan. **Mode diagnostik tidak lagi termasuk batas ini** — ia sudah ada sejak 0.5.0 dan
+isinya diuraikan di §9.
 
 Satu batas yang **bukan** pilihan melainkan syarat kebenaran: panel hanya membaca pesan di
 dalam percakapan yang terbuka, satu pengirim per pesan. Alasannya ada di bagian 12.1 butir 5,
 dan akibat mengabaikannya bukan panel kosong melainkan panel yang salah dengan yakin.
 
 Adapter wajib punya `probe(): { matched, selectorUsed, confidence }`. Bila semua selector gagal,
-extension **no-op + diagnostic log** — jangan diam-diam tidak berjalan. Sertakan canary test
-berbasis snapshot DOM yang gagal di CI ketika Gmail mengubah struktur.
+extension **no-op + diagnostic log** — jangan diam-diam tidak berjalan. Untuk snapshot DOM,
+`packages/adapters/tests/gmail-snapshots.test.ts` mengurai `outerHTML` sungguhan lewat `linkedom`;
+**tiga dari empat berkasnya sudah diambil** — `list-row.html`, `thread-open.html`, dan
+`show-original.html` — sementara `thread-no-name.html` belum dapat diambil dan alasannya dicatat di
+[`tools/corpus/dom-snapshots/README.md`](../tools/corpus/dom-snapshots/README.md).
+
+Satu hal yang perlu dicatat apa adanya, karena rumusan sebelumnya menyesatkan: snapshot yang
+tersimpan **tidak** gagal ketika Gmail mengubah DOM-nya — ia gagal ketika adapter berhenti cocok
+dengan markup yang sudah terekam. Canary yang benar-benar hidup adalah `sender-check.probe.js`
+yang dijalankan di halaman sungguhan, dan itulah yang memberi tahu bahwa Gmail sudah berubah;
+snapshot adalah regression fixture dan tempat selector diverifikasi, bukan penjaga terhadap
+perubahan Gmail.
 
 ### 12.1 Kontrak adapter: hal-hal yang mudah salah dan berakibat serius
 
@@ -738,6 +763,18 @@ berbasis snapshot DOM yang gagal di CI ketika Gmail mengubah struktur.
    berat. **Panel kosong lebih baik daripada panel yang salah**; itu sudah aturan di
    `apps/extension/src/lib/scan.ts`, dan sekarang ditegakkan di adapter juga.
 
+6. **Display name di list view dipotong Gmail, dan yang dipotong itu bukan nama yang dinilai di
+   thread.** Pada satu probe inbox 100 baris, nama yang melewati batas berhenti tepat di 20
+   karakter dengan titik di akhir — `"Korea Investment An."` dan `"Bibit 'info at bibi."` — sementara
+   nama 19 karakter (`"Alpha Capital Group"`) utuh. Karena `notes` tidak memuat satu pun catatan
+   "dibaca dari teks", pemotongan itu ada di **atribut `name` Gmail sendiri**, bukan di adapter.
+   Akibatnya bukan sekadar kosmetik: token yang seharusnya dibandingkan bisa hilang, dan indikator
+   list view yang belum dibangun (§9) akan menilai nama yang berbeda dari yang dinilai panel saat
+   thread dibuka — pengirim yang sama dapat memperoleh dua state berbeda. Perbedaan itu harus
+   diputuskan sebelum indikatornya dikerjakan. `list-row.html` menyimpan salah satu contohnya;
+   `thread-open.html` belum dapat menjawab apakah thread menampilkan nama penuh, karena nama
+   pengirim pada berkas itu pendek.
+
 Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 
 | Kolom Show original | Field | Catatan |
@@ -755,16 +792,16 @@ Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 
 | Phase | Isi | Status |
 |---|---|---|
-| 0 | Spike DOM Gmail (list / thread / tanpa-nama / `via` / `view=om`) | **terblokir** — butuh snapshot DOM dari sesi Gmail yang login |
+| 0 | Spike DOM Gmail (list / thread / tanpa-nama / `via` / `view=om`) | sebagian — list, thread, dan `view=om` sudah tersimpan sebagai snapshot di `tools/corpus/dom-snapshots/`; tanpa-nama belum dapat diambil, dan penanda `via` masih belum pernah teramati |
 | 1 | Core parser + normalization (TR39 skeleton, punycode RFC 3492, penjaga kamus) | **selesai** |
 | 2 | PSL + taksonomi 6 kelas domain | **selesai** |
 | 3 | Name/token analyzer + identity-claim gate (§5) | **selesai** |
 | 4 | Similarity engine + aturan panjang token (§7) | **selesai** |
 | 5 | Evidence engine + decision table (deterministik, traceable) | **selesai** |
 | 6 | Classification + corpus harness CLI + confusion matrix | **selesai** |
-| 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, dan panel ekstensi ada; **selectornya sudah diverifikasi pada Gmail sungguhan** untuk list view, thread terbuka, dan halaman Show original (satu akun, satu varian antarmuka); list view belum ditangani |
+| 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, dan panel ekstensi ada; **selectornya sudah diverifikasi pada Gmail sungguhan** dan tiga di antaranya kini dikunci snapshot (list view, thread terbuka, Show original; satu akun, satu varian antarmuka); yang belum adalah **indikator di list view** itu sendiri, bukan selectornya |
 | 8 | Perluas corpus + tuning precision-first | sebagian — 404 kasus, gate lulus |
-| 9 | Tier B: parse halaman "Show original" | sebagian — rule dan adapter halaman lengkap dan teruji, **dan sudah diverifikasi pada halaman sungguhan** (blok header mentah di `pre.raw_message_text`, 23 header, termasuk `Reply-To`); yang belum adalah snapshot DOM sebagai canary |
+| 9 | Tier B: parse halaman "Show original" | sebagian — rule dan adapter halaman lengkap dan teruji, **dan sudah diverifikasi pada halaman sungguhan** (blok header mentah di `pre.raw_message_text`, 23 header, termasuk `Reply-To`); snapshot `show-original.html` sudah tersimpan, sehingga assertion Tier B berjalan pada markup nyata |
 | 10 | Performa, i18n, privacy policy, packaging & release | belum — lihat catatan i18n di §9 |
 
 Perbedaan dari urutan awal: corpus & decision table **sebelum** UI; header auth Tier B **setelah**
@@ -781,7 +818,7 @@ ada yang dapat mengatakan apakah panel ini benar-benar membaca Gmail hari ini.
 
 | Risiko | Mitigasi |
 |---|---|
-| Gmail mengubah DOM / class name | `probe()` + fallback selector + canary test; degrade ke no-op |
+| Gmail mengubah DOM / class name | `probe()` di halaman sungguhan + fallback selector + snapshot sebagai regression fixture; degrade ke no-op |
 | Precision `INCONSISTENT` jeblok di data nyata | Gate §5 + gate precision di CI |
 | Perubahan PSL membuat hasil lama tak konsisten | `pslVersion` di cache key, script build terpisah |
 | User over-trust pada state `CONSISTENT` | Disclaimer permanen di semua state |
@@ -793,6 +830,10 @@ ada yang dapat mengatakan apakah panel ini benar-benar membaca Gmail hari ini.
 
 Phase 1–6 **selesai**. `packages/core` berisi engine lengkap, 400 fixture berlabel, 156 test, dan
 laporan corpus otomatis. Belum ada adapter maupun UI.
+
+Angka-angka di bagian ini adalah keadaan **pada saat Phase 1–6 selesai**, dan tidak diperbarui
+setiap kali pekerjaan berjalan: ia catatan sejarah, bukan status. Jumlah yang berlaku sekarang ada
+di §11 — corpus **404 kasus** dan **398 test**.
 
 ### 15.1 Kasus nyata yang lolos, dan perbaikannya
 

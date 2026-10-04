@@ -48,6 +48,10 @@ importers:
       '@sender-check/core':
         specifier: workspace:*
         version: link:../core
+    devDependencies:
+      linkedom:
+        specifier: 0.18.13
+        version: 0.18.13
 
   packages/core: {}
 
