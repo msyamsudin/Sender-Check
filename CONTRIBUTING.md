@@ -134,7 +134,9 @@ Dua hal saja, dan keduanya sudah dikerjakan sambil menulis perubahannya:
 - **Badan pull request** menjadi isi catatan rilis. Di situlah kalimat yang tidak dapat dihasilkan
   mesin ditulis — klaim yang dicabut, angka yang dikoreksi, alasan sebuah keputusan berubah. Pada
   squash merge, badan itu ikut ke badan commit, sehingga tidak ada catatan kedua yang harus
-  diperbarui.
+  diperbarui. Badan yang panjang dipotong di catatan rilis, dan penunjuknya memakai nomor pull
+  request bila judulnya memuat `(#N)` — karena itu jangan menghapus akhiran itu saat squash merge
+  dari CLI; bila tidak ada, penunjuknya memakai SHA commit.
 
 ### Memeriksa dan menghentikan
 
