@@ -808,9 +808,44 @@ Perbedaan dari urutan awal: corpus & decision table **sebelum** UI; header auth 
 core terbukti presisi, karena tuning rule di atas sinyal yang cakupannya sebagian kecil email
 menghasilkan threshold yang salah.
 
-Phase 7 sengaja dinyatakan **sebagian**, bukan selesai, walaupun kodenya sudah ada. Yang belum
-selesai bukan penulisan kodenya melainkan pembuktiannya: sampai ada snapshot DOM nyata, tidak
-ada yang dapat mengatakan apakah panel ini benar-benar membaca Gmail hari ini.
+Phase 7 sengaja dinyatakan **sebagian**, bukan selesai, walaupun kodenya sudah ada dan jalurnya
+sudah terbukti pada Gmail sungguhan. Yang belum bukan lagi pembuktian selector, melainkan
+**indikator di list view** — dan ia menunggu keputusan, bukan pengamatan: nama pengirim di daftar
+dipotong Gmail, sehingga indikator itu akan menilai nama yang berbeda dari yang dinilai panel saat
+thread dibuka (§12.1 butir 6).
+
+### 13.1 Yang perlu dikerjakan selanjutnya
+
+Daftar ini mengumpulkan pekerjaan yang selama ini tersebar sebagai catatan "belum" di §6.6, §9,
+§10, §12.1, §13, dan §15.5. Ia sengaja **tidak** mengulang alasannya: setiap baris menunjuk bagian
+yang menjelaskannya, supaya tidak ada dua salinan yang bisa menyimpang. Kolom "Menunggu" bukan
+prioritas melainkan **ketergantungan** — dua baris menunggu pengamatan yang belum ada, dan satu
+menunggu keputusan yang harus diambil sebelum indikator list view ditulis.
+
+| Pekerjaan | Sifat | Menunggu | Rujukan |
+|---|---|---|---|
+| Putuskan bagaimana nama yang dipotong Gmail diperlakukan di list view | keputusan | — | §12.1 butir 6 |
+| Verifikasi penanda "via" pada halaman yang benar-benar menampilkannya | pengamatan | sesi Gmail yang menampilkan `via <domain>` | §12.1 butir 4 |
+| Ambil `thread-no-name.html` bila pengirim tanpa nama ditemukan | pengamatan | halaman yang memuatnya; bentuk yang benar: teks elemen = alamat | [`dom-snapshots/README.md`](../tools/corpus/dom-snapshots/README.md) |
+| Indikator list view, hanya `INCONSISTENT` + `strong` | kode | keputusan pemotongan nama | §9, D2 |
+| Cache `chrome.storage.session`, LRU ~500, beserta permission `storage` | kode | indikator list view | §10 |
+| `IntersectionObserver` untuk baris yang terlihat | kode | indikator list view | §10 |
+| Popup: analisis pesan aktif + tombol header lengkap | kode | — | §9, D2 |
+| Tombol "Copy report" pada panel | kode | — | §9 |
+| Tampilkan `notes` adapter di mode diagnostik | kode | — | §9 |
+| `pslUpdatedAt` di footer, bersama `pslVersion` | kode | — | §6.6 |
+| i18n EN — hanya `packages/presentation` yang berubah | kode | ada pengguna berbahasa Inggris | §9 |
+| Halaman privasi | dokumen | — | §9, §14 |
+| Packaging dan publikasi ke AMO | rilis | halaman privasi | §13 Phase 10 |
+| Perluas `adversarial.json` lebih dulu, bukan `suspicious.json` | kualitas | — | §15.5 butir 1 |
+| Daftar brand kurasi dengan lisensi yang jelas | kualitas | lisensi yang jelas | §15.4, §15.5 butir 2 |
+| Naikkan recall setelah presisi bertahan 100% dua putaran | kualitas | dua putaran perubahan berturut-turut | §15.5 butir 3 |
+| Samakan §12 dengan `AdapterReport` yang sebenarnya: fungsi `probe()` dan medan `confidence` tidak ada di kode | dokumen | — | §12 |
+| Rekam ulang `show-original.html` dari `div[role="main"] pre` bila wadah spesifik ingin ikut teruji | fixture | — | §12 |
+
+Seluruh baris di atas berada di luar `packages/core`. Engine, corpus, dan decision table tidak
+memiliki pekerjaan yang tersisa selain cakupan recall, dan batasan yang diterima sadar sudah
+didaftarkan di §15.4 alih-alih disembunyikan di sini.
 
 ---
 
@@ -818,7 +853,7 @@ ada yang dapat mengatakan apakah panel ini benar-benar membaca Gmail hari ini.
 
 | Risiko | Mitigasi |
 |---|---|
-| Gmail mengubah DOM / class name | `probe()` di halaman sungguhan + fallback selector + snapshot sebagai regression fixture; degrade ke no-op |
+| Gmail mengubah DOM / class name | `sender-check.probe.js` di halaman sungguhan + fallback selector + snapshot sebagai regression fixture; degrade ke no-op |
 | Precision `INCONSISTENT` jeblok di data nyata | Gate §5 + gate precision di CI |
 | Perubahan PSL membuat hasil lama tak konsisten | `pslVersion` di cache key, script build terpisah |
 | User over-trust pada state `CONSISTENT` | Disclaimer permanen di semua state |
