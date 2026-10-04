@@ -46,7 +46,12 @@ const MOJIBAKE_MARKERS: ReadonlyArray<{ label: string; pattern: RegExp }> = [
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, '..', '..', '..');
 
-const TEXT_EXTENSIONS = new Set(['.ts', '.md', '.json', '.yaml', '.yml', '.mjs', '.txt']);
+/**
+ * `.html` ikut diperiksa karena snapshot DOM Gmail di `tools/corpus/dom-snapshots/`
+ * adalah berkas yang paling berisiko memuat data pribadi: ia salinan halaman sungguhan,
+ * dan satu-satunya yang menjaga isinya tetap tersamarkan adalah pemeriksaan di bawah.
+ */
+const TEXT_EXTENSIONS = new Set(['.ts', '.md', '.json', '.yaml', '.yml', '.mjs', '.txt', '.html']);
 const EXTENSIONLESS_TEXT_FILES = new Set(['.gitignore']);
 const SKIP_DIRECTORIES = new Set([
   'node_modules',

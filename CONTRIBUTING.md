@@ -204,6 +204,9 @@ membuktikan apa pun.
 
 ## Yang belum dikerjakan
 
-Bagian 13 pada `docs/DESIGN.md` memuat status setiap phase. Yang paling dibutuhkan
-sekarang adalah **snapshot DOM Gmail** (list view, thread, thread tanpa display name, dan
-halaman "Show original") untuk membangun adapter. Tanpa itu, Phase 7 terblokir.
+Bagian 13 pada `docs/DESIGN.md` memuat status setiap phase. Selector adapter sudah diverifikasi pada
+Gmail sungguhan, dan tiga dari empat snapshot DOM-nya sudah tersimpan di
+`tools/corpus/dom-snapshots/`. Yang belum dapat diambil adalah snapshot pengirim **tanpa display
+name** — alasannya, termasuk bentuk markup yang benar bila suatu saat ditemukan, ada di README
+direktori itu. Di luar itu, yang menunggu bukan lagi pengamatan melainkan pekerjaan kode: indikator
+list view beserta cache-nya, tombol "Copy report", i18n, halaman privasi, dan packaging.

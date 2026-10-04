@@ -15,10 +15,10 @@ sesuatu yang tidak ada.
 
 Ekstensi itu ada di `apps/extension`, dibangun dengan WXT, dan dapat dimuat ke
 `about:debugging`. Yang membuatnya belum dinyatakan selesai bukan lagi selector jalur
-utamanya, melainkan dua hal yang tidak dapat dikerjakan dari sini: **belum ada snapshot DOM
-yang disimpan** sebagai canary, sehingga perubahan Gmail hanya ketahuan kalau ada yang
-melaporkannya (cara mengambil snapshot ada di
-[`tools/corpus/dom-snapshots/`](../tools/corpus/dom-snapshots/README.md)), dan **penanda
+utamanya, melainkan dua hal: **satu snapshot DOM belum dapat diambil** — tiga lainnya sudah
+tersimpan sebagai regression fixture, sehingga perubahan adapter yang mematahkan pembacaan markup
+nyata gagal di CI (cara mengambilnya ada di
+[`tools/corpus/dom-snapshots/`](../tools/corpus/dom-snapshots/README.md)) — dan **penanda
 "via" masih belum pernah terbukti bekerja** — lihat catatan di `packages/adapters/src/gmail.ts`.
 
 ### Yang sudah terverifikasi pada Gmail sungguhan
@@ -390,7 +390,10 @@ Langkah berikutnya, berurutan menurut apa yang menghambat:
    dengan markup apa. Keluaran probe pada halaman yang menampilkannya adalah satu-satunya
    cara menjawabnya.
 2. **Snapshot DOM disimpan** di [`tools/corpus/dom-snapshots/`](../tools/corpus/dom-snapshots/README.md)
-   sebagai canary test, yang gagal di CI ketika Gmail mengubah strukturnya.
+   sebagai regression fixture. Test-nya sudah ada di `packages/adapters/tests/gmail-snapshots.test.ts`
+   dan assertion-nya masih di-skip sampai keempat berkasnya diambil. Yang memberi tahu bahwa Gmail
+   berubah tetap probe di halaman sungguhan; snapshot menjaga agar perubahan adapter tidak
+   diam-diam mematahkan pembacaan markup yang sudah terbukti.
 3. **Panel diverifikasi di thread sungguhan.** Bentuk panelnya sudah ada dan logikanya
    teruji tanpa browser, tetapi tiga hal hanya dapat diperiksa pada halaman asli: apakah
    panelnya terbaca, apakah ia muncul pada saat yang tepat, dan apakah deteksi thread-nya

@@ -1,0 +1,23 @@
+<pre class="raw_message_text">Delivered-To: me@example.com
+Received: by 2002:a17:906:d82:b0:c25:8a44:5bfb with SMTP id m2csp00000000000; Sen, 1 Jan 2024 09:00:00 +0000 (UTC)
+X-Received: by 2002:a17:903:19cd:b0:2dd:c100:b2bf with SMTP id d9443c01a7336-0000000000000000000000000.0; Sen, 1 Jan 2024 09:00:00 +0000 (UTC)
+ARC-Seal: i=1; a=rsa-sha256; t=1704096000; cv=none; d=google.com; s=arc-20260327; b=snS6VZ4BI2wGO2+e13p0+/MgIn3ojjKb7dOn2eBfqts9EogzWzhwLqvQuaoJeeC6oK KFp0LMrybhN54FUogIY4g7QmMZCcXYlgbrGVDWUSdY+JkJVKszd2r4dKvJvbGZyiltFS pinCfUVhFgbpFC5QFtfIacnOXb+8ryhq2+ijzducZCLUfkuvcdgbSQH6McoIcGyv18ut kfe1gVv2V/Fnmfcci/3bS7y9N3yKnkG/V5HEo0lHppvmlw2y3SaIu1V7dcZ7WAYC75m9 ZBKLdlAh9b1Uox+AHt4bKBDX/dZy0Z3TDo89R/qPKjLnv/dlef52yyJPvA9a6/0fd0Y2 CXgg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327; h=feedback-id:date:message-id:content-transfer-encoding:mime-version :subject:to:reply-to:from:dkim-signature:dkim-signature; bh=F9BsfYxCjmmKD9VqqegOGntvm8gpcF0Y/LVyyQLySqY=; fh=9/Pk/t2sLSTd7fu5936Q2pk2k8uOzYMjoi9LXg/AYOY=; b=B5Xsj+3/QSJhAMt+lWJmBqhjDoPNK/WzddccSp7NWvTiSEmdf99XmoXBGu/Lssxdhp Ua4NMAV/EN0UN2IhL2pGg8n9vFhEfSeghTzl3/ZQMyWS60hJ9oSMJoLiHis5xJjwf95V 54vjyxqKU9uKbQqYcM16shh7tIAzhEbyaI8l3g9N6GHzUKCakhYnhqw+wYDwAErhLhQu 3NkpOj/wUIw1HkMyY2nUNm/Paau1b41jYG3JVzZmJ7FHnJ/Og2QUzNiFc7rdxgncCtYY T/p8a6bO3cyOElavgBfgMGamNQlSWnhUcimfQ5fJs4q74eCclzb6v1NJoP9kX6BEd2OH gSuw==; dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com; dkim=pass header.i=@contohnewsletter.example header.s=xhj3rows7hs2psfuxf274erhrv423jrs header.b=XaZJxuVP; dkim=pass header.i=@amazonses.com header.s=hsbnp7p3ensaochzwyq5wwmceodymuwv header.b=ze+PSdRN; spf=pass (google.com: domain of 010101a0c3cef72f-00000000-0000-0000-0000-000000000000-000000@us-west-2.amazonses.com designates 54.240.27.69 as permitted sender) smtp.mailfrom=010101a0c3cef72f-00000000-0000-0000-0000-000000000000-000000@us-west-2.amazonses.com; dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=contohnewsletter.example
+Return-Path: &lt;010101a0c3cef72f-00000000-0000-0000-0000-000000000000-000000@us-west-2.amazonses.com&gt;
+Received: from a27-69.smtp-out.us-west-2.amazonses.com (a27-69.smtp-out.us-west-2.amazonses.com. [54.240.27.69]) by mx.google.com with ESMTPS id d9443c01a7336-0000000000000000000000000.0 for &lt;me@example.com&gt; (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128); Sen, 1 Jan 2024 09:00:00 +0000 (UTC)
+Received-SPF: pass (google.com: domain of 010101a0c3cef72f-00000000-0000-0000-0000-000000000000-000000@us-west-2.amazonses.com designates 54.240.27.69 as permitted sender) client-ip=54.240.27.69;
+Authentication-Results: mx.google.com; dkim=pass header.i=@contohnewsletter.example header.s=xhj3rows7hs2psfuxf274erhrv423jrs header.b=XaZJxuVP; dkim=pass header.i=@amazonses.com header.s=hsbnp7p3ensaochzwyq5wwmceodymuwv header.b=ze+PSdRN; spf=pass (google.com: domain of 010101a0c3cef72f-00000000-0000-0000-0000-000000000000-000000@us-west-2.amazonses.com designates 54.240.27.69 as permitted sender) smtp.mailfrom=010101a0c3cef72f-00000000-0000-0000-0000-000000000000-000000@us-west-2.amazonses.com; dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=contohnewsletter.example
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple; s=xhj3rows7hs2psfuxf274erhrv423jrs; d=contohnewsletter.example; t=1704096000; h=From:Reply-To:To:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:Message-ID:Date; bh=F9BsfYxCjmmKD9VqqegOGntvm8gpcF0Y/LVyyQLySqY=; b=XaZJxuVPxPeLIjTjlU6xvqpuFnHnYpYn3bUR3A4voxxicjZ93ymDDQh9ESi10up0 5YJtvinCu1Pxjo/ZZ1jPmSDZGNZUxc3N3Iv4MVp22B9p6FAGXZ/B+hDwh6HN9t6D2qr QEBE+zOrJSeywcEqZ/qwkyadnzLbh3tVRtsZZObs=
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple; s=hsbnp7p3ensaochzwyq5wwmceodymuwv; d=amazonses.com; t=1704096000; h=From:Reply-To:To:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:Message-ID:Date:Feedback-ID; bh=F9BsfYxCjmmKD9VqqegOGntvm8gpcF0Y/LVyyQLySqY=; b=ze+PSdRNJD5hWw8KeZTh4US6q5vLoP2z2x45pEgWOK5U9dC70QKBcCDMHvEoP9nk IYYbfg3sNicjTKUYbTKCu/G5jXVxhK0coOOWSXqRuFsW4Enm9ocExwByCoVjv9Teyad QBkijdhM9u0djDUWuX/QxjnPggjgJGwsVw2RXOzE=
+From: Contoh News &lt;daily@contohnewsletter.example&gt;
+Reply-To: feedback@contoh.example
+To: me@example.com
+Subject: Laporan Contoh
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Message-ID: &lt;010101a0c3cef72f-00000000-0000-0000-0000-000000000000-000000@us-west-2.amazonses.com&gt;
+Date: Sen, 1 Jan 2024 09:00:00 +0000
+Feedback-ID: ::1.us-west-2.0000000000000000000000000000000000000000=:AmazonSES
+X-SES-Outgoing: 2024.01.01-54.240.27.69</pre>
