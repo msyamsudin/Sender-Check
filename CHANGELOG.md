@@ -18,6 +18,7 @@ table berubah.
 
 | Versi | Tanggal | `ALGORITHM_VERSION` | Ringkasan | Catatan rilis |
 |---|---|---|---|---|
+| 0.5.0 | 2026-10-04 | 0.2.2 | Mode diagnostik yang menampilkan nilai mentah engine | pesan tag `v0.5.0` |
 | 0.4.2 | 2026-10-04 | 0.2.1 (tidak berubah) | Tunjuk commit bila judul tidak memuat nomor pull request | pesan tag `v0.4.2` |
 | 0.4.1 | 2026-10-04 | 0.2.1 (tidak berubah) | Perbaiki pembacaan tag pada rilis otomatis, dan batalkan rilis 0.5.0; Catatan rilis tanpa tag rujukan, penjaga tag, dan… | pesan tag `v0.4.1` |
 | 0.4.0 | 2026-10-04 | 0.2.1 | Panel hanya menilai pengirim dalam percakapan, dan rilis berjalan otomatis; Cabut klaim siap tempel pada pnpm rules dan… | pesan tag `v0.4.0` |
