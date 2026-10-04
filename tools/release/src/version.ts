@@ -144,6 +144,35 @@ export function isNewer(next: string, current: string): boolean {
   return a.patch > b.patch;
 }
 
+/**
+ * `true` bila perubahan berkas-berkas ini dapat mengubah keputusan analisis.
+ *
+ * Seluruh `packages/core/src` dihitung, **kecuali `version.ts`**: berkas itu hanya
+ * mendeklarasikan versi, dan mengubahnya tidak mengubah satu pun keputusan. Tanpa pengecualian
+ * itu, rilis yang justru sedang mengoreksi versi algoritma akan menaikkan versi algoritma lagi —
+ * dan rilis yang hanya menyentuh berkas versi akan membuang cache verdikt pengguna tanpa sebab.
+ */
+export function isEngineChange(paths: readonly string[]): boolean {
+  return paths.some(
+    (path) => path.startsWith('packages/core/src/') && path !== 'packages/core/src/version.ts',
+  );
+}
+
+/**
+ * `true` bila indeks `CHANGELOG.md` sudah memuat baris hasil rilis otomatis.
+ *
+ * Baris itu dikenali dari kolom terakhirnya, ``pesan tag `vX.Y.Z` ``; baris 0.1.0–0.3.0 yang
+ * ditulis tangan menunjuk berkas arsip, bukan tag. Dipakai sebagai penjaga: bila tidak ada tag
+ * yang terbaca padahal indeks sudah memuat baris seperti itu, yang rusak adalah checkout-nya —
+ * tag tidak ikut diambil — bukan repositori yang belum pernah dirilis.
+ *
+ * Penjaga ini ada karena kegagalannya nyata: rilis kedua menghitung ulang seluruh riwayat dan
+ * keluar sebagai `0.5.0` semata karena `actions/checkout` tidak mengambil tag secara default.
+ */
+export function hasTaggedReleaseRow(changelog: string): boolean {
+  return /^\|[^\n]*pesan tag `v\d+\.\d+\.\d+`[^\n]*\|$/m.test(changelog);
+}
+
 /** Judul commit tanpa awalan tipe dan tanpa nomor pull request, untuk ringkasan satu baris. */
 export function plainSubject(subject: string): string {
   const stripped = subject

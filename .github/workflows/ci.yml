@@ -163,6 +163,12 @@ jobs:
           # Butuh seluruh riwayat dan tag: versi dihitung dari commit sejak tag terakhir, dan
           # catatan rilis dibentuk dari badan commit hasil squash merge.
           fetch-depth: 0
+          # `fetch-depth: 0` mengambil riwayat penuh **tanpa** tag; tag hanya ikut bila input ini
+          # dinyalakan. Tanpa itu, rilis kedua melihat repositori seolah belum pernah dirilis —
+          # seluruh riwayat dihitung ulang, satu perbaikan keluar sebagai `0.5.0`, dan versi
+          # algoritma naik tanpa sebab. `prepare.ts` kini menolak keadaan itu, tetapi menolak
+          # bukan memperbaiki: tag-nya tetap harus diambil.
+          fetch-tags: true
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6

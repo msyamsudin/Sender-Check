@@ -23,7 +23,6 @@
  * diambil dari `summaryLines()` di harness corpus, yaitu fungsi yang sama yang dikutip
  * `docs/USAGE.md` dan dijaga test dokumentasi. Salinan kedua dari angka itu akan menyimpang.
  */
-import { execFileSync } from 'node:child_process';
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
@@ -34,10 +33,13 @@ import {
   summaryLines,
   type Metrics,
 } from '../../corpus/src/harness.ts';
+import { changedFiles, commitsSince, lastTag, tagExists } from './git.ts';
 import {
   bump,
   bumpKind,
+  hasTaggedReleaseRow,
   indexRow,
+  isEngineChange,
   isNewer,
   isReleaseCommit,
   parseVersion,
@@ -56,79 +58,14 @@ const PACKAGE_JSON = join(REPO, 'package.json');
 const VERSION_TS = join(REPO, 'packages', 'core', 'src', 'version.ts');
 const CHANGELOG = join(REPO, 'CHANGELOG.md');
 
-function git(args: readonly string[]): string {
-  return execFileSync('git', args as string[], {
-    cwd: REPO,
-    encoding: 'utf8',
-    maxBuffer: 64 * 1024 * 1024,
-  });
-}
-
-function gitOrNull(args: readonly string[]): string | null {
-  try {
-    const output = execFileSync('git', args as string[], {
-      cwd: REPO,
-      encoding: 'utf8',
-      maxBuffer: 64 * 1024 * 1024,
-      // Keluaran galat dibuang, bukan diteruskan: pertanyaan "apakah tag ini ada" memang
-      // dijawab dengan gagal, dan `git describe` menulis "No names found" ke stderr pada
-      // repositori yang belum punya tag. Pesan itu bukan masalah, dan di log CI ia terbaca
-      // seperti kegagalan.
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-    return output.length === 0 ? null : output;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Tag rilis terakhir yang dapat dijangkau dari HEAD, atau `null` bila belum ada.
- *
- * Memakai daftar tag yang sudah diurutkan, bukan `git describe`: `describe` gagal pada
- * repositori tanpa tag, dan kegagalan itu harus ditangkap sebagai keadaan yang sah — bukan
- * sebagai galat yang tercetak di log.
- */
-function lastTag(): string | null {
-  const list = gitOrNull([
-    'tag',
-    '--list',
-    '--merged',
-    'HEAD',
-    '--sort=-v:refname',
-    '--match',
-    'v[0-9]*',
-  ]);
-  if (list === null) return null;
-  return list.split('\n')[0]?.trim() ?? null;
-}
-
 /**
  * Commit pada rentang, tanpa commit rilis otomatisasi.
  *
- * Badan commit ikut diambil karena ia memuat badan pull request pada squash merge — di situlah
- * kalimat yang tidak dapat dihasilkan mesin berada.
+ * Penyaringan ada di sini, bukan di `git.ts`: berkas itu hanya membaca git, sedangkan "commit
+ * mana yang dihitung sebagai perubahan" adalah keputusan rilis.
  */
-function commitsSince(range: string): Commit[] {
-  const raw = git(['log', `--format=%s%x1f%b%x1e`, range]);
-  const commits: Commit[] = [];
-
-  for (const record of raw.split('\x1e')) {
-    const trimmed = record.replace(/^\n/, '');
-    if (trimmed.trim().length === 0) continue;
-
-    const [subject = '', body = ''] = trimmed.split('\x1f');
-    if (isReleaseCommit(subject)) continue;
-    commits.push({ subject, body });
-  }
-
-  return commits;
-}
-
-function changedFiles(range: string): string[] | null {
-  const output = gitOrNull(['diff', '--name-only', range]);
-  if (output === null) return null;
-  return output.split('\n').map((line) => line.trim()).filter((line) => line.length > 0);
+function releaseCommits(range: string): Commit[] {
+  return commitsSince(REPO, range).filter((commit) => !isReleaseCommit(commit.subject));
 }
 
 function readAlgorithmVersion(): string {
@@ -195,9 +132,31 @@ function writeOutput(key: string, value: string): void {
 
 function main(): void {
   const today = new Date().toISOString().slice(0, 10);
-  const baseline = lastTag();
+  const changelog = readFileSync(CHANGELOG, 'utf8');
+  const baseline = lastTag(REPO);
+
+  /**
+   * Penjaga terhadap checkout yang kehilangan tag.
+   *
+   * `actions/checkout` mengambil riwayat penuh dengan `fetch-depth: 0`, tetapi **tag tidak ikut**
+   * kecuali `fetch-tags: true`. Tanpa penjaga ini, kegagalannya sunyi dan hasilnya salah dengan
+   * cara yang mahal: seluruh riwayat dihitung ulang sebagai "belum pernah dirilis", versi paket
+   * melompat, dan versi algoritma naik tanpa sebab. Itu terjadi pada rilis kedua — satu perbaikan
+   * keluar sebagai `0.5.0`.
+   *
+   * Indeks `CHANGELOG.md` dipakai sebagai saksi, bukan tebakan: barisnya hanya bertuliskan
+   * "pesan tag" setelah ada rilis otomatis sebelumnya.
+   */
+  if (baseline === null && hasTaggedReleaseRow(changelog)) {
+    throw new Error(
+      'tidak ada tag yang terbaca, padahal CHANGELOG.md sudah memuat rilis bertag: ' +
+        'checkout ini kehilangan tag, bukan repositori yang belum pernah dirilis. ' +
+        'Periksa `fetch-tags: true` pada job rilis.',
+    );
+  }
+
   const range = baseline === null ? 'HEAD' : `${baseline}..HEAD`;
-  const commits = commitsSince(range);
+  const commits = releaseCommits(range);
 
   console.log(`rentang commit   : ${range}`);
   console.log(`commit dinilai   : ${commits.length}`);
@@ -221,17 +180,22 @@ function main(): void {
 
   // Penjaga idempotensi: menjalankan ulang rilis untuk versi yang sudah ditandai tidak boleh
   // membuat tag kedua dengan nama yang sama — itu gagal, tetapi gagalnya berisik dan membingungkan.
-  if (gitOrNull(['tag', '--list', `v${packageVersion}`]) !== null) {
+  if (tagExists(REPO, `v${packageVersion}`)) {
     console.log(`tag v${packageVersion} sudah ada; tidak ada yang dirilis`);
     writeOutput('skip', 'true');
     return;
   }
 
-  const files = changedFiles(range);
-  // Tanpa tag rujukan, rentangnya adalah seluruh riwayat, sehingga "berubah" tidak lagi berarti
-  // "berubah sejak rilis terakhir". Yang benar adalah menebak ke sisi yang murah: naikkan.
-  const coreChanged =
-    files === null || files.some((path) => path.startsWith('packages/core/src/'));
+  /**
+   * Berkas yang berubah sejak rilis terakhir, atau `null` bila tidak ada rujukannya.
+   *
+   * Tanpa tag rujukan, rentangnya adalah seluruh riwayat, sehingga "berubah sejak rilis terakhir"
+   * tidak punya arti. `null` di sini berarti **tidak diketahui**, dan pemanggilnya menebak ke sisi
+   * yang murah: anggap engine berubah. Sebelumnya keadaan ini terbaca dari keluaran git yang
+   * kebetulan kosong — kebetulan yang benar hasilnya, tetapi bukan alasan yang dapat diperiksa.
+   */
+  const files = baseline === null ? null : changedFiles(REPO, range);
+  const coreChanged = files === null || isEngineChange(files);
   const dataChanged =
     files !== null && files.some((path) => path.startsWith('packages/core/src/data/'));
 

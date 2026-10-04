@@ -5,8 +5,10 @@ import {
   classify,
   conventionalType,
   formatVersion,
+  hasTaggedReleaseRow,
   indexRow,
   isBreaking,
+  isEngineChange,
   isNewer,
   isReleaseCommit,
   parseVersion,
@@ -247,5 +249,30 @@ describe('catatan rilis', () => {
     });
 
     expect(notes).toContain('ALGORITHM_VERSION: 0.2.0 (tidak berubah)');
+  });
+});
+
+describe('penjaga checkout dan berkas engine', () => {
+  it('hanya berkas engine yang dihitung, bukan berkas versi', () => {
+    expect(isEngineChange(['packages/core/src/evidence/rules.ts'])).toBe(true);
+    expect(isEngineChange(['packages/core/src/classification/decision-table.ts'])).toBe(true);
+
+    // `version.ts` hanya mendeklarasikan versi: mengubahnya tidak mengubah satu pun keputusan.
+    // Menghitungnya akan membuat rilis yang justru mengoreksi versi menaikkan versi itu lagi.
+    expect(isEngineChange(['packages/core/src/version.ts'])).toBe(false);
+    expect(isEngineChange(['packages/core/tests/analyze.test.ts', 'docs/USAGE.md'])).toBe(false);
+    expect(isEngineChange([])).toBe(false);
+  });
+
+  it('mengenali indeks yang sudah memuat rilis bertag', () => {
+    const tagged = '| 0.4.0 | 2026-10-04 | 0.2.1 | Ringkasan | pesan tag `v0.4.0` |';
+    const handWritten =
+      '| 0.3.0 | 2026-09-24 | 0.2.0 (tidak berubah) | Ringkasan | `docs/CHANGELOG-0.x.md` |';
+
+    expect(hasTaggedReleaseRow(tagged)).toBe(true);
+    // Baris 0.1.0–0.3.0 ditulis tangan dan menunjuk arsip, bukan tag; penjaga tidak boleh
+    // menganggapnya bukti bahwa checkout ini seharusnya melihat tag.
+    expect(hasTaggedReleaseRow(handWritten)).toBe(false);
+    expect(hasTaggedReleaseRow('# Changelog\n\n| Versi |\n|---|---|\n')).toBe(false);
   });
 });
