@@ -18,6 +18,7 @@ table berubah.
 
 | Versi | Tanggal | `ALGORITHM_VERSION` | Ringkasan | Catatan rilis |
 |---|---|---|---|---|
+| 0.4.1 | 2026-10-04 | 0.2.1 (tidak berubah) | Perbaiki pembacaan tag pada rilis otomatis, dan batalkan rilis 0.5.0; Catatan rilis tanpa tag rujukan, penjaga tag, dan… | pesan tag `v0.4.1` |
 | 0.4.0 | 2026-10-04 | 0.2.1 | Panel hanya menilai pengirim dalam percakapan, dan rilis berjalan otomatis; Cabut klaim siap tempel pada pnpm rules dan… | pesan tag `v0.4.0` |
 | 0.3.0 | 2026-09-24 | 0.2.0 (tidak berubah) | Adapter Gmail Tier A/B, skrip konsol Firefox, decoder RFC 2047 | `docs/CHANGELOG-0.x.md` |
 | 0.2.0 | 2026-09-24 | tidak dicatat | Gate G7 + rule Tier B pertama; ambang dan normalisasi diperbaiki | `docs/CHANGELOG-0.x.md` |
