@@ -57,19 +57,20 @@ export function lastTag(repo: string): string | null {
 /**
  * Commit pada rentang, **terbaru lebih dulu** — sama seperti keluaran `git log`.
  *
- * Badan commit ikut diambil karena ia memuat badan pull request pada squash merge. Penyaringan
- * commit rilis dilakukan pemanggil, bukan di sini: berkas ini hanya membaca git.
+ * Badan commit ikut diambil karena ia memuat badan pull request pada squash merge, dan SHA
+ * singkatnya dipakai sebagai penunjuk ketika badan itu dipotong. Penyaringan commit rilis
+ * dilakukan pemanggil, bukan di sini: berkas ini hanya membaca git.
  */
 export function commitsSince(repo: string, range: string): Commit[] {
-  const raw = git(repo, ['log', '--format=%s%x1f%b%x1e', range]);
+  const raw = git(repo, ['log', '--format=%h%x1f%s%x1f%b%x1e', range]);
   const commits: Commit[] = [];
 
   for (const record of raw.split('\x1e')) {
     const trimmed = record.replace(/^\n/, '');
     if (trimmed.trim().length === 0) continue;
 
-    const [subject = '', body = ''] = trimmed.split('\x1f');
-    commits.push({ subject, body });
+    const [sha = '', subject = '', body = ''] = trimmed.split('\x1f');
+    commits.push({ sha, subject, body });
   }
 
   return commits;

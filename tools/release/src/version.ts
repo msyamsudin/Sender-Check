@@ -16,10 +16,17 @@
  *    berubah. Yang kedua jauh lebih buruk, jadi biasnya ke arah yang pertama.
  */
 
-/** Satu commit, apa adanya dari `git log`: judul dan badan (badan memuat isi pull request). */
+/**
+ * Satu commit, apa adanya dari `git log`: judul dan badan (badan memuat isi pull request).
+ *
+ * `sha` ikut dibawa karena dipakai sebagai penunjuk ketika badan commit dipotong: judul hasil
+ * squash merge dari antarmuka web memuat nomor pull request, tetapi squash merge yang dijalankan
+ * dari CLI dengan `--subject` tidak — dan penunjuk yang tidak menunjuk ke mana pun tidak berguna.
+ */
 export interface Commit {
   readonly subject: string;
   readonly body: string;
+  readonly sha?: string;
 }
 
 export type Bump = 'major' | 'minor' | 'patch';
@@ -263,6 +270,20 @@ function pullRequestNumber(subject: string): string | null {
   return /\(#(\d+)\)\s*$/.exec(subject.trim())?.[1] ?? null;
 }
 
+/**
+ * Penunjuk ke tempat badan lengkapnya berada.
+ *
+ * Nomor pull request lebih baik karena di sanalah penjelasannya ditulis. Bila judulnya tidak
+ * memuatnya — squash merge lewat CLI dengan `--subject` menghapus akhiran itu — SHA commit dipakai:
+ * GitHub menautkan SHA di catatan rilis secara otomatis, sedangkan "…" tidak menunjuk apa pun.
+ */
+function bodyPointer(commit: Commit): string {
+  const number = pullRequestNumber(commit.subject);
+  if (number !== null) return `Selengkapnya: pull request #${number}`;
+  if (commit.sha !== undefined && commit.sha.length > 0) return `Selengkapnya: commit ${commit.sha}`;
+  return '…';
+}
+
 /** Badan commit untuk catatan rilis, dipotong pada batas yang wajar. */
 function bodyFor(commit: Commit): string[] {
   const lines = bodyLines(commit.body);
@@ -275,8 +296,7 @@ function bodyFor(commit: Commit): string[] {
   const kept = lines.slice(0, MAX_BODY_LINES);
   while (kept.join('\n').length > MAX_BODY_CHARS && kept.length > 1) kept.pop();
 
-  const number = pullRequestNumber(commit.subject);
-  kept.push('', number === null ? '  …' : `  Selengkapnya: pull request #${number}`);
+  kept.push('', `  ${bodyPointer(commit)}`);
   return kept;
 }
 

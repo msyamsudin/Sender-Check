@@ -211,6 +211,29 @@ describe('catatan rilis', () => {
     expect(long).toContain('Selengkapnya: pull request #7');
   });
 
+  it('menunjuk commit bila judulnya tidak memuat nomor pull request', () => {
+    // Squash merge lewat CLI dengan `--subject` menghapus akhiran `(#N)`. Tanpa cadangan ini,
+    // badan yang dipotong berakhir dengan "…" — penunjuk yang tidak menunjuk ke mana pun.
+    const long = renderNotes({
+      version: '0.4.0',
+      date: '2026-09-25',
+      algorithm: '0.2.0',
+      previousAlgorithm: '0.2.0',
+      corpus: 'Corpus: 1 kasus',
+      baseline: 'v0.3.0',
+      commits: [
+        {
+          subject: 'fix: tanpa nomor pull request',
+          body: Array.from({ length: 60 }, (_, i) => `baris ${i}`).join('\n'),
+          sha: '3398afa',
+        },
+      ],
+    });
+
+    expect(long).toContain('Selengkapnya: commit 3398afa');
+    expect(long).not.toContain('Selengkapnya: pull request');
+  });
+
   it('tanpa tag rujukan, hanya badan commit yang memicu rilis yang dibawa', () => {
     // Pernah terjadi pada `v0.4.0`: badan pull request lama ikut terbawa dan menyatakan
     // "ALGORITHM_VERSION tetap 0.2.0" tepat di bawah baris kepala yang menyebut `0.2.1`. Judulnya

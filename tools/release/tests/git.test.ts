@@ -86,6 +86,8 @@ describe('commitsSince', () => {
     expect(commits).toHaveLength(1);
     expect(commits[0]?.subject).toBe('fix: ketiga');
     expect(commits[0]?.body).toContain('Badan menjelaskan sesuatu.');
+    // SHA singkat ikut dibawa: ia dipakai sebagai penunjuk ketika badan commit dipotong.
+    expect(commits[0]?.sha).toMatch(/^[0-9a-f]{7,}$/);
   });
 });
 
