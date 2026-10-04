@@ -149,6 +149,10 @@ versi secara manual tetap mungkin, dan tetap diperiksa job `release-check`: tag 
 `v` + versi di `package.json`, dan pesan tag harus memuat baris `ALGORITHM_VERSION: <nilai>` yang
 cocok dengan `packages/core/src/version.ts`.
 
+Tag manual wajib **dianotasi** (`git tag -a`). Catatan rilis hidup di pesan tag, dan tag ringan
+tidak punya pesan sama sekali; `release-check` menolaknya sambil menyebut sebabnya, bukan melaporkan
+pesan yang "tidak memuat" sesuatu yang memang tidak ada.
+
 ### Satu prasyarat, sekali
 
 Job `release` meminta `permissions: contents: write` untuk mendorong commit dan tag. GitHub

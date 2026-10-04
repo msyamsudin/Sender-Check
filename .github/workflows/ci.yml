@@ -20,15 +20,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Versi pnpm diambil dari field `packageManager` di package.json, sehingga
       # CI dan mesin pengembang tidak dapat menyimpang.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -70,7 +70,7 @@ jobs:
 
       - name: Unggah laporan corpus
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: corpus-report
           path: tools/corpus/reports/corpus-report.md
@@ -87,15 +87,29 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # Pesan tag yang dianotasi hanya ada bila seluruh riwayat dan tag ikut diambil.
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
+
+      # `actions/checkout` meninggalkan ref tag sebagai **tag ringan** yang menunjuk commit pada
+      # peristiwa tag, sehingga `%(contents)`-nya berisi pesan commit, bukan pesan tag. Itu
+      # benar-benar terjadi pada `v0.4.0`: penjaga ini gagal walaupun pesan tagnya benar, dan
+      # kegagalannya menyesatkan. Objek tag dianotasi kini diambil ulang secara eksplisit, lalu
+      # jenisnya diperiksa — tag ringan memang tidak punya catatan rilis, dan itu kegagalan yang
+      # perlu disebut apa adanya, bukan disamarkan sebagai pesan yang salah.
+      - name: Ambil objek tag yang dianotasi
+        run: |
+          git fetch --force origin "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
+          if [ "$(git cat-file -t "$GITHUB_REF_NAME")" != "tag" ]; then
+            echo "::error::$GITHUB_REF_NAME bukan tag yang dianotasi, sehingga tidak punya catatan rilis"
+            exit 1
+          fi
 
       - name: Tag harus sama dengan v + version di package.json
         run: |
@@ -144,17 +158,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # Butuh seluruh riwayat dan tag: versi dihitung dari commit sejak tag terakhir, dan
           # catatan rilis dibentuk dari badan commit hasil squash merge.
           fetch-depth: 0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm

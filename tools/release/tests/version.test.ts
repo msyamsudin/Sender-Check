@@ -209,6 +209,32 @@ describe('catatan rilis', () => {
     expect(long).toContain('Selengkapnya: pull request #7');
   });
 
+  it('tanpa tag rujukan, hanya badan commit yang memicu rilis yang dibawa', () => {
+    // Pernah terjadi pada `v0.4.0`: badan pull request lama ikut terbawa dan menyatakan
+    // "ALGORITHM_VERSION tetap 0.2.0" tepat di bawah baris kepala yang menyebut `0.2.1`. Judulnya
+    // tetap benar, penjelasannya tidak lagi — jadi yang dibuang hanya penjelasannya.
+    //
+    // Urutan di bawah sengaja mengikuti `git log`: yang memicu rilis lebih dulu. Test versi pertama
+    // menuliskan urutannya terbalik, sehingga lolos bersama bug yang mengambil commit paling tua.
+    const notes = renderNotes({
+      version: '0.4.0',
+      date: '2026-09-25',
+      algorithm: '0.2.1',
+      previousAlgorithm: '0.2.0',
+      corpus: 'Corpus: 1 kasus',
+      baseline: null,
+      commits: [
+        feat('feat: perubahan yang memicu rilis (#2)', 'Penjelasan untuk rilis ini.'),
+        feat('feat: pekerjaan lama (#1)', 'ALGORITHM_VERSION tetap 0.2.0: tidak ada rule.'),
+      ],
+    });
+
+    expect(notes).toContain('- feat: pekerjaan lama (#1)');
+    expect(notes).toContain('Penjelasan untuk rilis ini.');
+    expect(notes).not.toContain('ALGORITHM_VERSION tetap 0.2.0');
+    expect(notes).toContain('hanya dibawa untuk commit yang memicu rilis ini');
+  });
+
   it('menyatakan versi algoritma yang tidak berubah sebagai tidak berubah', () => {
     const notes = renderNotes({
       version: '0.4.0',
