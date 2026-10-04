@@ -17,6 +17,7 @@ import {
   type LocationLike,
 } from '@sender-check/adapters';
 import { toFinding, type SenderFinding } from '@sender-check/presentation';
+import type { PanelSource } from './panel-model.ts';
 import { classifyPage, type PageKind } from './view.ts';
 
 export interface PageAnalysis {
@@ -42,6 +43,47 @@ export interface PageAnalysis {
   readonly selectorUsed: string | null;
   /** Catatan diagnostik adapter, ditampilkan hanya di mode diagnostik. */
   readonly notes: readonly string[];
+  /**
+   * Verdikt mentah per temuan, untuk mode diagnostik.
+   *
+   * `SenderFinding` sengaja hanya memuat apa yang ditampilkan panel biasa — state,
+   * confidence, dan kalimat buktinya — sehingga `gate`, seluruh baris `trace`,
+   * `algorithmVersion`, dan `pslVersion` tidak dapat disusun ulang dari sana. Peta ini yang
+   * membawanya, dan hanya pemanggil yang benar-benar membuka mode diagnostik yang membacanya.
+   */
+  readonly diagnosticSource: DiagnosticSources;
+}
+
+/**
+ * Verdikt mentah setiap temuan, beserta metadata pembacaan halaman.
+ *
+ * Kuncinya adalah objek `SenderFinding` itu sendiri: temuan dan verdiktnya lahir dari satu
+ * pemanggilan `analyze`, dan menyimpannya sebagai dua daftar paralel akan membuka peluang
+ * keduanya tidak sinkron — peluang yang justru ingin ditutup oleh mode diagnostik.
+ */
+export type DiagnosticSources = ReadonlyMap<SenderFinding, PanelSource>;
+
+/**
+ * Peta kosong, dipakai bersama oleh setiap jalur yang tidak menghasilkan temuan.
+ *
+ * Satu konstanta, bukan `new Map()` di tiap tempat: peta kosong tidak pernah berubah, dan
+ * membuat yang baru untuk setiap pemindaian hanya menambah alokasi pada jalur yang paling
+ * sering berjalan — setiap mutasi DOM yang tidak menghasilkan temuan.
+ */
+const EMPTY_DIAGNOSTIC: DiagnosticSources = new Map();
+
+/**
+ * Verdikt mentah satu temuan, atau `null` bila tidak ada.
+ *
+ * Panel memanggil ini hanya ketika mode diagnostik aktif, sehingga biaya memetakannya tidak
+ * pernah dibayar oleh pemakaian biasa.
+ */
+export function diagnosticSourceFor(
+  analysis: PageAnalysis,
+  finding: SenderFinding | null,
+): PanelSource | null {
+  if (finding === null) return null;
+  return analysis.diagnosticSource.get(finding) ?? null;
 }
 
 /**
@@ -75,6 +117,7 @@ function fromInbox(doc: DocumentLike): Omit<PageAnalysis, 'kind'> {
   // yang sama ikut menjadi calon pengirim — dan karena `pickPrimary` memilih temuan
   // terberat, panel dapat menampilkan orang yang sama untuk setiap email yang dibuka.
   const report = scanGmailInbox(doc, { scope: 'conversation' });
+  const diagnosticSource = new Map<SenderFinding, PanelSource>();
 
   const findings = report.senders.map((sender) => {
     // `viaHint` diteruskan apa adanya, dan `gmailOwnWarning` berada di tingkat halaman
@@ -86,7 +129,20 @@ function fromInbox(doc: DocumentLike): Omit<PageAnalysis, 'kind'> {
       gmailOwnWarning: report.gmailOwnWarning,
     };
 
-    return toFinding(identity, analyze(identity));
+    const verdict = analyze(identity);
+    const finding = toFinding(identity, verdict);
+
+    diagnosticSource.set(finding, {
+      verdict,
+      // `sourceSelector` adalah selector yang menghasilkan calon ini, dan ia lebih tepat
+      // daripada `selectorUsed` untuk satu temuan tertentu pada halaman dengan beberapa
+      // pengirim. Keduanya dicatat: `selectorUsed` menjawab "selector mana yang dipakai
+      // halaman ini", `sourceSelector` menjawab "selector mana yang menghasilkan temuan ini".
+      selectorUsed: sender.sourceSelector,
+      notes: report.notes,
+    });
+
+    return finding;
   });
 
   const primary = pickPrimary(findings);
@@ -97,6 +153,7 @@ function fromInbox(doc: DocumentLike): Omit<PageAnalysis, 'kind'> {
     primary,
     selectorUsed: report.selectorUsed,
     notes: report.notes,
+    diagnosticSource,
   };
 }
 
@@ -105,7 +162,7 @@ function fromShowOriginal(doc: DocumentLike): Omit<PageAnalysis, 'kind'> {
   const report = scanGmailShowOriginal(doc);
   const identity = report.identity;
 
-  const base = { selectorUsed: null, notes: report.notes };
+  const base = { selectorUsed: null, notes: report.notes, diagnosticSource: EMPTY_DIAGNOSTIC };
 
   // Tanpa alamat From yang dapat diurai, tidak ada dasar untuk menilai. Engine pun akan
   // menolak, tetapi menghentikannya di sini membuat alasannya jelas dan tidak menghasilkan
@@ -130,9 +187,16 @@ function fromShowOriginal(doc: DocumentLike): Omit<PageAnalysis, 'kind'> {
       : {}),
   };
 
-  const finding = toFinding(emailIdentity, analyze(emailIdentity));
+  const verdict = analyze(emailIdentity);
+  const finding = toFinding(emailIdentity, verdict);
 
-  return { ...base, matched: true, findings: [finding], primary: finding };
+  // Halaman ini tidak punya selector: headernya dibaca dari satu blok teks, bukan dari
+  // elemen per pengirim. `selectorUsed` karena itu `null`, dan itu memang jawabannya.
+  const diagnosticSource = new Map<SenderFinding, PanelSource>([
+    [finding, { verdict, selectorUsed: null, notes: report.notes }],
+  ]);
+
+  return { ...base, matched: true, findings: [finding], primary: finding, diagnosticSource };
 }
 
 /**
@@ -158,5 +222,6 @@ export function analyzePage(doc: DocumentLike, page: LocationLike): PageAnalysis
     primary: null,
     selectorUsed: null,
     notes: [],
+    diagnosticSource: EMPTY_DIAGNOSTIC,
   };
 }

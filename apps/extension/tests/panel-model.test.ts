@@ -6,7 +6,13 @@ import {
   NO_NAME_LABEL,
   toFinding,
 } from '@sender-check/presentation';
-import { buildPanelModel, UNASSESSABLE_BASIS, UNASSESSABLE_GUIDANCE } from '../src/lib/panel-model.ts';
+import {
+  buildPanelModel,
+  unassessableBasis,
+  UNASSESSABLE_BASIS,
+  UNASSESSABLE_GUIDANCE,
+  UNASSESSABLE_GUIDANCE_ON_HEADER,
+} from '../src/lib/panel-model.ts';
 
 const findingFor = (identity: Parameters<typeof analyze>[0]) => toFinding(identity, analyze(identity));
 
@@ -38,8 +44,23 @@ describe('isi panel', () => {
     const model = buildPanelModel(TIER_A);
     const labels = model.fields.map((field) => field.label);
 
-    expect(labels).toEqual(['Nama', 'Alamat']);
+    expect(labels).toEqual(['Nama', 'Alamat', 'Sumber']);
     expect(model.fields[1]?.value).toBe('bcaindonesia@gmail.com');
+  });
+
+  it('menyebut dari halaman mana identitasnya dibaca', () => {
+    // Beda antara "tidak ada" dan "tidak terbaca" adalah beda antara temuan dan batas alat,
+    // dan pertanyaan pertama yang muncul pada panel Tier A adalah "kenapa Balas ke tidak ada?".
+    // Medan ini yang menjawabnya tanpa membuka mode diagnostik.
+    const tierA = buildPanelModel(TIER_A);
+    const tierB = buildPanelModel(TIER_B);
+
+    expect(tierA.fields.find((field) => field.label === 'Sumber')?.value).toBe(
+      'tampilan thread (Tier A)',
+    );
+    expect(tierB.fields.find((field) => field.label === 'Sumber')?.value).toBe(
+      'halaman header (Tier A + B)',
+    );
   });
 
   it('menampilkan Reply-To hanya ketika ada', () => {
@@ -162,12 +183,36 @@ describe('bagian yang preventif pada state belum dapat dinilai', () => {
   it('menyebut alasan dan langkah aman hanya pada state yang belum dapat dinilai', () => {
     const model = buildPanelModel(UNASSESSABLE);
 
-    expect(model.basis).toBe(UNASSESSABLE_BASIS);
+    expect(model.basis).toBe(unassessableBasis(UNASSESSABLE));
     expect(model.guidance).toBe(UNASSESSABLE_GUIDANCE);
 
     expect(buildPanelModel(TIER_A).basis).toBeNull();
     expect(buildPanelModel(TIER_A).guidance).toBeNull();
     expect(buildPanelModel(TIER_B).guidance).toBeNull();
+  });
+
+  it('menyebut alasan gate yang sebenarnya, bukan satu kalimat untuk semuanya', () => {
+    // Kelima alasan gate sebelumnya tampil identik, dengan alasan bahwa kelimanya berarti hal
+    // yang sama bagi pembaca. Itu tidak berlaku untuk dua di antaranya: pada nama yang tidak
+    // dirender dan pada domain milis, kalimat "nama tidak memuat klaim" justru menyatakan hal
+    // yang tidak benar tentang emailnya.
+    const personal = buildPanelModel(UNASSESSABLE).basis ?? '';
+
+    expect(personal).toContain('nama orang');
+    expect(personal).toContain('personal_name_on_personal_domain');
+
+    const noName = buildPanelModel(findingFor({ displayName: null, fromAddress: 'a@b.com' })).basis ?? '';
+    expect(noName).toContain('tidak merender nama');
+    expect(noName).toContain('no_display_name');
+
+    const mailingList = buildPanelModel(
+      findingFor({ displayName: 'Budi Santoso', fromAddress: 'budi@lists.example.org' }),
+    );
+    expect(mailingList.basis ?? '').toContain('milis');
+    expect(mailingList.basis ?? '').toContain('mailing_list_domain');
+
+    // Kalimat umumnya tetap ada sebagai jaring pengaman bila engine menambah alasan baru.
+    expect(UNASSESSABLE_BASIS).toContain('belum dapat dipastikan');
   });
 
   it('mengarahkan ke halaman header, dan tidak menjanjikan apa pun yang tidak dapat dilakukan', () => {
@@ -177,5 +222,19 @@ describe('bagian yang preventif pada state belum dapat dinilai', () => {
     expect(UNASSESSABLE_GUIDANCE).toContain('panel menilai ulang');
     // Tanpa kata-kata yang menyiratkan "aman": yang benar adalah belum diperiksa.
     expect(UNASSESSABLE_BASIS).toContain('belum dapat dipastikan');
+  });
+
+  it('tidak menyuruh membuka halaman header ketika panel sudah di halaman itu', () => {
+    // "Periksa header aslinya" tidak masuk akal bagi pengguna yang sedang melihat halaman itu,
+    // dan menyarankannya membuat panel terbaca tidak tahu di mana ia berada.
+    const onHeader = findingFor({
+      displayName: 'Budi Santoso',
+      fromAddress: 'x7k2@randomisp.co.id',
+      replyTo: 'budi@randomisp.co.id',
+    });
+
+    expect(onHeader.identity.provenance ?? 'dom-original').toBe('dom-original');
+    expect(buildPanelModel(onHeader).guidance).toBe(UNASSESSABLE_GUIDANCE_ON_HEADER);
+    expect(UNASSESSABLE_GUIDANCE_ON_HEADER).not.toContain('Tampilkan aslinya');
   });
 });

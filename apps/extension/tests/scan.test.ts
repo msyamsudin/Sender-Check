@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { FakeDocument, fakeDocument, type ElementInit } from '../../../packages/adapters/tests/fake-dom.ts';
-import { analyzePage, pickPrimary } from '../src/lib/scan.ts';
+import { analyzePage, diagnosticSourceFor, pickPrimary } from '../src/lib/scan.ts';
 
 /**
  * Pengujian dari halaman ke temuan.
@@ -253,8 +253,49 @@ describe('halaman yang sengaja tidak ditangani', () => {
   });
 });
 
-describe('pemilihan temuan utama', () => {
-  const finding = (state: 'CONSISTENT' | 'UNCLEAR' | 'INCONSISTENT' | 'UNASSESSABLE') =>
+/**
+ * Verdikt mentah untuk mode diagnostik.
+ *
+ * `SenderFinding` sengaja hanya memuat yang ditampilkan panel biasa, sehingga `gate`, seluruh
+ * baris `trace`, `algorithmVersion`, dan `pslVersion` tidak dapat disusun ulang dari sana.
+ * Peta inilah jalurnya, dan test ini memastikan jalur itu benar-benar terisi — bukan hanya
+ * bahwa tipenya ada.
+ */
+describe('sumber diagnostik', () => {
+  it('membawa verdikt mentah dan selector per temuan', () => {
+    const doc = fakeDocument(conversationMessage('#msg-f:9', 'Bank BCA', 'bcaindonesia@gmail.com'));
+    const analysis = analyzePage(doc, at(`${U}#inbox/${THREAD_ID}`));
+    const source = diagnosticSourceFor(analysis, analysis.primary);
+
+    expect(source).not.toBeNull();
+    expect(source?.verdict.state).toBe(analysis.primary?.state);
+    expect(source?.verdict.trace.length).toBeGreaterThan(0);
+    expect(source?.verdict.algorithmVersion.length).toBeGreaterThan(0);
+    expect(source?.verdict.pslVersion.length).toBeGreaterThan(0);
+    // Selector per temuan, bukan hanya selector halaman: pada halaman dengan beberapa
+    // pengirim, dua hal itu dapat berbeda.
+    expect(source?.selectorUsed).toBe('[email]');
+  });
+
+  it('membawa verdikt halaman header, yang tidak punya selector', () => {
+    const analysis = analyzePage(showOriginalPage('Rise <no-reply@mngl.in>', true), at(`${U}?view=om&th=x`));
+    const source = diagnosticSourceFor(analysis, analysis.primary);
+
+    expect(source?.verdict.gate.passed).toBe(true);
+    // Halaman itu membaca satu blok teks, bukan satu elemen per pengirim, jadi tidak ada
+    // selector yang dapat disebut — dan itu jawabannya, bukan medan yang hilang.
+    expect(source?.selectorUsed).toBeNull();
+  });
+
+  it('tidak punya sumber apa pun ketika tidak ada yang dinilai', () => {
+    const analysis = analyzePage(fakeDocument(senderRow('Bank BCA', 'bcaindonesia@gmail.com')), at(`${U}#inbox`));
+
+    expect(analysis.primary).toBeNull();
+    expect(diagnosticSourceFor(analysis, analysis.primary)).toBeNull();
+  });
+});
+
+describe('pemilihan temuan utama', () => {  const finding = (state: 'CONSISTENT' | 'UNCLEAR' | 'INCONSISTENT' | 'UNASSESSABLE') =>
     ({ state }) as unknown as Parameters<typeof pickPrimary>[0][number];
 
   it('urutan kepentingannya INCONSISTENT > UNCLEAR > UNASSESSABLE > CONSISTENT', () => {

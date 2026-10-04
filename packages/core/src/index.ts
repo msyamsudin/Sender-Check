@@ -11,7 +11,7 @@ export { ALL_RULE_CODES } from './types.ts';
 export { ALGORITHM_VERSION, DATA_UPDATED_AT } from './version.ts';
 
 export { analyze } from './analyze.ts';
-export { isEspDelivery, resolveIdentity } from './identity.ts';
+export { isEspDelivery, resolveIdentity, resolveProvenance } from './identity.ts';
 export type { ResolvedIdentity } from './identity.ts';
 
 // Domain

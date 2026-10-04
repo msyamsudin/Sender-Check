@@ -514,6 +514,31 @@ setiap state, lambang yang menyertai warna sehingga warna bukan satu-satunya pem
 tidak ada `innerHTML` di lapisan tampilan (dijaga test), dan tidak ada nama maupun logo
 webmail di dalam produk.
 
+**Mode diagnostik** sudah ada, dan isinya lebih luas daripada daftar di atas — bukan karena
+rencananya berubah, melainkan karena seluruh nilai yang disebut di situ sudah dihitung engine
+sejak awal dan tidak satu pun punya jalur ke DOM. Bagian ini yang membukanya, dan yang
+dilaporkannya adalah:
+
+| Nilai | Asalnya | Catatan |
+|---|---|---|
+| `state`, `confidence` | `Verdict` | Pengguna melihat "menentang · kuat" per bukti, tetapi tidak pernah tahu apakah putusannya `HIGH` atau `MEDIUM` |
+| `gate.passed`, `gate.claim`, `gate.reason` | `Verdict.gate` | Ketujuh `ClaimKind` dan kelima `GateReason`; pembedaan `no_identity_claim` dari `personal_name_on_personal_domain` dibuat justru untuk bagian ini (lihat `evidence/gate.ts`) |
+| seluruh baris `trace` | `Verdict.trace` | Baris yang menang ditandai, karena `classify` berhenti di situ |
+| `algorithmVersion`, `pslVersion`, `provenance` | `Verdict`, `EmailIdentity` | Versi PSL berlaku untuk hostname yang benar-benar diurai |
+| `selectorUsed`, catatan adapter | `packages/adapters` | Selector yang benar-benar menghasilkan pengirim |
+| setiap bukti: `code`, `polarity`, `strength`, `tier`, `args`, `trace` | `Verdict.evidence` | Termasuk bukti `neutral`, yang panel biasa buang seluruhnya |
+
+Cara membukanya: `Alt+Shift+D`, atau tombol kecil **diagnostik** di kepala panel. Modenya
+**tidak** mengubah penilaian apa pun — ia mengganti bagian tengah kartu, sementara kepala
+kartu, medan identitas, dan disclaimer tetap sama. Ia juga tidak disimpan ke storage dan tidak
+bertahan antar pemuatan halaman: bagian ini menyajikan istilah internal dan bukti mentah, dan
+keadaan yang menempel berarti pengguna dapat menemukannya aktif tanpa pernah memintanya.
+
+Yang **belum** dari mode ini, dan disebutkan supaya tidak dikira sudah ada: `notes` adapter
+belum ikut ditampilkan, walaupun sudah dibawa sampai `PanelSource`. Ia berguna justru ketika
+selector gagal membaca nama, dan kegagalan itu sudah terlihat dari `selectorUsed` — jadi
+menampilkannya adalah pekerjaan berikutnya, bukan syarat kebenaran.
+
 Yang **belum**: i18n. Kalimatnya baru tersedia dalam bahasa Indonesia, dan itu disengaja —
 menerjemahkan ke bahasa yang belum ada penggunanya menghasilkan teks yang tidak pernah
 dibaca siapa pun, dan teks terjemahan yang tidak pernah dibaca akan menyimpang tanpa ada

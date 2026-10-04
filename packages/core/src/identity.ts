@@ -51,8 +51,21 @@ function hasTierBFields(input: EmailIdentity): boolean {
   return hasReplyTo || hasReturnPath || hasAuth;
 }
 
+/**
+ * Provenance yang dipakai `resolveIdentity`, tanpa menyalin aturannya.
+ *
+ * Dibutuhkan lapisan yang menampilkan atau mencatat provenance tetapi tidak memegang
+ * `ResolvedIdentity` — mis. panel, yang hanya memegang `EmailIdentity` dan `Verdict`. Tanpa
+ * fungsi ini, aturan turunannya harus disalin ke sana, dan dua salinan aturan yang sama
+ * adalah dua versi kebenaran: begitu salah satunya berubah, panel akan menyatakan provenance
+ * yang berbeda dari yang dipakai engine untuk memutuskan sinyal mana yang boleh dinilai.
+ */
+export function resolveProvenance(input: EmailIdentity): Provenance {
+  return input.provenance ?? (hasTierBFields(input) ? 'dom-original' : 'dom-inbox');
+}
+
 export function resolveIdentity(input: EmailIdentity): ResolvedIdentity {
-  const provenance: Provenance = input.provenance ?? (hasTierBFields(input) ? 'dom-original' : 'dom-inbox');
+  const provenance: Provenance = resolveProvenance(input);
 
   const fromParsed = parseAddress(input.fromAddress);
   const fromParts = fromParsed.valid ? analyzeDomain(fromParsed.hostname) : null;

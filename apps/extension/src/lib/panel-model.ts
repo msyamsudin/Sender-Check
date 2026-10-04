@@ -6,7 +6,7 @@
  * `document` di sini, sehingga test dapat memeriksa kalimat, urutan, dan pilihan medan
  * tanpa browser dan tanpa jsdom.
  *
- * Tiga keputusan tampilan ada di berkas ini, dan ketiganya punya alasan:
+ * Empat keputusan tampilan ada di berkas ini, dan keempatnya punya alasan:
  *
  * **1. Semua kalimat berasal dari `@sender-check/presentation`.** Panel tidak menyusun
  * kalimatnya sendiri, karena itu akan menjadi salinan ketiga dari teks yang sama.
@@ -18,8 +18,14 @@
  *
  * **3. Disclaimer ikut pada setiap state, termasuk `CONSISTENT`.** `docs/DESIGN.md`
  * menetapkan itu, dan alasannya ada di `DISCLAIMER_LINES`.
+ *
+ * **4. `diagnostic` hanya diisi bila mode diagnostik diminta.** Isinya adalah nilai mentah
+ * engine yang tidak pernah ditampilkan panel biasa. Yang perlu ditegaskan di sini: mode itu
+ * **tidak** mengubah satu pun keputusan di atas. Ia menambahkan bagian, bukan menggantikan;
+ * panel biasa dan panel diagnostik menyatakan hal yang sama, dan yang kedua hanya menyebutkan
+ * dasarnya.
  */
-import type { State } from '@sender-check/core';
+import { resolveProvenance, type State, type Verdict } from '@sender-check/core';
 import {
   AUTHENTICATION_CAVEAT,
   DISCLAIMER_LINES,
@@ -28,16 +34,19 @@ import {
   POLARITY_LABEL,
   STATE_TITLE,
   STRENGTH_LABEL,
+  diagnosticFrom,
+  formatArgs,
   isContextNote,
   senderLabel,
   shortPolarity,
+  type DiagnosticRow,
+  type DiagnosticTraceRow,
   type SenderFinding,
 } from '@sender-check/presentation';
 export interface PanelField {
   readonly label: string;
   readonly value: string;
 }
-
 export interface PanelReason {
   /** Polaritas singkat, untuk gaya: `inconsistency`, `consistency`, `context`, `neutral`. */
   readonly kind: string;
@@ -48,6 +57,68 @@ export interface PanelReason {
   readonly sentence: string;
   /** `true` bila ini keterangan dari webmail, bukan bagian dari penilaian. */
   readonly context: boolean;
+}
+
+/** Satu baris `gate` pada bagian diagnostik. */
+export interface PanelGateRow {
+  readonly label: string;
+  readonly value: string;
+}
+
+/**
+ * Bagian diagnostik, sudah dalam bentuk yang siap digambar.
+ *
+ * Bentuknya sengaja "satu daftar baris label/nilai", bukan sekumpulan medan bernama: mode ini
+ * menampilkan apa adanya nilai internal, dan medan bernama akan membuat `panel-view.ts` ikut
+ * mengetahui nama setiap nilai. Yang perlu diketahui lapisan tampilan hanyalah cara menggambar
+ * daftar.
+ */
+export interface PanelDiagnostic {
+  /** Nama setiap bagian, dengan alasan singkatnya — dibaca sebagai judul. */
+  readonly summary: readonly DiagnosticRow[];
+  readonly gate: readonly PanelGateRow[];
+  /**
+   * Seluruh baris decision table, ditambah baris mana yang menang.
+   *
+   * Pemenangnya dinyatakan sebagai nomor baris, bukan sebagai `boolean` per baris, karena
+   * kalimatnya lebih pendek: "baris 3 menang" menjelaskan seluruh daftar sekaligus.
+   */
+  readonly rows: readonly string[];
+  readonly winner: string | null;
+  /** Daftar kode bukti — termasuk yang tidak ditampilkan panel. */
+  readonly codes: string;
+  /** Satu baris per kode bukti: polaritas, kekuatan, kalimat, `args`, dan trace mentahnya. */
+  readonly reasons: readonly PanelDiagnosticReason[];
+}
+
+/** Satu bukti di bagian diagnostik, lengkap dengan yang tidak pernah sampai ke panel biasa. */
+export interface PanelDiagnosticReason {
+  /** `CODE · polarity/strength · tier` — satu baris agar daftarnya tetap terbaca. */
+  readonly heading: string;
+  /** Kalimat yang dipakai panel biasa, atau `null` untuk bukti netral. */
+  readonly sentence: string | null;
+  /** Argumen template, apa adanya. */
+  readonly args: string;
+  readonly trace: string;
+}
+
+/**
+ * Bahan yang hanya diketahui pemanggil, dan hanya dibutuhkan mode diagnostik.
+ *
+ * `verdict` tidak dapat disusun ulang dari `SenderFinding`: `toFinding` sengaja merangkumnya
+ * menjadi kalimat. Karena itu pemanggil yang memegang verdikt meneruskannya di sini — dan
+ * hanya ketika mode diagnostik diminta.
+ */
+export interface PanelSource {
+  readonly verdict: Verdict;
+  readonly selectorUsed?: string | null;
+  readonly notes?: readonly string[];
+}
+
+export interface PanelOptions {
+  /** `true` menambahkan bagian diagnostik. Default `false`: panel biasa tidak berubah. */
+  readonly diagnostic?: boolean;
+  readonly source?: PanelSource;
 }
 
 export interface PanelModel {
@@ -84,18 +155,69 @@ export interface PanelModel {
    */
   readonly guidance: string | null;
   readonly disclaimer: readonly string[];
+  /**
+   * Isi mode diagnostik, atau `null` bila mode itu tidak diminta.
+   *
+   * Semua yang ada di sini sudah dihitung engine dan sebelumnya tidak punya jalur ke DOM:
+   * `confidence` keseluruhan, `gate` beserta klaimnya, seluruh baris decision table, versi
+   * algoritma dan PSL, provenance, dan setiap bukti apa adanya — termasuk yang dibuang panel
+   * (`neutral`).
+   */
+  readonly diagnostic: PanelDiagnostic | null;
 }
 
 /**
- * Kenapa panel tidak menilai, dalam bahasa pengguna.
+ * Kenapa panel tidak menilai, per alasan gate.
  *
- * Satu kalimat tetap, bukan peta per alasan gate: seluruh alasan gate yang mungkin di
- * halaman thread berarti hal yang sama bagi pembaca — tidak ada klaim identitas yang dapat
- * diuji dari yang tampil di sini — dan menyebut nama token internal (`no_identity_claim`,
- * `personal_name_on_personal_domain`) kepada pengguna tidak menjelaskan apa pun.
+ * Sebelumnya satu kalimat tetap untuk kelima alasan, dengan alasan bahwa kelimanya berarti
+ * hal yang sama bagi pembaca. Itu benar untuk dua di antaranya dan **salah** untuk tiga
+ * sisanya, dan bedanya adalah hal yang paling sering ditanyakan pengguna:
+ *
+ *  - `no_display_name` — webmail tidak merender nama sama sekali. Tidak ada yang salah dengan
+ *    pengirimnya; tidak ada yang bisa dibandingkan.
+ *  - `mailing_list_domain` — pengirimnya milis, dan engine memang menolak menilai milis.
+ *    Kalimat "nama tidak memuat klaim" **tidak benar** di sini: nama pengirim milis justru
+ *    sering memuat nama orang.
+ *  - `no_identity_claim` vs `personal_name_on_personal_domain` — dua keadaan yang berbeda, dan
+ *    `evaluateGate` sengaja membedakannya (lihat komentarnya di
+ *    `packages/core/src/evidence/gate.ts`). Yang pertama berarti tidak ada token identitas
+ *    sama sekali; yang kedua berarti ada nama orang, dan nama orang di domain perorangan
+ *    bukan anomali.
+ *
+ * Nama token internalnya disebut di ujung kalimat, dalam tanda kurung. Itu satu-satunya
+ * kosakata yang dipakai bersama `docs/DESIGN.md`, `docs/USAGE.md`, dan `gate.ts`, sehingga
+ * pengguna yang membaca dokumen dapat mencocokkannya dengan yang dilihatnya.
+ */
+const GATE_REASON_BASIS: Record<string, string> = {
+  no_display_name:
+    'Pesan ini tidak merender nama pengirim sama sekali, sehingga tidak ada yang dapat dibandingkan dengan alamatnya. Ini batas tampilan webmail, bukan penilaian tentang pengirimnya. (no_display_name)',
+  mailing_list_domain:
+    'Alamat pengirim ini berada di domain milis, dan pengirim milis memang tidak dinilai: nama yang tampil di situ adalah nama pengirim pesan ke milis, bukan identitas pemilik domain. (mailing_list_domain)',
+  no_identity_claim:
+    'Nama yang ditampilkan tidak memuat klaim identitas apa pun yang dapat diuji terhadap alamatnya, sehingga pengirim ini belum dapat dipastikan dari tampilan pesan. (no_identity_claim)',
+  personal_name_on_personal_domain:
+    'Nama yang ditampilkan adalah nama orang, dan alamatnya bukan alamat organisasi. Nama orang di alamat perorangan bukan anomali, jadi tidak ada yang dapat diuji di sini. (personal_name_on_personal_domain)',
+};
+
+/**
+ * Kalimat yang dipakai bila alasan gate tidak dikenali.
+ *
+ * Bukan kehati-hatian berlebihan: `GateReason` dapat bertambah di engine sebelum lapisan ini
+ * ikut berubah, dan panel yang menampilkan bagian kosong pada keadaan itu lebih buruk daripada
+ * panel yang menyatakan batasnya secara umum.
  */
 export const UNASSESSABLE_BASIS =
   'Nama yang ditampilkan tidak memuat klaim yang dapat diuji terhadap alamatnya, sehingga pengirim ini belum dapat dipastikan dari tampilan pesan.';
+
+/**
+ * Alasan tidak menilai untuk satu temuan.
+ *
+ * `gate` pada `SenderFinding` sudah berbentuk alasan bila gate menolak, dan berbentuk klaim
+ * bila gate lolos — jadi nilainya hanya dipakai ketika state-nya memang `UNASSESSABLE`.
+ */
+export function unassessableBasis(finding: SenderFinding): string {
+  return GATE_REASON_BASIS[finding.gate] ?? UNASSESSABLE_BASIS;
+}
 
 /**
  * Langkah aman untuk state `UNASSESSABLE`.
@@ -107,6 +229,16 @@ export const UNASSESSABLE_BASIS =
  */
 export const UNASSESSABLE_GUIDANCE =
   'Sebelum menekan tautan atau mengisi data di email ini, periksa header aslinya: menu ⋮ → "Tampilkan aslinya". Di halaman itu panel menilai ulang memakai "balas ke" dan hasil autentikasi.';
+
+/**
+ * Langkah aman ketika panel sudah berada di halaman header.
+ *
+ * Di sini "periksa header aslinya" tidak masuk akal: pengguna sedang melihatnya. Yang tersisa
+ * adalah keadaan yang sebenarnya — panel sudah memakai semua yang ada di halaman itu, dan
+ * yang tidak ada di sana tidak dapat diperiksa dari mana pun.
+ */
+export const UNASSESSABLE_GUIDANCE_ON_HEADER =
+  'Panel ini sudah membaca seluruh header yang tersedia di halaman ini, termasuk "balas ke" dan hasil autentikasi. Bila tidak ada klaim identitas di dalamnya, tidak ada lagi yang dapat diperiksa dari pesan ini.';
 
 /** Urutan bobot untuk pengurutan. `strong` lebih dulu. */
 const STRENGTH_ORDER: Record<string, number> = { strong: 0, medium: 1, weak: 2 };
@@ -174,6 +306,22 @@ function buildFields(finding: SenderFinding): PanelField[] {
     fields.push({ label: 'Dikirim oleh', value: identity.returnPath });
   }
 
+  // `Sumber` menjawab pertanyaan yang paling mudah salah dibaca pada panel ini: "kenapa
+  // 'Balas ke' tidak muncul?". Pada halaman thread, jawabannya bukan bahwa header itu tidak
+  // ada, melainkan bahwa halaman itu memang tidak memuatnya — dan beda antara "tidak ada"
+  // dan "tidak terbaca" adalah beda antara temuan dan batas alat.
+  //
+  // Nilainya diturunkan `resolveProvenance`, fungsi engine yang sama yang dipakai
+  // `resolveIdentity`, bukan dibaca langsung dari `identity.provenance`: field itu biasanya
+  // kosong, dan engine yang mengisinya saat resolusi.
+  fields.push({
+    label: 'Sumber',
+    value:
+      resolveProvenance(identity) === 'dom-original'
+        ? 'halaman header (Tier A + B)'
+        : 'tampilan thread (Tier A)',
+  });
+
   return fields;
 }
 
@@ -190,14 +338,71 @@ function buildAuthentication(finding: SenderFinding): string[] {
 }
 
 /**
+ * Ringkasan baris-baris decision table.
+ *
+ * Semua baris yang tercatat dicetak, termasuk yang tidak dievaluasi: `classify` berhenti pada
+ * baris pertama yang cocok, sehingga baris sesudahnya tidak pernah diuji. Yang menjawab
+ * "kenapa hasilnya begini" adalah baris pemenangnya, dan ia ditandai — tanpa penanda itu,
+ * daftar ini terbaca seolah sembilan baris semuanya diperiksa.
+ */
+function buildTrace(rows: readonly DiagnosticTraceRow[]): string[] {
+  return rows.map((row) => {
+    const marker = row.winner ? '← menang' : row.matched ? '(cocok)' : '(tidak diuji)';
+    return `baris ${row.row}  ${marker}  ${row.condition}`;
+  });
+}
+
+/**
+ * Isi mode diagnostik.
+ *
+ * Satu-satunya tempat di ekstensi yang menyentuh nilai mentah engine. Yang dibuangnya hanya
+ * satu hal: bukti `neutral` tidak diberi kalimat, karena panel biasa memang tidak
+ * menampilkannya — tetapi barisnya tetap ada di sini, lengkap dengan trace-nya, dan justru
+ * itulah bedanya "tidak ditampilkan" dan "tidak ada".
+ */
+function buildDiagnostic(finding: SenderFinding, source: PanelSource): PanelDiagnostic {
+  const diagnostic = diagnosticFrom(finding.identity, source.verdict, {
+    selectorUsed: source.selectorUsed ?? null,
+    notes: source.notes ?? [],
+  });
+
+  const winnerRow = diagnostic.trace[diagnostic.traceWinner ?? -1] ?? null;
+
+  return {
+    summary: diagnostic.summary,
+    gate: diagnostic.gate,
+    rows: buildTrace(diagnostic.trace),
+    winner: winnerRow === null ? null : `baris ${winnerRow.row} menentukan hasilnya`,
+    codes: diagnostic.evidence.map((row) => row.code).join('  ') || '(tidak ada bukti)',
+    reasons: diagnostic.evidence.map((row) => ({
+      heading: `${row.code} · ${row.polarity}/${row.strength} · tier ${row.tier}`,
+      sentence: row.sentence,
+      args: formatArgs(row.args),
+      trace: row.trace,
+    })),
+  };
+}
+
+/**
  * Isi panel dari satu temuan.
  *
  * `basis` dan `guidance` diisi hanya untuk state `UNASSESSABLE`: itulah satu-satunya state
  * yang berarti "belum ada yang diperiksa", dan karena itu satu-satunya yang perlu menjelaskan
  * mengapa, lalu menyebut langkah aman yang dapat dikerjakan pengguna.
+ *
+ * `options.diagnostic` menambahkan bagian diagnostik, dan `options.source` yang menyediakan
+ * isinya. Keduanya opsional supaya pemanggil yang hanya ingin panel biasa — dan test yang
+ * memeriksanya — tidak perlu memegang verdikt mentah.
  */
-export function buildPanelModel(finding: SenderFinding): PanelModel {
+export function buildPanelModel(finding: SenderFinding, options: PanelOptions = {}): PanelModel {
   const unassessable = finding.state === 'UNASSESSABLE';
+  const onHeader = resolveProvenance(finding.identity) === 'dom-original';
+  const { source } = options;
+
+  let guidance: string | null = null;
+  if (unassessable) {
+    guidance = onHeader ? UNASSESSABLE_GUIDANCE_ON_HEADER : UNASSESSABLE_GUIDANCE;
+  }
 
   return {
     state: finding.state,
@@ -207,8 +412,12 @@ export function buildPanelModel(finding: SenderFinding): PanelModel {
     fields: buildFields(finding),
     reasons: orderReasons(finding),
     authentication: buildAuthentication(finding),
-    basis: unassessable ? UNASSESSABLE_BASIS : null,
-    guidance: unassessable ? UNASSESSABLE_GUIDANCE : null,
+    basis: unassessable ? unassessableBasis(finding) : null,
+    guidance,
     disclaimer: DISCLAIMER_LINES,
+    diagnostic:
+      options.diagnostic === true && source !== undefined
+        ? buildDiagnostic(finding, source)
+        : null,
   };
 }

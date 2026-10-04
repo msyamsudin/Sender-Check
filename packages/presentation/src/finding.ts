@@ -111,12 +111,25 @@ export const CONTEXT_NOTE_CODES: readonly string[] = [
   'GMAIL_OWN_WARNING_PRESENT',
 ];
 
-/** Satu baris bukti, sudah berbentuk kalimat. */
+/**
+ * Satu baris bukti, sudah berbentuk kalimat.
+ *
+ * `polarity` dan `strength` adalah nilai mentah engine, dan `trace` adalah bukti mentah yang
+ * ditulis untuk pengembang. Ketiganya dibawa serta bukan untuk panel biasa: panel biasa sudah
+ * menerjemahkan `polarity` dan `strength` menjadi label, dan `trace` memang tidak layak dibaca
+ * pengguna. Yang membutuhkannya adalah mode diagnostik, dan sebelum berkas ini membawanya,
+ * tidak ada satu pun jalur dari nilai itu ke layar — `toFinding` membuangnya, sehingga
+ * `confidence`, `trace` decision table, dan `args` bukti hanya dapat dilihat dengan debugger.
+ * Pola yang sama berulang di seluruh proyek ini: nilai yang dihitung lalu dibuang tidak dapat
+ * dipakai untuk menjawab "kenapa hasilnya begini".
+ */
 export interface FindingEvidence {
   readonly code: string;
   readonly polarity: string;
   readonly strength: string;
   readonly sentence: string;
+  /** Bukti mentah engine, mis. `"rise" ⊂ "risehq"`. Hanya untuk mode diagnostik. */
+  readonly trace: string;
 }
 
 /** Satu pengirim, siap ditampilkan. */
@@ -146,6 +159,7 @@ export function toFinding(identity: EmailIdentity, verdict: Verdict): SenderFind
       polarity: item.polarity,
       strength: item.strength,
       sentence: describeRule(item.code, item.args, item.trace),
+      trace: item.trace,
     })),
   };
 }

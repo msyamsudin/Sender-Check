@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { analyze } from '../src/analyze.ts';
-import { resolveIdentity } from '../src/identity.ts';
+import { resolveIdentity, resolveProvenance } from '../src/identity.ts';
 import type { EmailIdentity, RuleCode, Verdict } from '../src/types.ts';
 
 function codes(verdict: Verdict): RuleCode[] {
@@ -153,6 +153,27 @@ describe('provenance', () => {
     expect(
       resolveIdentity({ displayName: 'A', fromAddress: 'a@b.com', provenance: 'dom-inbox' }).provenance,
     ).toBe('dom-inbox');
+  });
+
+  it('resolveProvenance menyatakan aturan yang sama tanpa memerlukan ResolvedIdentity', () => {
+    // Dipakai panel dan mode diagnostik, yang hanya memegang `EmailIdentity` dan `Verdict`.
+    // Kalau nilainya berbeda dari yang dipakai `resolveIdentity`, panel akan menyatakan
+    // provenance yang berbeda dari yang dipakai engine untuk memutuskan sinyal mana yang
+    // boleh dinilai — dan perbedaannya tidak akan terlihat kecuali pada email tertentu.
+    const cases: readonly EmailIdentity[] = [
+      { displayName: 'A', fromAddress: 'a@b.com' },
+      { displayName: 'A', fromAddress: 'a@b.com', replyTo: 'c@d.com' },
+      { displayName: 'A', fromAddress: 'a@b.com', returnPath: 'bounce@sendgrid.net' },
+      { displayName: 'A', fromAddress: 'a@b.com', authenticationResults: 'spf=pass' },
+      // Field Tier B yang kosong bukan field Tier B: `resolveIdentity` memakai aturan yang
+      // sama, dan provenance yang salah di sini akan membuka sinyal Tier B pada DOM inbox.
+      { displayName: 'A', fromAddress: 'a@b.com', replyTo: '   ' },
+      { displayName: 'A', fromAddress: 'a@b.com', provenance: 'dom-inbox', replyTo: 'c@d.com' },
+    ];
+
+    for (const input of cases) {
+      expect(resolveProvenance(input), JSON.stringify(input)).toBe(resolveIdentity(input).provenance);
+    }
   });
 
   it('sinyal Tier B tidak pernah dipakai ketika provenance adalah dom-inbox', () => {
