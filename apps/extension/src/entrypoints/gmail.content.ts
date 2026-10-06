@@ -31,7 +31,8 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 import type { ShadowRootContentScriptUi } from 'wxt/utils/content-script-ui/shadow-root';
-import { analyzePage, diagnosticSourceFor } from '../lib/scan.ts';
+import { analyzePage, analyzeList, diagnosticSourceFor } from '../lib/scan.ts';
+import { LIST_ROW_SELECTOR } from '@sender-check/adapters';
 import { copyToClipboard } from '../lib/clipboard.ts';
 import { buildPanelModel } from '../lib/panel-model.ts';
 import { renderPanel, type PanelActions } from '../lib/panel-view.ts';
@@ -59,6 +60,109 @@ const DEBOUNCE_MS = 400;
  * kombinasi tombol, dan satu tombol kecil di panel — keduanya tindakan yang disengaja.
  */
 const DIAGNOSTIC_SHORTCUT_KEY = 'd';
+
+/**
+ * Kelas penanda di tampilan daftar.
+ *
+ * Penanda berada di **DOM halaman**, bukan di shadow root panel — karena yang ditandai
+ * adalah baris milik Gmail. Konsekuensinya gayanya harus inline: CSS panel berada di dalam
+ * shadow root dan tidak dapat menjangkau elemen halaman.
+ */
+const LIST_FLAG_CLASS = 'sc-flag';
+
+/** Gaya penanda: titik kecil berwarna aksen `INCONSISTENT`, sama dengan warna panelnya. */
+const LIST_FLAG_STYLE =
+  'display:inline-block;width:7px;height:7px;border-radius:50%;background:#b54708;margin-left:4px;vertical-align:middle;';
+
+/** Membuang semua penanda yang pernah dipasang. */
+function clearListFlags(): void {
+  for (const node of document.querySelectorAll(`.${LIST_FLAG_CLASS}`)) node.remove();
+}
+
+/**
+ * Menyamakan penanda di daftar dengan keadaan yang seharusnya.
+ *
+ * Posisi ditentukan oleh indeks: `analyzeList` menghasilkan satu entri per baris dengan
+ * urutan dokumen yang sama, sehingga entri ke-i menempel pada baris ke-i. Entri `null`
+ * dilewati — itulah gunanya daftar itu tetap sepanjang jumlah baris.
+ *
+ * Penanda disisipkan sebagai saudara elemen pengirim, bukan ke dalamnya: teks di dalam
+ * elemen pengirim dipakai adapter sebagai cadangan ketika atribut `name` tidak ada, dan
+ * menambahkan teks ke sana akan merusak pembacaan pada pemindaian berikutnya.
+ *
+ * ## Kenapa idempoten, bukan "buang semua lalu pasang lagi"
+ *
+ * Versi pertamanya membuang seluruh penanda lebih dulu pada setiap pemindaian, dan itu
+ * berarti dua mutasi `childList` setiap 400 ms tanpa henti — walaupun tidak ada apa pun
+ * yang berubah di halaman — ditambah risiko lingkaran bila Gmail sendiri merender ulang
+ * baris ketika DOM-nya disentuh. Dengan menyamakan, pemindaian pada keadaan diam tidak
+ * menghasilkan mutasi apa pun, sehingga observer tidak pernah menjadwalkan apa pun dan
+ * lingkaran itu tidak dapat terbentuk. Penanda yang penandanya sudah sesuai disimpan;
+ * hanya yang berbeda atau yang tidak lagi layak yang disentuh.
+ */
+function renderListFlags(): void {
+  const analysis = analyzeList(document);
+  const rows = document.querySelectorAll(LIST_ROW_SELECTOR);
+  const keep = new Set<Element>();
+
+  if (analysis.matched) {
+    analysis.flags.forEach((flag, index) => {
+      if (flag === null) return;
+
+      const row = rows[index];
+      if (row === undefined) return;
+
+      const existing = row.querySelector(`.${LIST_FLAG_CLASS}`);
+      if (existing !== null && existing.getAttribute('title') === flag.reason) {
+        keep.add(existing);
+        return;
+      }
+      if (existing !== null) existing.remove();
+
+      const anchor = row.querySelector(flag.sourceSelector);
+      if (anchor === null) return;
+
+      const marker = document.createElement('span');
+      marker.className = LIST_FLAG_CLASS;
+      marker.setAttribute('role', 'img');
+      marker.setAttribute('aria-label', flag.reason);
+      marker.setAttribute('title', flag.reason);
+      marker.setAttribute('style', LIST_FLAG_STYLE);
+      anchor.after(marker);
+      keep.add(marker);
+    });
+  }
+
+  // Sisa penanda — baris yang hilang, tidak lagi terbaca, atau tidak lagi layak — dibuang
+  // di akhir, setelah seluruh baris disamakan.
+  for (const marker of document.querySelectorAll(`.${LIST_FLAG_CLASS}`)) {
+    if (!keep.has(marker)) marker.remove();
+  }
+}
+
+/** `true` bila sebuah node adalah penanda milik kita. */
+function isFlagNode(node: Node): boolean {
+  return node instanceof Element && node.classList.contains(LIST_FLAG_CLASS);
+}
+
+/**
+ * `true` bila seluruh perubahan dalam batch ini berasal dari penanda yang kita pasang sendiri.
+ *
+ * Tanpa penyaringan ini, pemasangan penanda memicu `MutationObserver` → jadwal pemindaian →
+ * pemasangan lagi, dan daftar akan dipindai tanpa henti setiap 400 ms. Penyaringannya sengaja
+ * ketat: hanya elemen `.sc-flag` yang diakui milik kita. Satu pun teks yang berubah karena
+ * Gmail tidak termasuk, sehingga pemindaian ulang karena perubahan Gmail tidak pernah
+ * tertahan oleh penyaring ini.
+ */
+function isOwnFlagMutation(records: readonly MutationRecord[]): boolean {
+  if (records.length === 0) return false;
+
+  return records.every((record) => {
+    const nodes = [...record.addedNodes, ...record.removedNodes];
+    if (nodes.length === 0) return false;
+    return nodes.every(isFlagNode);
+  });
+}
 
 export default defineContentScript({
   matches: ['https://mail.google.com/*'],
@@ -155,6 +259,18 @@ export default defineContentScript({
 
     async function refresh(): Promise<void> {
       const analysis = analyzePage(document, location);
+
+      // Tampilan daftar tidak memunculkan panel — yang muncul adalah penanda per baris.
+      // Keduanya sengaja diperlakukan di cabang terpisah: keadaan "panel ditutup" pada
+      // sebuah thread tidak boleh mematikan penanda di daftar, dan sebaliknya.
+      if (analysis.kind === 'list') {
+        renderListFlags();
+        await hide();
+        return;
+      }
+
+      clearListFlags();
+
       const finding = analysis.primary;
 
       if (finding === null || dismissedAt === location.href) {
@@ -197,9 +313,16 @@ export default defineContentScript({
       }, DEBOUNCE_MS);
     }
 
-    const observer = new MutationObserver(schedule);
+    const observer = new MutationObserver((records) => {
+      if (isOwnFlagMutation(records)) return;
+      schedule();
+    });
     observer.observe(document.body, { childList: true, subtree: true });
-    ctx.onInvalidated(() => observer.disconnect());
+    ctx.onInvalidated(() => {
+      observer.disconnect();
+      // Penanda tertinggal di DOM halaman bila ekstensi dimuat ulang: cabut bersih.
+      clearListFlags();
+    });
 
     /**
      * Pintasan mode diagnostik.

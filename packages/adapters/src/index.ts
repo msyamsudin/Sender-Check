@@ -8,7 +8,9 @@
  */
 export {
   detectGmailView,
+  LIST_ROW_SELECTOR,
   scanGmailInbox,
+  scanGmailList,
 } from './gmail.ts';
 export {
   decodeEncodedWords,
@@ -22,6 +24,8 @@ export type {
   ElementLike,
   GmailView,
   HeaderReport,
+  ListReport,
+  ListRowReading,
   LocationLike,
   ScanOptions,
   ScanScope,
