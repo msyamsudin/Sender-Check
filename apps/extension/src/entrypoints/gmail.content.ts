@@ -31,10 +31,16 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 import type { ShadowRootContentScriptUi } from 'wxt/utils/content-script-ui/shadow-root';
-import { analyzePage, analyzeList, diagnosticSourceFor } from '../lib/scan.ts';
+import { browser } from 'wxt/browser';
 import { LIST_ROW_SELECTOR } from '@sender-check/adapters';
 import { copyToClipboard } from '../lib/clipboard.ts';
-import { buildPanelModel } from '../lib/panel-model.ts';
+import {
+  OPEN_HEADER_REQUEST,
+  SNAPSHOT_REQUEST,
+  type OpenHeaderResult,
+} from '../lib/messaging.ts';
+import { analyzeList, analyzePage, diagnosticSourceFor } from '../lib/scan.ts';
+import { buildPanelModel, type PanelModel } from '../lib/panel-model.ts';
 import { renderPanel, type PanelActions } from '../lib/panel-view.ts';
 import '../lib/panel.css';
 
@@ -60,6 +66,30 @@ const DEBOUNCE_MS = 400;
  * kombinasi tombol, dan satu tombol kecil di panel — keduanya tindakan yang disengaja.
  */
 const DIAGNOSTIC_SHORTCUT_KEY = 'd';
+
+/**
+ * Label tombol "lainnya" (⋮) pada sebuah pesan, dibaca dari `aria-label`.
+ *
+ * Dibandingkan memakai nama kelas Gmail (`Wsq5Cf` dan kawan-kawan): kelas itu diobfuskasi
+ * dan berubah antar rilis, sedangkan `aria-label` bertahan jauh lebih lama karena ia yang
+ * dipakai pembaca layar. Konsekuensinya i label memang tergantung bahasa, sehingga daftarnya
+ * memuat bahasa yang dipakai dokumentasi (Indonesia dan Inggris) dan kegagalannya bukan
+ * kehancuran: pengguna cukup membuka menu itu sendiri.
+ */
+const MORE_BUTTON_LABELS: readonly string[] = [
+  'opsi pesan lainnya',
+  'opsi lainnya',
+  'more message options',
+  'more options',
+  'more actions',
+  'lainnya',
+];
+
+/** Nama item menu "Show original" pada dua bahasa yang didokumentasikan. */
+const SHOW_ORIGINAL_LABELS: readonly string[] = ['tampilkan aslinya', 'show original'];
+
+/** Berapa lama menunggu menu Gmail selesai dirender setelah tombolnya diklik. */
+const MENU_WAIT_MS = 2000;
 
 /**
  * Kelas penanda di tampilan daftar.
@@ -164,6 +194,73 @@ function isOwnFlagMutation(records: readonly MutationRecord[]): boolean {
   });
 }
 
+/** Membaca `aria-label` sebuah elemen, sudah dirapikan dan diturunkan hurufnya. */
+function labelOf(element: Element): string {
+  return (element.getAttribute('aria-label') ?? '').trim().toLowerCase();
+}
+
+/**
+ * Tombol "lainnya" (⋮) milik sebuah pesan, atau `null` bila tidak ditemukan.
+ *
+ * Pencarian dibatasi ke dalam elemen ber-`data-message-id`, bukan seluruh halaman: tombol
+ * itu memang milik pesan, dan menjelajahi halaman utuh akan menemukan tombol milik daftar
+ * inbox — persis kesalahan yang pernah membuat panel menjelaskan pengirim yang salah.
+ */
+function findMoreButton(): HTMLElement | null {
+  for (const message of document.querySelectorAll('[data-message-id]')) {
+    for (const button of message.querySelectorAll('button')) {
+      const label = labelOf(button);
+      if (label.length > 0 && MORE_BUTTON_LABELS.includes(label)) return button;
+    }
+  }
+  return null;
+}
+
+/** Item menu "Show original" yang sedang terbuka, atau `null`. */
+function findShowOriginalItem(): HTMLElement | null {
+  for (const item of document.querySelectorAll('[role="menuitem"], [role="menu"] li')) {
+    // Spasi dirapatkan dulu: teks elemen sering memuat baris baru dari indentation, dan
+    // perbandingan kata-kata yang persis akan gagal hanya karena formatnya.
+    const text = (item.textContent ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
+    // Selektor campuran mengembalikan `Element`; elemen menu Gmail selalu elemen HTML,
+    // dan `click()` hanya dimiliki HTML.
+    if (SHOW_ORIGINAL_LABELS.includes(text)) return item as HTMLElement;
+  }
+  return null;
+}
+
+/** Menunggu item menu muncul, karena Gmail merendernya setelah tombolnya diklik. */
+async function waitForShowOriginalItem(): Promise<HTMLElement | null> {
+  const deadline = Date.now() + MENU_WAIT_MS;
+  for (;;) {
+    const item = findShowOriginalItem();
+    if (item !== null) return item;
+    if (Date.now() >= deadline) return null;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
+/**
+ * Membuka halaman "Show original" dengan mendorong menu Gmail, bukan dengan mengambilnya.
+ *
+ * Tiga keadaan hasilnya, dan ketiganya dibedakan karena menjawab pertanyaan yang berbeda
+ * — lihat `OpenHeaderResult` di `lib/messaging.ts`. Pada dua keadaan terakhir pengguna
+ * tetap melihat langkah manualnya di popup: yang dilakukan fungsi ini adalah memperpendek
+ * jalannya, bukan menggantinya.
+ */
+async function openShowOriginal(): Promise<OpenHeaderResult> {
+  const button = findMoreButton();
+  if (button === null) return { opened: false, menuOpened: false };
+
+  button.click();
+
+  const item = await waitForShowOriginalItem();
+  if (item === null) return { opened: false, menuOpened: true };
+
+  item.click();
+  return { opened: true, menuOpened: true };
+}
+
 export default defineContentScript({
   matches: ['https://mail.google.com/*'],
   runAt: 'document_idle',
@@ -205,7 +302,18 @@ export default defineContentScript({
      */
     let diagnostic = false;
 
+    /**
+     * Isi panel yang sedang digambar, atau `null` bila tidak ada.
+     *
+     * Inilah yang dijawabkan kepada popup lewat `SNAPSHOT_REQUEST`. Menyimpannya di sini —
+     * alih-alih membangun ulang dari DOM ketika popup bertanya — membuat jawabannya selalu
+     * **sama persis** dengan yang sedang dilihat pengguna di halaman, termasuk keadaan
+     * mode diagnostiknya, dan popup tidak perlu tahu apa pun tentang cara membaca halaman.
+     */
+    let currentModel: PanelModel | null = null;
+
     async function hide(): Promise<void> {
+      currentModel = null;
       if (uiPromise === null) return;
       (await uiPromise).remove();
     }
@@ -255,6 +363,7 @@ export default defineContentScript({
       };
 
       renderPanel(container, model, actions);
+      currentModel = model;
     }
 
     async function refresh(): Promise<void> {
@@ -322,6 +431,31 @@ export default defineContentScript({
       observer.disconnect();
       // Penanda tertinggal di DOM halaman bila ekstensi dimuat ulang: cabut bersih.
       clearListFlags();
+    });
+
+    /**
+     * Jawaban untuk popup.
+     *
+     * Dua cabang, dan cara menjawabnya berbeda: snapshot sudah ada di memori sehingga
+     * dijawab lewat `sendResponse` biasa, sedangkan membuka halaman header memerlukan
+     * waktu (menunggu menu Gmail dirender) sehingga menjawab secara tertunda dengan
+     * mengembalikan `true` — pola yang berlaku di Chrome maupun Firefox.
+     *
+     * Ini juga satu-satunya alasan ekstensi ini tetap tanpa background script: pesan tidak
+     * perlu diteruskan ke mana pun, content script halaman yang menjawabnya langsung.
+     */
+    browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+      if (message === SNAPSHOT_REQUEST) {
+        sendResponse(currentModel);
+        return false;
+      }
+
+      if (message === OPEN_HEADER_REQUEST) {
+        void openShowOriginal().then(sendResponse);
+        return true;
+      }
+
+      return false;
     });
 
     /**

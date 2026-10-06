@@ -1,0 +1,88 @@
+/*
+ * Gaya popup.
+ *
+ * `panel.css` dipakai apa adanya — isi kartunya memang sama persis dengan panel halaman,
+ * dan menulis ulang gayanya akan membuat dua tampilan yang dapat menyimpang. Yang diubah
+ * di sini hanya **kedudukan** kartunya: di halaman ia mengambang di sudut kanan bawah
+ * (`position: fixed`), sedangkan di popup ia adalah seluruh isi jendela.
+ *
+ * Sengaja tanpa selektor id pada `.sc-card`: aturan ber-id memang menang melawan
+ * `.sc-card--INCONSISTENT` dan kawan-kawan, sehingga aksen per state akan hilang. Cukup
+ * spesifitas yang sama dan urutan yang belakangan, dan warna aksen tetap milik panel.css.
+ */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Firefox menentukan ukuran popup dari lebar kontennya; tetapkan supaya teks panjang
+   tidak membuat jendela melebar sendiri. Tingginya mengikuti isi, dan panel yang panjang
+   menggulir bersama isi jendela. */
+body {
+  width: 380px;
+  background: #ffffff;
+  color: #101828;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+}
+
+.sc-card {
+  position: static;
+  width: auto;
+  max-height: none;
+  overflow: visible;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Bilah aksi bawah: langkah manual dan pintasnya. */
+.sc-bar {
+  padding: 10px 16px 14px;
+  border-top: 1px solid #eaecf0;
+  background: #f9fafb;
+}
+
+.sc-bar-note {
+  margin: 0 0 8px;
+  color: #475467;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.sc-bar-button {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #344054;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sc-bar-button:hover:not([disabled]) {
+  background: #f2f4f7;
+  color: #101828;
+}
+
+.sc-bar-button[disabled] {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.sc-bar-status {
+  margin: 8px 0 0;
+  color: #475467;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.sc-popup-empty {
+  margin: 0;
+  padding: 16px;
+  color: #475467;
+  line-height: 1.5;
+}
