@@ -87,6 +87,15 @@ export interface PanelDiagnostic {
   readonly winner: string | null;
   /** Daftar kode bukti — termasuk yang tidak ditampilkan panel. */
   readonly codes: string;
+  /**
+   * Catatan adapter, apa adanya: kenapa sebuah selector dipakai, kenapa nama jatuh ke teks,
+   * kenapa halaman tidak menghasilkan apa pun.
+   *
+   * Kosong bila adapter tidak mencatat apa pun — dan barisnya tetap digambar oleh lapisan
+   * tampilan, karena "tidak ada catatan" dan "catatan tidak ditampilkan" adalah dua hal
+   * yang berbeda, dan membedakan keduanya adalah fungsi mode diagnostik ini.
+   */
+  readonly notes: readonly string[];
   /** Satu baris per kode bukti: polaritas, kekuatan, kalimat, `args`, dan trace mentahnya. */
   readonly reasons: readonly PanelDiagnosticReason[];
 }
@@ -374,6 +383,7 @@ function buildDiagnostic(finding: SenderFinding, source: PanelSource): PanelDiag
     rows: buildTrace(diagnostic.trace),
     winner: winnerRow === null ? null : `baris ${winnerRow.row} menentukan hasilnya`,
     codes: diagnostic.evidence.map((row) => row.code).join('  ') || '(tidak ada bukti)',
+    notes: diagnostic.notes,
     reasons: diagnostic.evidence.map((row) => ({
       heading: `${row.code} · ${row.polarity}/${row.strength} · tier ${row.tier}`,
       sentence: row.sentence,

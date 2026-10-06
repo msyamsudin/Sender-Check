@@ -80,6 +80,16 @@ export interface FindingDiagnostic {
   /** Indeks baris pemenang pada `trace`, atau `null` bila tidak ada yang cocok. */
   readonly traceWinner: number | null;
   readonly evidence: readonly DiagnosticEvidenceRow[];
+  /**
+   * Catatan adapter, apa adanya — mis. selector mana yang benar-benar menghasilkan pengirim.
+   *
+   * `diagnosticFrom` sudah menerima `notes` sejak awal, tetapi tidak pernah mengembalikannya:
+   * nilai itu diterima lalu dibuang, sehingga catatan adapter tidak punya jalur ke layar
+   * dari mana pun padahal sudah dibawa sampai `PanelSource`. Ia justru paling dibutuhkan
+   * ketika selector gagal membaca nama — kegagalan yang sudah terlihat dari `selectorUsed`
+   * tetapi tidak menjelaskan **mengapa**.
+   */
+  readonly notes: readonly string[];
 }
 
 /**
@@ -227,6 +237,7 @@ export function diagnosticFrom(
       winner: index === winner,
     })),
     traceWinner: winner === -1 ? null : winner,
+    notes: source.notes ?? [],
     evidence: verdict.evidence.map((item: Evidence) => ({
       code: item.code,
       polarity: item.polarity,

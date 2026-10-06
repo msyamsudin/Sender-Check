@@ -248,6 +248,23 @@ function renderDiagnostic(diagnostic: PanelDiagnostic): HTMLElement {
   );
   section.append(codeSection);
 
+  // Catatan adapter selalu digambar, termasuk ketika kosong: "tidak ada catatan" dan
+  // "catatan tidak ditampilkan" adalah dua keadaan yang berbeda, dan mode diagnostik
+  // memang ada untuk membedakan hal seperti ini. Isinya nilai apa adanya dari
+  // `packages/adapters` — di antaranya alasan sebuah selector gagal membaca nama.
+  const notesSection = element('section', 'sc-diag-section');
+  notesSection.append(element('h4', 'sc-diag-h', 'Catatan adapter'));
+  if (diagnostic.notes.length === 0) {
+    notesSection.append(element('p', 'sc-diag-mono', '(tidak ada catatan)'));
+  } else {
+    const list = element('ul', 'sc-diag-list');
+    for (const note of diagnostic.notes) {
+      list.append(element('li', 'sc-diag-item', note));
+    }
+    notesSection.append(list);
+  }
+  section.append(notesSection);
+
   const evidenceSection = element('section', 'sc-diag-section');
   evidenceSection.append(element('h4', 'sc-diag-h', 'Bukti apa adanya (termasuk yang netral)'));
 

@@ -169,7 +169,8 @@ describe('mode diagnostik', () => {
       selectorUsed: '[email]',
       notes: ['display name dibaca dari teks karena atribut name tidak ada'],
     });
-    const summary = buildPanelModel(finding, { diagnostic: true, source }).diagnostic?.summary ?? [];
+    const model = buildPanelModel(finding, { diagnostic: true, source });
+    const summary = model.diagnostic?.summary ?? [];
 
     expect(summaryValue(summary, 'selectorUsed')).toBe('[email]');
 
@@ -177,6 +178,28 @@ describe('mode diagnostik', () => {
     const empty = buildPanelModel(without.finding, { diagnostic: true, source: without.source })
       .diagnostic?.summary ?? [];
     expect(summaryValue(empty, 'selectorUsed')).toBe('(tidak ada)');
+  });
+
+  it('membawa catatan adapter, yang sebelumnya diterima lalu dibuang', () => {
+    // `notes` sudah masuk `PanelSource` sejak mode ini dibuat, tetapi `diagnosticFrom`
+    // tidak pernah mengembalikannya — sehingga catatan yang paling dibutuhkan ketika
+    // selector gagal membaca nama tidak punya jalur ke layar dari mana pun.
+    const notes = [
+      'display name dibaca dari teks karena atribut name tidak ada',
+      'blok header dibaca dari "pre.raw_message_text" dengan 23 header',
+    ];
+    const { finding, source } = sourceFor(TIER_B, { notes });
+    const model = buildPanelModel(finding, { diagnostic: true, source });
+
+    expect(model.diagnostic?.notes).toEqual(notes);
+  });
+
+  it('membawa daftar catatan kosong, bukan null, supaya "tidak ada catatan" tetap terlihat', () => {
+    const { finding, source } = sourceFor(TIER_B);
+    const model = buildPanelModel(finding, { diagnostic: true, source });
+
+    expect(model.diagnostic?.notes).toEqual([]);
+    expect(buildPanelModel(finding, { diagnostic: true, source }).diagnostic).not.toBeNull();
   });
 
   it('menyebut provenance, karena "Balas ke" yang tidak ada bukan berarti header itu tidak ada', () => {
