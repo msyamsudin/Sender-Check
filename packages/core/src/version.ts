@@ -13,7 +13,7 @@
  * `CHANGELOG.md`. Untuk 0.1.0–0.3.0, yang dirilis sebelum tag dan rilis otomatis dipakai,
  * angkanya tidak dapat direkonstruksi — lihat `docs/CHANGELOG-0.x.md`.
  */
-export const ALGORITHM_VERSION = '0.2.2';
+export const ALGORITHM_VERSION = '0.2.3';
 
 /**
  * Tanggal rilis tabel data non-generated (freemail/ESP/dll) terakhir diperbarui.
@@ -21,4 +21,4 @@ export const ALGORITHM_VERSION = '0.2.2';
  * Seperti `ALGORITHM_VERSION`, nilainya diperbarui otomatis saat rilis bila ada berkas di
  * `packages/core/src/data/` yang berubah.
  */
-export const DATA_UPDATED_AT = '2026-01-01';
+export const DATA_UPDATED_AT = '2026-10-06';

@@ -18,6 +18,7 @@ table berubah.
 
 | Versi | Tanggal | `ALGORITHM_VERSION` | Ringkasan | Catatan rilis |
 |---|---|---|---|---|
+| 0.6.0 | 2026-10-06 | 0.2.3 | Indikator tampilan daftar, popup, footer versi PSL, dan catatan adapter | pesan tag `v0.6.0` |
 | 0.5.1 | 2026-10-04 | 0.2.2 (tidak berubah) | Kunci selector adapter pada snapshot DOM Gmail sungguhan | pesan tag `v0.5.1` |
 | 0.5.0 | 2026-10-04 | 0.2.2 | Mode diagnostik yang menampilkan nilai mentah engine | pesan tag `v0.5.0` |
 | 0.4.2 | 2026-10-04 | 0.2.1 (tidak berubah) | Tunjuk commit bila judul tidak memuat nomor pull request | pesan tag `v0.4.2` |
