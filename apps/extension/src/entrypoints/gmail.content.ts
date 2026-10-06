@@ -32,6 +32,7 @@ import { defineContentScript } from 'wxt/utils/define-content-script';
 import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 import type { ShadowRootContentScriptUi } from 'wxt/utils/content-script-ui/shadow-root';
 import { analyzePage, diagnosticSourceFor } from '../lib/scan.ts';
+import { copyToClipboard } from '../lib/clipboard.ts';
 import { buildPanelModel } from '../lib/panel-model.ts';
 import { renderPanel, type PanelActions } from '../lib/panel-view.ts';
 import '../lib/panel.css';
@@ -135,6 +136,10 @@ export default defineContentScript({
           dismissedAt = location.href;
           void hide();
         },
+        // Teks yang disalin diambil dari model yang sedang digambar, bukan dibentuk ulang
+        // dari temuan: tombol ini harus menyalin persis apa yang sedang dilihat pengguna,
+        // dan dua jalur pembentukan teks akan berarti dua versi untuk satu email.
+        onCopyReport: () => copyToClipboard(model.report),
         onToggleDiagnostic: () => {
           diagnostic = !diagnostic;
           // Digambar ulang lewat jalur yang sama dengan pemindaian biasa, bukan dengan
