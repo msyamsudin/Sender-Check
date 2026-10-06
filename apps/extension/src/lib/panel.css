@@ -185,6 +185,11 @@
 
 .sc-tag {
   flex: none;
+  /* Sengaja tidak ikut meregang: `align-items` bawaan flex adalah `stretch`, sehingga pil
+     mengikuti tinggi baris dan pada kalimat dua-tiga baris ia berubah menjadi elips besar,
+     bukan pil. `border-radius: 999px` membuatnya jelas terlihat. Dengan perataan ini pil
+     selalu setinggi teksnya sendiri. */
+  align-self: flex-start;
   padding: 0 6px;
   border-radius: 999px;
   background: #f2f4f7;
