@@ -444,11 +444,12 @@ sebuah pesan yang punya konsistensi kuat sekaligus inkonsistensi menengah akan d
 ## 9. Spesifikasi UI
 
 - **List view:** indikator halus **hanya** untuk `INCONSISTENT` + `strength: strong`.
-  Tidak ada badge untuk `UNASSESSABLE`/`UNCLEAR`. Satu hal yang harus diputuskan sebelum
-  indikator ini dikerjakan: nama pengirim di list view **dipotong Gmail**, sehingga ia bukan
-  nama yang sama dengan yang dinilai panel saat thread dibuka — lihat §12.1 butir 6.
-- **Thread terbuka:** panel penuh, evidence-first, dengan tombol "Copy report" (belum
-  diimplementasikan). Pada state `UNASSESSABLE` panel **menjelaskan mengapa** ia tidak
+  Tidak ada badge untuk `UNASSESSABLE`/`UNCLEAR`. Nama pengirim yang **dipotong Gmail
+  dilewati sama sekali** — keputusannya ada di §12.1 butir 6 beserta alasannya, dan ia
+  menjaga agar pengirim yang sama tidak memperoleh dua state berbeda antara daftar dan
+  thread.
+- **Thread terbuka:** panel penuh, evidence-first, dengan tombol "Copy report" yang menyalin
+  isi panel apa adanya sebagai teks. Pada state `UNASSESSABLE` panel **menjelaskan mengapa** ia tidak
   menilai dan **menyebut langkah aman** yang dapat dikerjakan pengguna: periksa header asli
   lewat menu ⋮ → "Tampilkan aslinya", tempat panel menilai ulang dengan `Reply-To` dan hasil
   autentikasi. Ekstensi tidak mengambil halaman itu sendiri (D1), dan bagian ini sengaja
@@ -514,7 +515,14 @@ Dua catatan tentang panel ini:
 **Status implementasi.** Yang sudah berlaku di `apps/extension`: disclaimer permanen di
 setiap state, lambang yang menyertai warna sehingga warna bukan satu-satunya pembawa arti,
 tidak ada `innerHTML` di lapisan tampilan (dijaga test), dan tidak ada nama maupun logo
-webmail di dalam produk.
+webmail di dalam produk. **Indikator list view** kini juga ada: penanda hanya dipasang pada
+baris `INCONSISTENT` berbukti kuat dengan nama utuh, dan ia berada di DOM halaman (bukan di
+shadow root) karena yang ditandai adalah baris milik Gmail. **Popup** juga ada: ia tidak menganalisis sendiri melainkan
+meminta isi panel yang sama ke content script lewat pesan runtime (`lib/messaging.ts`),
+sehingga analisisnya identik dengan panel halaman; tombolnya membuka halaman header dengan
+mendorong menu Gmail, dan bila itemnya tidak dikenali pada bahasa pengguna, popup menuliskan
+langkah manualnya. Isi panel dapat disalin lewat tombol "Copy report", dan footer memuat
+`pslVersion` + `pslUpdatedAt` sesuai bagian 6.6.
 
 **Mode diagnostik** sudah ada, dan isinya lebih luas daripada daftar di atas — bukan karena
 rencananya berubah, melainkan karena seluruh nilai yang disebut di situ sudah dihitung engine
@@ -536,10 +544,11 @@ kartu, medan identitas, dan disclaimer tetap sama. Ia juga tidak disimpan ke sto
 bertahan antar pemuatan halaman: bagian ini menyajikan istilah internal dan bukti mentah, dan
 keadaan yang menempel berarti pengguna dapat menemukannya aktif tanpa pernah memintanya.
 
-Yang **belum** dari mode ini, dan disebutkan supaya tidak dikira sudah ada: `notes` adapter
-belum ikut ditampilkan, walaupun sudah dibawa sampai `PanelSource`. Ia berguna justru ketika
-selector gagal membaca nama, dan kegagalan itu sudah terlihat dari `selectorUsed` — jadi
-menampilkannya adalah pekerjaan berikutnya, bukan syarat kebenaran.
+Yang **dari mode ini, dan disebutkan supaya tidak diduga**: `notes` adapter ikut ditampilkan
+sebagai bagian "Catatan adapter", lengkap dengan keadaan kosongnya — "tidak ada catatan" dan
+"catatan tidak ditampilkan" adalah dua hal yang berbeda, dan membedakan keduanya justru fungsi
+mode ini. Ia berguna justru ketika selector gagal membaca nama, dan kegagalan itu sudah terlihat
+dari `selectorUsed`.
 
 Yang **belum**: i18n. Kalimatnya baru tersedia dalam bahasa Indonesia, dan itu disengaja —
 menerjemahkan ke bahasa yang belum ada penggunanya menghasilkan teks yang tidak pernah
@@ -565,10 +574,11 @@ sudah dipakai, sesuai butir pertama. Permission minimal sudah, dan dijaga test y
 `<all_urls>`, `tabs`, `webRequest`, `cookies`, serta `history`. Multi-akun sudah: pencocokan
 host maupun pengenalan thread tidak membedakan nomor `u/N`.
 
-Yang **belum** adalah `IntersectionObserver` dan cache `storage.session`, dan keduanya
-memang belum dibutuhkan: keduanya baru bermakna ketika puluhan baris dianalisis sekaligus,
-yaitu pekerjaan list view yang belum dikerjakan. Menambahkannya sekarang berarti menulis
-cache untuk satu thread yang isinya paling banyak beberapa pengirim.
+Yang **belum** adalah `IntersectionObserver` dan cache `storage.session`, dan sekarang alasan
+menundanya sudah habis: indikator list view (§9) menilai seluruh baris pada setiap perubahan
+DOM, yaitu persis keadaan yang semula disebut sebagai syarat agar keduanya bermakna. Keduanya
+kini terdaftar di §13.1 sebagai pekerjaan berikutnya, beserta permission `storage` yang
+menyertainya — dan permission itu baru diminta bersama kodenya, bukan lebih dulu.
 
 ---
 
@@ -665,19 +675,24 @@ tools/corpus/                     fixture berlabel + harness CLI + laporan + tes
 tools/gen-psl/                    generator build-time dari daftar PSL resmi
 tools/gen-unicode/                generator build-time dari confusables.txt
 examples/                         contoh pemakaian yang dapat dijalankan
-docs/                             DESIGN.md, USAGE.md, RULES.md
+docs/                             DESIGN.md, USAGE.md, RULES.md, FIREFOX.md, CHANGELOG-0.x.md
 ```
 
 Struktur lengkapnya:
 
 ```
-apps/extension/                   ekstensi Firefox (WXT): content script + panel
+apps/extension/                   ekstensi Firefox (WXT): content script + panel + popup
   src/entrypoints/gmail.content.ts  perekat: kapan memindai, kapan menggambar
+  src/entrypoints/popup/            popup: isi panel yang sama + tombol header lengkap
   src/lib/view.ts                   jenis halaman: thread, list, show-original, lain
   src/lib/scan.ts                   adapter + engine menjadi temuan siap tampil
   src/lib/panel-model.ts            isi panel sebagai data, tanpa DOM
   src/lib/panel-view.ts             menuangkan model ke elemen
-  tests/                            60 test tanpa browser
+  src/lib/messaging.ts              kontrak pesan popup <-> content script
+  src/lib/clipboard.ts              menyalin laporan, dengan fallback execCommand
+  src/lib/panel.css                 gaya panel
+  src/lib/popup.css                 penyesuaian kartu untuk jendela popup
+  tests/                            66 test tanpa browser
 ```
 
 `packages/adapters`, `tools/console`, dan ekstensinya sudah ada. Jadi **tidak ada lagi paket
@@ -698,8 +713,16 @@ Satu batas yang **bukan** pilihan melainkan syarat kebenaran: panel hanya membac
 dalam percakapan yang terbuka, satu pengirim per pesan. Alasannya ada di bagian 12.1 butir 5,
 dan akibat mengabaikannya bukan panel kosong melainkan panel yang salah dengan yakin.
 
-Adapter wajib punya `probe(): { matched, selectorUsed, confidence }`. Bila semua selector gagal,
-extension **no-op + diagnostic log** — jangan diam-diam tidak berjalan. Untuk snapshot DOM,
+Adapter **tidak punya** fungsi `probe()` dan tidak pernah menghasilkan `confidence` — keduanya
+pernah ditulis di sini seolah kode, dan kodenya tidak pernah ada. Yang benar-benar ada adalah
+dua laporan di `packages/adapters/src/types.ts`: `scanGmailInbox(doc, options)` mengembalikan
+`AdapterReport` (`matched`, `selectorUsed`, `probes`, `senders`, `gmailOwnWarning`, `notes`),
+dan `scanGmailShowOriginal(doc)` mengembalikan `HeaderReport` (`matched`, `probes`, `headers`,
+`identity`, `notes`). Yang mendekati "probe" adalah skrip konsol
+`tools/console/dist/sender-check.probe.js`, yang memang menjalankan pembacaan pada halaman
+sungguhan dan mencetak `probes`-nya; `confidence` memang ada, tetapi milik `Verdict` di engine,
+bukan milik adapter. Bila semua selector gagal, extension **no-op + diagnostic log** — jangan
+diam-diam tidak berjalan. Untuk snapshot DOM,
 `packages/adapters/tests/gmail-snapshots.test.ts` mengurai `outerHTML` sungguhan lewat `linkedom`;
 **tiga dari empat berkasnya sudah diambil** — `list-row.html`, `thread-open.html`, dan
 `show-original.html` — sementara `thread-no-name.html` belum dapat diambil dan alasannya dicatat di
@@ -769,11 +792,20 @@ perubahan Gmail.
    nama 19 karakter (`"Alpha Capital Group"`) utuh. Karena `notes` tidak memuat satu pun catatan
    "dibaca dari teks", pemotongan itu ada di **atribut `name` Gmail sendiri**, bukan di adapter.
    Akibatnya bukan sekadar kosmetik: token yang seharusnya dibandingkan bisa hilang, dan indikator
-   list view yang belum dibangun (§9) akan menilai nama yang berbeda dari yang dinilai panel saat
+   list view yang kini dibangun (§9) akan menilai nama yang berbeda dari yang dinilai panel saat
    thread dibuka — pengirim yang sama dapat memperoleh dua state berbeda. Perbedaan itu harus
    diputuskan sebelum indikatornya dikerjakan. `list-row.html` menyimpan salah satu contohnya;
    `thread-open.html` belum dapat menjawab apakah thread menampilkan nama penuh, karena nama
    pengirim pada berkas itu pendek.
+
+   **Keputusan: indikator list view melewatkan nama yang terpotong.** Penanda hanya dipasang
+   bila nama di daftar utuh, sehingga kegagalannya selalu ke arah "tidak menampilkan" —
+   bukan "menampilkan penilaian yang salah". Itu pilihan yang sama dengan presisi-pertama
+   di §9 dan dengan aturan "panel kosong lebih baik daripada panel yang salah" di butir 5.
+   Tanda potongnya sendiri adalah heuristik yang sengaja sempit: nama tepat 20 karakter yang
+   berakhir titik — pola yang muncul pada kedua contoh di atas — sehingga ia juga gagal ke
+   arah yang aman. Penerapannya ada di `apps/extension/src/lib/scan.ts`
+   (`isTruncatedName`), dan testnya mengunci kedua contoh asli itu.
 
 Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 
@@ -799,7 +831,7 @@ Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 | 4 | Similarity engine + aturan panjang token (§7) | **selesai** |
 | 5 | Evidence engine + decision table (deterministik, traceable) | **selesai** |
 | 6 | Classification + corpus harness CLI + confusion matrix | **selesai** |
-| 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, dan panel ekstensi ada; **selectornya sudah diverifikasi pada Gmail sungguhan** dan tiga di antaranya kini dikunci snapshot (list view, thread terbuka, Show original; satu akun, satu varian antarmuka); yang belum adalah **indikator di list view** itu sendiri, bukan selectornya |
+| 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, panel ekstensi, popup, dan **indikator list view** ada; **selectornya sudah diverifikasi pada Gmail sungguhan** dan tiga di antaranya kini dikunci snapshot (list view, thread terbuka, Show original; satu akun, satu varian antarmuka). Yang belum: indikator list view **belum pernah dilihat pada halaman sungguhan** — ia memakai selector baris yang sama dengan yang sudah terverifikasi, tetapi pemasangan penandanya sendiri belum |
 | 8 | Perluas corpus + tuning precision-first | sebagian — 404 kasus, gate lulus |
 | 9 | Tier B: parse halaman "Show original" | sebagian — rule dan adapter halaman lengkap dan teruji, **dan sudah diverifikasi pada halaman sungguhan** (blok header mentah di `pre.raw_message_text`, 23 header, termasuk `Reply-To`); snapshot `show-original.html` sudah tersimpan, sehingga assertion Tier B berjalan pada markup nyata |
 | 10 | Performa, i18n, privacy policy, packaging & release | belum — lihat catatan i18n di §9 |
@@ -809,38 +841,30 @@ core terbukti presisi, karena tuning rule di atas sinyal yang cakupannya sebagia
 menghasilkan threshold yang salah.
 
 Phase 7 sengaja dinyatakan **sebagian**, bukan selesai, walaupun kodenya sudah ada dan jalurnya
-sudah terbukti pada Gmail sungguhan. Yang belum bukan lagi pembuktian selector, melainkan
-**indikator di list view** — dan ia menunggu keputusan, bukan pengamatan: nama pengirim di daftar
-dipotong Gmail, sehingga indikator itu akan menilai nama yang berbeda dari yang dinilai panel saat
-thread dibuka (§12.1 butir 6).
+sudah terbukti pada Gmail sungguhan. Indikator list view kini **sudah ditulis**, termasuk
+keputusan pemotongan namanya (§12.1 butir 6), tetapi ia belum pernah dilihat berjalan pada
+halaman Gmail sungguhan — dan karena itu ia belum dihitung selesai.
 
 ### 13.1 Yang perlu dikerjakan selanjutnya
 
-Daftar ini mengumpulkan pekerjaan yang selama ini tersebar sebagai catatan "belum" di §6.6, §9,
+Daftar ini mengumpulkan pekerjaan yang selama ini tersebar sebagai catatan "belum" di §9,
 §10, §12.1, §13, dan §15.5. Ia sengaja **tidak** mengulang alasannya: setiap baris menunjuk bagian
 yang menjelaskannya, supaya tidak ada dua salinan yang bisa menyimpang. Kolom "Menunggu" bukan
-prioritas melainkan **ketergantungan** — dua baris menunggu pengamatan yang belum ada, dan satu
-menunggu keputusan yang harus diambil sebelum indikator list view ditulis.
+prioritas melainkan **ketergantungan** — dua baris di antaranya menunggu pengamatan yang belum
+ada, dan keputusan yang menunggu indikator list view sudah diambil (§12.1 butir 6).
 
 | Pekerjaan | Sifat | Menunggu | Rujukan |
 |---|---|---|---|
-| Putuskan bagaimana nama yang dipotong Gmail diperlakukan di list view | keputusan | — | §12.1 butir 6 |
 | Verifikasi penanda "via" pada halaman yang benar-benar menampilkannya | pengamatan | sesi Gmail yang menampilkan `via <domain>` | §12.1 butir 4 |
 | Ambil `thread-no-name.html` bila pengirim tanpa nama ditemukan | pengamatan | halaman yang memuatnya; bentuk yang benar: teks elemen = alamat | [`dom-snapshots/README.md`](../tools/corpus/dom-snapshots/README.md) |
-| Indikator list view, hanya `INCONSISTENT` + `strong` | kode | keputusan pemotongan nama | §9, D2 |
-| Cache `chrome.storage.session`, LRU ~500, beserta permission `storage` | kode | indikator list view | §10 |
-| `IntersectionObserver` untuk baris yang terlihat | kode | indikator list view | §10 |
-| Popup: analisis pesan aktif + tombol header lengkap | kode | — | §9, D2 |
-| Tombol "Copy report" pada panel | kode | — | §9 |
-| Tampilkan `notes` adapter di mode diagnostik | kode | — | §9 |
-| `pslUpdatedAt` di footer, bersama `pslVersion` | kode | — | §6.6 |
+| Cache `chrome.storage.session`, LRU ~500, beserta permission `storage` | kode | — | §10 |
+| `IntersectionObserver` untuk baris yang terlihat | kode | — | §10 |
 | i18n EN — hanya `packages/presentation` yang berubah | kode | ada pengguna berbahasa Inggris | §9 |
 | Halaman privasi | dokumen | — | §9, §14 |
 | Packaging dan publikasi ke AMO | rilis | halaman privasi | §13 Phase 10 |
 | Perluas `adversarial.json` lebih dulu, bukan `suspicious.json` | kualitas | — | §15.5 butir 1 |
 | Daftar brand kurasi dengan lisensi yang jelas | kualitas | lisensi yang jelas | §15.4, §15.5 butir 2 |
 | Naikkan recall setelah presisi bertahan 100% dua putaran | kualitas | dua putaran perubahan berturut-turut | §15.5 butir 3 |
-| Samakan §12 dengan `AdapterReport` yang sebenarnya: fungsi `probe()` dan medan `confidence` tidak ada di kode | dokumen | — | §12 |
 | Rekam ulang `show-original.html` dari `div[role="main"] pre` bila wadah spesifik ingin ikut teruji | fixture | — | §12 |
 
 Seluruh baris di atas berada di luar `packages/core`. Engine, corpus, dan decision table tidak

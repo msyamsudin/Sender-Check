@@ -158,7 +158,7 @@ Tanpa mengubah struktur atau nama atributnya. Struktur itulah yang sedang diperi
 ## Ekstensi Firefox
 
 Ekstensi ada di `apps/extension`, dibangun dengan [WXT](https://wxt.dev). Bentuknya sengaja
-sempit: satu content script, tanpa background, tanpa popup, tanpa halaman opsi.
+sempit: satu content script dan satu popup, tanpa background, tanpa halaman opsi.
 
 ### Yang dilakukannya
 
@@ -166,12 +166,22 @@ sempit: satu content script, tanpa background, tanpa popup, tanpa halaman opsi.
 |---|---|
 | Satu thread sedang dibuka | Panel muncul di sudut kanan bawah: state, identitas pengirim, alasan, hasil autentikasi, dan disclaimer |
 | Halaman "Show original" | Panel yang sama, dengan sinyal Tier B: `Reply-To`, `Return-Path`, `Authentication-Results` |
-| List view, hasil pencarian, halaman pengaturan | **Tidak ada panel.** Disengaja — lihat di bawah |
+| List view, hasil pencarian, halaman pengaturan | **Tidak ada panel.** Pada list view hanya muncul penanda kecil pada baris yang memenuhi syarat (lihat di bawah); di halaman lain tidak ada apa-apa |
+| Ikon toolbar ditekan | Popup menampilkan analisis pesan yang sedang terbuka — isi yang sama dengan panel — plus tombol "Analisis header lengkap" dan langkah manualnya. Di luar thread yang terbuka, popup hanya menyatakan belum ada yang dapat dianalisis |
 
-Panel hanya muncul ketika pengguna membuka satu pesan. Indikator di list view berarti sinyal
-muncul tanpa diminta pada puluhan baris sekaligus, dan itu menuntut presisi yang belum
-dimiliki alat ini. Panel yang muncul saat pengguna memang sedang memeriksa satu pesan jauh
-lebih mudah dipertanggungjawabkan.
+Popup tidak menganalisis halaman sendiri: ia meminta isi panel kepada content script yang
+sudah berada di halaman Gmail, lewat kontrak pesan di `apps/extension/src/lib/messaging.ts`.
+Karena itu jawabannya selalu sama dengan yang sedang dilihat di halaman, dan popup tidak
+memerlukan permission apa pun di luar yang sudah diminta manifesnya.
+
+Panel hanya muncul ketika pengguna membuka satu pesan. Di **list view** yang muncul bukan
+panel melainkan penanda per baris, dan syaratnya sengaja sempit: hanya `INCONSISTENT` dengan
+bukti `strong`, hanya bila nama di daftar **tidak dipotong Gmail**, dan tidak ada tanda sama
+sekali untuk `UNCLEAR` maupun `UNASSESSABLE`. Pemotongan nama itu yang membuatnya perlu
+sempit: nama di daftar berbeda dari nama yang dinilai panel saat thread dibuka, sehingga
+menilainya akan membuat pengirim yang sama memperoleh dua state berbeda — keputusannya ada di
+`docs/DESIGN.md` bagian 12.1 butir 6. Penanda berada di DOM halaman, bukan di dalam panel,
+karena yang ditandai adalah baris milik Gmail.
 
 ### Yang dibaca panel: satu pengirim per pesan
 
@@ -248,17 +258,19 @@ Dua hal, dan keduanya disengaja agar batas kemampuannya jelas:
    beberapa pengirim, yang ditampilkan tetap hanya satu: temuan yang paling perlu diperiksa.
    Menampilkan satu panel per pesan menuntut adapter mengembalikan elemen DOM, dan adapter
    sengaja hanya mengembalikan data.
-2. **Tanpa cache.** `docs/DESIGN.md` merencanakan cache `storage.session` bersama list view.
-   Selama panel hanya bekerja pada satu thread, cache belum dibutuhkan, dan permission
-   `storage` belum diminta.
+2. **Tanpa cache dan tanpa `IntersectionObserver`.** `docs/DESIGN.md` merencanakan cache
+   `storage.session` (LRU ~500) bersama pembatasan analisis pada baris yang terlihat. Keduanya
+   belum dikerjakan: penanda list view kini menilai seluruh baris yang ada di daftar, dan
+   selama daftarnya satu layar hal itu tidak terasa. Meminta permission `storage` sebelum ia
+   dipakai akan membuat tinjauan izin menanyakan sesuatu yang belum dapat dijelaskan.
 
 ### Mode diagnostik
 
 Panel biasa menjelaskan **apa** yang ditemukan. Mode diagnostik menjelaskan **atas dasar apa**,
 dan ia ada karena nilai-nilainya sudah dihitung engine sejak awal tetapi tidak punya jalur ke
 layar: `confidence` keseluruhan, keputusan `gate`, seluruh baris decision table, versi
-algoritma dan PSL, `provenance`, dan setiap bukti apa adanya — termasuk `args` dan `trace`
-mentahnya.
+algoritma dan PSL, `provenance`, catatan adapter (`notes`), dan setiap bukti apa adanya —
+termasuk `args` dan `trace` mentahnya.
 
 Ada dua cara membukanya, dan keduanya tindakan yang disengaja:
 
@@ -375,10 +387,13 @@ kedua halaman**, bukan hanya di inbox.
 | `viaHint` tidak pernah terisi, `span.zx` selalu "tidak cocok" | Diharapkan, sampai ada bukti sebaliknya. Selector penanda "via" **belum pernah cocok** pada satu pun halaman Gmail yang diuji, jadi keluarannya memang `undefined`. Kalau kamu sendiri **melihat** `via <domain>` pada baris pengirim di Gmail, kirimkan keluaran probe halaman itu: hanya pengamatan seperti itu yang dapat menentukan selector mana yang benar |
 | Panel ekstensi tidak muncul | Empat sebab yang mungkin, berurutan dari yang paling sering: halamannya bukan thread yang terbuka (list view memang tidak menampilkan panel), halaman itu belum memuat wadah percakapan (`[data-message-id]`) sehingga panel sengaja diam, tidak ada pengirim yang terbaca, atau URL-nya tidak dikenali sebagai thread. Jalankan `sender-check.probe.js` di halaman itu: `notes` menyebutkan batas mana yang gagal |
 | Panel muncul di halaman yang bukan thread | Kirimkan URL-nya. Pengenalan thread memakai bentuk hash URL, dan halaman Gmail yang tidak lazim dapat salah dikenali. Aturannya ada di `apps/extension/src/lib/view.ts` beserta testnya |
+| Penanda tidak muncul di list view | Periksa tiga syaratnya, berurutan: barisnya memang `INCONSISTENT` berbukti `strong`? nama di daftar tidak dipotong (tepat 20 karakter dan berakhir titik)? dan halamannya memang daftar? Ketiganya disengaja — penanda yang tidak muncul lebih baik daripada penanda yang menilai nama potong |
 | Panel muncul tetapi isinya kosong | Kirimkan tangkapan layarnya. Kemungkinan besar ada elemen yang gagal dibuat, dan itu kesalahan di lapisan tampilan, bukan di analisis |
 | Panel menampilkan alamat yang sama — misalnya alamat Anda sendiri — untuk setiap email yang dibuka | Sebelum lingkup percakapan ada, chip penerima ("to saya") di dalam pesan yang sama ikut dibaca sebagai pengirim, dan `pickPrimary` memilihnya karena temuan terberat. Sekarang yang dibaca hanya elemen beralamat pertama pada baris pengirim. Bila masih terjadi, jalankan `sender-check.probe.js` di halaman itu dan kirimkan keluarannya: probe sengaja membaca seluruh halaman, sehingga ia menunjukkan elemen mana yang cocok |
 | Panel menampilkan pengirim yang benar, tetapi panelnya tidak berubah setelah berpindah email | Berbeda dari baris di atas: yang salah bukan yang dibaca, melainkan apakah panel digambar ulang. Buka konsol halaman, cari pesan berawalan `[Sender-Check]`, lalu kirimkan keluaran `console.warn` yang muncul beserta URL tiap email |
 | Tombol "Periksa header asli" tidak ada | Benar: tombol itu dicabut. Yang tersedia adalah langkah manual di bagian "Yang preventif pada state 'belum dapat dinilai'" — menu ⋮ → "Tampilkan aslinya", dan panel menilai ulang di halaman itu |
+| Popup menulis "Panel belum terpasang di halaman ini" | Content script belum berjalan di tab itu: umumnya terjadi setelah ekstensi dipasang pertama kali tanpa memuat ulang tab Gmail. Muat ulang tab-nya. Isi popup juga memang kosong di luar thread yang terbuka — itu keadaan yang benar, bukan kegagalan |
+| Tombol "Analisis header lengkap" hanya membuka menu, tanpa membuka halaman | Item menunya tidak dikenali pada bahasa Gmail yang dipakai. Menunya memang sudah terbuka, jadi pilih "Tampilkan aslinya" di situ. Nama item yang dikenali kini hanya Indonesia dan Inggris; kirimkan nama aslinya kalau bahasamu berbeda, supaya daftarnya dapat ditambah |
 
 ## Yang masih menunggu
 

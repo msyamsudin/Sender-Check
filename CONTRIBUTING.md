@@ -208,5 +208,6 @@ Bagian 13 pada `docs/DESIGN.md` memuat status setiap phase. Selector adapter sud
 Gmail sungguhan, dan tiga dari empat snapshot DOM-nya sudah tersimpan di
 `tools/corpus/dom-snapshots/`. Yang belum dapat diambil adalah snapshot pengirim **tanpa display
 name** — alasannya, termasuk bentuk markup yang benar bila suatu saat ditemukan, ada di README
-direktori itu. Di luar itu, yang menunggu bukan lagi pengamatan melainkan pekerjaan kode: indikator
-list view beserta cache-nya, tombol "Copy report", i18n, halaman privasi, dan packaging.
+direktori itu. Di luar itu, yang menunggu bukan lagi pengamatan melainkan pekerjaan kode: cache
+`storage.session` dan `IntersectionObserver` untuk indikator list view, i18n, halaman
+privasi, dan packaging.
