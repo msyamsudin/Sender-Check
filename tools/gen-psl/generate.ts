@@ -103,6 +103,29 @@ function encode(values: readonly string[]): string {
   return values.join('\n');
 }
 
+/**
+ * Waktu pembaruan daftar dalam bentuk ISO-8601 UTC, atau `unknown`.
+ *
+ * Header `VERSION` resmi PSL berbentuk `2026-09-21_18-50-07_UTC`: timestamp yang sudah
+ * benar tetapi bukan bentuk yang layak dibaca manusia. Yang diubah hanya **bentuknya** —
+ * nilainya diambil dari berkas daftar, bukan dari jam, sehingga regenerasi yang tidak
+ * mengubah daftar selalu menghasilkan nilai yang sama. `docs/DESIGN.md` bagian 6.6
+ * meminta `pslUpdatedAt` ini disertakan di footer UI bersama `pslVersion`.
+ *
+ * `unknown` untuk versi yang tidak dikenali, bukan tanggal karangan: footer yang menulis
+ * tanggal palsu lebih buruk daripada footer yang menyatakan ia tidak tahu.
+ */
+function toIsoTimestamp(version: string): string {
+  const match =
+    /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})_(?<hour>\d{2})-(?<minute>\d{2})-(?<second>\d{2})_UTC$/.exec(
+      version,
+    );
+  const groups = match?.groups;
+  if (groups === undefined) return 'unknown';
+
+  return `${groups['year']}-${groups['month']}-${groups['day']}T${groups['hour']}:${groups['minute']}:${groups['second']}Z`;
+}
+
 function emit(list: ParsedList): string {
   return `// AUTO-GENERATED — JANGAN DIEDIT MANUAL.
 //
@@ -119,6 +142,11 @@ function emit(list: ParsedList): string {
 // didelegasikan lewat suffix privat (mis. foo.github.io) sebagai subdomain-delegated.
 
 export const PSL_VERSION = '${list.version}';
+/**
+ * Waktu daftar ini diperbarui, dalam ISO-8601 UTC.
+ * Diturunkan dari header VERSION di atas, bukan dari jam mesin build.
+ */
+export const PSL_UPDATED_AT = '${toIsoTimestamp(list.version)}';
 export const PSL_COMMIT = '${list.commit}';
 
 /** Suffix publik yang cocok persis. */

@@ -25,7 +25,7 @@
  * panel biasa dan panel diagnostik menyatakan hal yang sama, dan yang kedua hanya menyebutkan
  * dasarnya.
  */
-import { resolveProvenance, type State, type Verdict } from '@sender-check/core';
+import { resolveProvenance, PSL_UPDATED_AT, PSL_VERSION, type State, type Verdict } from '@sender-check/core';
 import {
   AUTHENTICATION_CAVEAT,
   DISCLAIMER_LINES,
@@ -87,6 +87,15 @@ export interface PanelDiagnostic {
   readonly winner: string | null;
   /** Daftar kode bukti — termasuk yang tidak ditampilkan panel. */
   readonly codes: string;
+  /**
+   * Catatan adapter, apa adanya: kenapa sebuah selector dipakai, kenapa nama jatuh ke teks,
+   * kenapa halaman tidak menghasilkan apa pun.
+   *
+   * Kosong bila adapter tidak mencatat apa pun — dan barisnya tetap digambar oleh lapisan
+   * tampilan, karena "tidak ada catatan" dan "catatan tidak ditampilkan" adalah dua hal
+   * yang berbeda, dan membedakan keduanya adalah fungsi mode diagnostik ini.
+   */
+  readonly notes: readonly string[];
   /** Satu baris per kode bukti: polaritas, kekuatan, kalimat, `args`, dan trace mentahnya. */
   readonly reasons: readonly PanelDiagnosticReason[];
 }
@@ -156,6 +165,16 @@ export interface PanelModel {
   readonly guidance: string | null;
   readonly disclaimer: readonly string[];
   /**
+   * Baris versi di footer — `pslVersion` dan `pslUpdatedAt` keduanya, seperti yang diminta
+   * `docs/DESIGN.md` bagian 6.6.
+   *
+   * Nilainya diambil dari daftar yang **dibundel**, bukan dari `Verdict.pslVersion`:
+   * footer menyatakan alat mana yang dipakai halaman ini, sedangkan verdikt bisa saja
+   * menulis `unknown` karena sebuah hostname tidak dapat diurai — dan "PSL unknown" pada
+   * footer akan terbaca sebagai kerusakan padahal itu keadaan yang benar.
+   */
+  readonly footer: readonly string[];
+  /**
    * Isi mode diagnostik, atau `null` bila mode itu tidak diminta.
    *
    * Semua yang ada di sini sudah dihitung engine dan sebelumnya tidak punya jalur ke DOM:
@@ -164,6 +183,18 @@ export interface PanelModel {
    * (`neutral`).
    */
   readonly diagnostic: PanelDiagnostic | null;
+  /**
+   * Seluruh isi panel sebagai satu teks, siap disalin pengguna lewat tombol "Salin laporan".
+   *
+   * Berkas ini memutuskan apa yang ditampilkan — dan laporan itu **adalah** panel, dalam
+   * bentuk yang dapat ditempel di tempat lain. Karena itu ia dibentuk dari model yang sama,
+   * bukan dari temuan secara terpisah: dua jalur akan menghasilkan dua versi kebenaran untuk
+   * satu email, dan versi yang salah justru yang disalin keluar dari panel.
+   *
+   * Ia tidak memuat subjek maupun isi pesan, persis seperti panelnya — batas privasi di
+   * `docs/DESIGN.md` bagian 9 berlaku untuk apa pun yang keluar dari panel.
+   */
+  readonly report: string;
 }
 
 /**
@@ -374,6 +405,7 @@ function buildDiagnostic(finding: SenderFinding, source: PanelSource): PanelDiag
     rows: buildTrace(diagnostic.trace),
     winner: winnerRow === null ? null : `baris ${winnerRow.row} menentukan hasilnya`,
     codes: diagnostic.evidence.map((row) => row.code).join('  ') || '(tidak ada bukti)',
+    notes: diagnostic.notes,
     reasons: diagnostic.evidence.map((row) => ({
       heading: `${row.code} · ${row.polarity}/${row.strength} · tier ${row.tier}`,
       sentence: row.sentence,
@@ -381,6 +413,68 @@ function buildDiagnostic(finding: SenderFinding, source: PanelSource): PanelDiag
       trace: row.trace,
     })),
   };
+}
+
+/**
+ * Baris versi di footer panel.
+ *
+ * Satu baris, bukan dua: keduanya menerangkan **satu** hal yang sama — daftar suffix mana
+ * yang berlaku dan seberapa baru daftar itu — dan dipisah menjadi dua baris akan membuat
+ * footer tumbuh tanpa menambah informasi. Formatnya sama dengan yang dipakai laporan corpus
+ * (`tools/corpus/src/harness.ts`), supaya angka yang dilihat pengguna dan angka yang dilihat
+ * pengembang dapat dicocokkan.
+ */
+function buildFooter(): string[] {
+  return [`PSL ${PSL_VERSION} · diperbarui ${PSL_UPDATED_AT}`];
+}
+
+/**
+ * Laporan teks dari isi panel.
+ *
+ * Satu fungsi, dipanggil sekali di akhir `buildPanelModel`, sehingga tombol "Salin laporan"
+ * tidak pernah dapat menyalin sesuatu yang berbeda dari yang sedang dilihat pengguna.
+ * Urutannya sama dengan urutan panel: kepala, medan, alasan, autentikasi, bagian preventif,
+ * disclaimer, lalu baris versi.
+ */
+function buildReport(model: Omit<PanelModel, 'report'>): string {
+  const lines: string[] = [
+    'Laporan Sender-Check',
+    '',
+    `${model.mark} ${model.title}`,
+    model.subject,
+    '',
+  ];
+
+  // Label diratakan dengan spasi, bukan ditulis dengan lebar tetap: `Dikirim oleh` lebih
+  // panjang dari yang lain, dan lebar tetap akan membuat kolomnya miring.
+  const width = model.fields.reduce((max, field) => Math.max(max, field.label.length), 0);
+  for (const field of model.fields) {
+    lines.push(`${field.label.padEnd(width)} : ${field.value}`);
+  }
+
+  lines.push('', 'Mengapa:');
+  if (model.reasons.length === 0) {
+    lines.push('(tidak ada bukti yang dapat ditampilkan)');
+  } else {
+    for (const reason of model.reasons) {
+      const tag = reason.context ? reason.label : `${reason.label} · ${reason.strength}`;
+      lines.push(`- [${tag}] ${reason.sentence}`);
+    }
+  }
+
+  if (model.authentication.length > 0) {
+    lines.push('', 'Autentikasi:');
+    for (const sentence of model.authentication) lines.push(`- ${sentence}`);
+  }
+
+  if (model.basis !== null || model.guidance !== null) {
+    lines.push('');
+    if (model.basis !== null) lines.push(model.basis);
+    if (model.guidance !== null) lines.push(model.guidance);
+  }
+
+  lines.push('', ...model.disclaimer, '', ...model.footer);
+  return lines.join('\n');
 }
 
 /**
@@ -404,7 +498,7 @@ export function buildPanelModel(finding: SenderFinding, options: PanelOptions = 
     guidance = onHeader ? UNASSESSABLE_GUIDANCE_ON_HEADER : UNASSESSABLE_GUIDANCE;
   }
 
-  return {
+  const base: Omit<PanelModel, 'report'> = {
     state: finding.state,
     mark: MARK[finding.state],
     title: STATE_TITLE[finding.state],
@@ -415,9 +509,12 @@ export function buildPanelModel(finding: SenderFinding, options: PanelOptions = 
     basis: unassessable ? unassessableBasis(finding) : null,
     guidance,
     disclaimer: DISCLAIMER_LINES,
+    footer: buildFooter(),
     diagnostic:
       options.diagnostic === true && source !== undefined
         ? buildDiagnostic(finding, source)
         : null,
   };
+
+  return { ...base, report: buildReport(base) };
 }

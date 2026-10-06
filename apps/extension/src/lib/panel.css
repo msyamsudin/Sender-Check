@@ -185,6 +185,11 @@
 
 .sc-tag {
   flex: none;
+  /* Sengaja tidak ikut meregang: `align-items` bawaan flex adalah `stretch`, sehingga pil
+     mengikuti tinggi baris dan pada kalimat dua-tiga baris ia berubah menjadi elips besar,
+     bukan pil. `border-radius: 999px` membuatnya jelas terlihat. Dengan perataan ini pil
+     selalu setinggi teksnya sendiri. */
+  align-self: flex-start;
   padding: 0 6px;
   border-radius: 999px;
   background: #f2f4f7;
@@ -250,6 +255,38 @@
 
 .sc-disclaimer-line {
   margin: 0;
+}
+
+/* Baris versi di footer (`pslVersion` + `pslUpdatedAt`, `docs/DESIGN.md` bagian 6.6).
+   Dibedakan dari disclaimer karena menerangkan alatnya, bukan temuannya — dan bentuk
+   monospace-nya menandai bahwa ini nilai yang dapat dicocokkan, bukan kalimat. */
+.sc-meta {
+  margin: 6px 0 0;
+  color: #98a2b3;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  word-break: break-all;
+}
+
+/* Tombol "Salin laporan". Sengaja tipis dan tanpa warna aksen: ia meneruskan isi yang
+   sudah dilihat pengguna, bukan tindakan yang menuntut keputusan. */
+.sc-copy {
+  display: block;
+  margin: 8px 0 0;
+  padding: 3px 8px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  background: transparent;
+  color: #475467;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.sc-copy:hover {
+  background: #f2f4f7;
+  color: #101828;
 }
 
 /* --- Mode diagnostik --------------------------------------------------------------

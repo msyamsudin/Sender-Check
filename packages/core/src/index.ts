@@ -23,7 +23,7 @@ export {
   parseAddress,
 } from './domain/address.ts';
 export type { ParsedAddress } from './domain/address.ts';
-export { isIpLiteral, parsePublicSuffix, PSL_VERSION } from './domain/psl.ts';
+export { isIpLiteral, parsePublicSuffix, PSL_UPDATED_AT, PSL_VERSION } from './domain/psl.ts';
 export type { PublicSuffixResult } from './domain/psl.ts';
 
 // Nama

@@ -12,11 +12,17 @@
 import { analyze, type EmailIdentity, type State } from '@sender-check/core';
 import {
   scanGmailInbox,
+  scanGmailList,
   scanGmailShowOriginal,
   type DocumentLike,
+  type ListRowReading,
   type LocationLike,
 } from '@sender-check/adapters';
-import { toFinding, type SenderFinding } from '@sender-check/presentation';
+import {
+  STATE_TITLE,
+  toFinding,
+  type SenderFinding,
+} from '@sender-check/presentation';
 import type { PanelSource } from './panel-model.ts';
 import { classifyPage, type PageKind } from './view.ts';
 
@@ -224,4 +230,109 @@ export function analyzePage(doc: DocumentLike, page: LocationLike): PageAnalysis
     notes: [],
     diagnosticSource: EMPTY_DIAGNOSTIC,
   };
+}
+
+/**
+ * Panjang nama yang dianggap terpotong, beserta tandanya.
+ *
+ * Gmail memotong `name` pada baris daftar tepat di 20 karakter dan menambahkan titik di
+ * belakangnya — buktinya ada di snapshot `list-row.html` (`"Contoh Sekuritas In."`) dan
+ * dihasilkan dari probe 100 baris (§12.1 butir 6): nama 19 karakter tetap utuh, nama yang
+ * melewati batas berhenti di 20 dengan titik.
+ *
+ * Heuristiknya sengaja sempit: **hanya** 20 karakter dan **hanya** berakhir titik. Ia
+ * menangkap pola yang benar-benar teramati, dan gagal ke arah yang aman — nama yang salah
+ * dianggap potong hanya membuat penanda tidak muncul, bukan muncul untuk penilaian yang
+ * salah. Nama yang salah dianggap utuh akan menilai nama potong, dan itulah yang harus
+ * dicegah (keputusan §12.1 butir 6).
+ */
+export const TRUNCATED_NAME_LENGTH = 20;
+
+/** `true` bila nama itu tanda pemotongan Gmail, bukan nama utuh. */
+export function isTruncatedName(name: string | null): boolean {
+  if (name === null) return false;
+  const trimmed = name.trimEnd();
+  return trimmed.length === TRUNCATED_NAME_LENGTH && trimmed.endsWith('.');
+}
+
+/** Satu penanda untuk satu baris daftar. */
+export interface ListFlag {
+  readonly state: State;
+  /** Teks untuk tooltip dan `aria-label` — kalimat yang sama dengan panel. */
+  readonly reason: string;
+  /** Elemen mana di dalam baris yang harus menerima penanda. */
+  readonly sourceSelector: string;
+}
+
+export interface ListAnalysis {
+  /** `false` bila halaman ini tidak memuat baris daftar sama sekali. */
+  readonly matched: boolean;
+  /**
+   * Satu entri per baris, urut dokumen. `null` = baris itu tidak diberi penanda —
+   * karena tidak dapat dibaca, nama tidak ditampilkan, nama terpotong, atau tidak
+   * memenuhi syarat `INCONSISTENT` + bukti kuat.
+   */
+  readonly flags: readonly (ListFlag | null)[];
+  readonly notes: readonly string[];
+}
+
+/** Identitas satu baris daftar. `gmailOwnWarning` sengaja tidak diisi: peringatan Gmail
+ *  berada di halaman thread, bukan di daftar. */
+function identityForListRow(row: ListRowReading): EmailIdentity {
+  return {
+    displayName: row.displayName,
+    fromAddress: row.fromAddress,
+    ...(row.viaHint !== undefined ? { gmailViaHint: row.viaHint } : {}),
+  };
+}
+
+/**
+ * `true` bila sebuah temuan layak ditandai di daftar.
+ *
+ * §9 membatasi indikator pada `INCONSISTENT` + bukti `strong`, dan keduanya sengaja
+ * diperiksa dua kali: hari ini baris 3 satu-satunya jalan menuju `INCONSISTENT` dan selalu
+ * membawa bukti kuat, sehingga keduanya setara — tetapi decision table boleh berubah, dan
+ * menulis syaratnya apa adanya membuat perubahan itu terlihat di sini lebih dulu.
+ */
+function isFlaggable(finding: SenderFinding): boolean {
+  if (finding.state !== 'INCONSISTENT') return false;
+  return finding.evidence.some(
+    (item) => item.strength === 'strong' && item.polarity === 'supports_inconsistency',
+  );
+}
+
+/**
+ * Menilai setiap baris tampilan daftar untuk indikator halus.
+ *
+ * Tiga hal yang membuat hasilnya berbeda dari panel:
+ *
+ * 1. **Nama yang terpotong dilewati.** Keputusan §12.1 butir 6: menilainya akan membuat
+ *    pengirim yang sama memperoleh dua state berbeda antara daftar dan thread.
+ * 2. **Hanya `INCONSISTENT` dengan bukti kuat** yang ditandai; `UNCLEAR` dan
+ *    `UNASSESSABLE` sengaja tidak — indikator yang muncul pada setiap baris yang tidak
+ *    jelas akan membuat daftar terlihat seperti penuh peringatan.
+ * 3. **Hasilnya selalu sebanyak barisnya**, termasuk `null`, karena penanda dipasang per
+ *    indeks.
+ */
+export function analyzeList(doc: DocumentLike): ListAnalysis {
+  const report = scanGmailList(doc);
+  if (!report.matched) return { matched: false, flags: [], notes: report.notes };
+
+  const flags = report.rows.map((row) => {
+    if (row === null) return null;
+    if (isTruncatedName(row.displayName)) return null;
+    if (row.displayName === null) return null;
+
+    const identity = identityForListRow(row);
+    const finding = toFinding(identity, analyze(identity));
+    if (!isFlaggable(finding)) return null;
+
+    return {
+      state: finding.state,
+      reason: STATE_TITLE[finding.state],
+      sourceSelector: row.sourceSelector,
+    };
+  });
+
+  return { matched: true, flags, notes: report.notes };
 }

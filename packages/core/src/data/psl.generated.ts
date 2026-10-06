@@ -13,6 +13,11 @@
 // didelegasikan lewat suffix privat (mis. foo.github.io) sebagai subdomain-delegated.
 
 export const PSL_VERSION = '2026-09-21_18-50-07_UTC';
+/**
+ * Waktu daftar ini diperbarui, dalam ISO-8601 UTC.
+ * Diturunkan dari header VERSION di atas, bukan dari jam mesin build.
+ */
+export const PSL_UPDATED_AT = '2026-09-21T18:50:07Z';
 export const PSL_COMMIT = '728555a30ef4d40e42a82d5678e5fbad2ad17b26';
 
 /** Suffix publik yang cocok persis. */

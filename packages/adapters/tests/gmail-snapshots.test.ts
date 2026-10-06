@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseHTML } from 'linkedom';
 import { describe, expect, it } from 'vitest';
-import { scanGmailInbox } from '../src/gmail.ts';
+import { scanGmailInbox, scanGmailList } from '../src/gmail.ts';
 import { scanGmailShowOriginal } from '../src/gmail-headers.ts';
 import type { DocumentLike } from '../src/types.ts';
 
@@ -162,6 +162,16 @@ describe.skipIf(listRow === null)('snapshot: satu baris list view', () => {
     expect(report.senders.length).toBeGreaterThan(0);
   });
 
+  it('halaman tanpa baris daftar tidak menghasilkan baris apa pun', () => {
+    // `matched: false` dan daftar kosong adalah keadaan yang benar, bukan kegagalan:
+    // ekstensi hanya memasang penanda bila daftarnya ada, dan berhenti melakukannya begitu
+    // pengguna berpindah dari daftar ke thread.
+    const report = scanGmailList(toDocument('<div>halaman tanpa tabel</div>'));
+
+    expect(report.matched).toBe(false);
+    expect(report.rows).toEqual([]);
+  });
+
   it('setiap pengirim membawa alamat yang dapat diurai', () => {
     for (const sender of readPage().senders) {
       expect(sender.fromAddress).toMatch(/^[^@\s]+@[^@\s]+\.[^@\s]+$/);
@@ -187,6 +197,30 @@ describe.skipIf(listRow === null)('snapshot: satu baris list view', () => {
     const conversation = scanGmailInbox(required(listRow), { scope: 'conversation' });
 
     expect(conversation.senders).toEqual([]);
+  });
+
+  it('pemindaian baris menghasilkan tepat satu entri untuk baris ini', () => {
+    // Bentuk hasilnya yang diuji, bukan hanya isinya: satu entri per baris, urut dokumen.
+    // Indikator list view menempatkan penanda pada baris ke-i berdasarkan entri ke-i, dan
+    // kehilangan satu entri akan menggeser seluruh penanda sesudahnya ke baris yang salah.
+    const report = scanGmailList(required(listRow));
+
+    expect(report.matched).toBe(true);
+    expect(report.rows).toHaveLength(1);
+    expect(report.rows[0]?.fromAddress).toBe('no-reply@contoh-sekuritas.example');
+    expect(report.rows[0]?.displayName).toBe('Contoh Sekuritas In.');
+    expect(report.rows[0]?.sourceSelector).toBe('[email]');
+  });
+
+  it('nama pada daftar membawa tanda pemotongan Gmail: 20 karakter dan berakhir titik', () => {
+    // Inilah ukuran bukti yang mendasari keputusan perlakuan nama potong (§12.1 butir 6).
+    // Bila suatu saat snapshot berisi nama berbeda, assertion ini yang memberi tahu bahwa
+    // heuristiknya perlu ditinjau — dan itu lebih baik daripada indikator yang menilai nama
+    // yang sudah dipotong tanpa seorang pun menyadarinya.
+    const name = scanGmailList(required(listRow)).rows[0]?.displayName ?? '';
+
+    expect(name).toHaveLength(20);
+    expect(name.endsWith('.')).toBe(true);
   });
 });
 

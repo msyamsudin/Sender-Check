@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analyze, type State } from '@sender-check/core';
+import { analyze, PSL_UPDATED_AT, PSL_VERSION, type State } from '@sender-check/core';
 import {
   AUTHENTICATION_CAVEAT,
   DISCLAIMER_LINES,
@@ -166,6 +166,52 @@ describe('isi panel', () => {
       // Istilah internal tidak boleh bocor ke panel.
       expect(model.title, state).not.toContain(model.state);
     }
+  });
+
+  it('footer memuat versi PSL beserta waktu pembarunya, sesuai §6.6', () => {
+    const model = buildPanelModel(TIER_A);
+    const footer = model.footer.join('\n');
+
+    expect(footer).toContain(PSL_VERSION);
+    expect(footer).toContain(PSL_UPDATED_AT);
+    // Bukan tanggal karangan: bentuknya ISO-8601 UTC, diturunkan dari header VERSION daftar.
+    expect(PSL_UPDATED_AT).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+  });
+
+  it('laporan adalah panel yang sama dalam bentuk teks', () => {
+    // Tombol "Salin laporan" menyalin apa yang sedang dilihat pengguna. Dua jalur pembentukan
+    // teks akan berarti dua versi kebenaran untuk satu email — dan versi yang salah justru
+    // yang keluar dari panel.
+    const model = buildPanelModel(TIER_B);
+    const report = model.report;
+
+    expect(report).toContain(model.title);
+    expect(report).toContain(model.subject);
+    for (const field of model.fields) expect(report, field.label).toContain(field.value);
+    for (const reason of model.reasons) expect(report, reason.sentence).toContain(reason.sentence);
+    for (const line of model.disclaimer) expect(report, line).toContain(line);
+    for (const line of model.footer) expect(report, line).toContain(line);
+    expect(report).toContain('Autentikasi:');
+  });
+
+  it('laporan tetap membawa bagian preventif pada state yang belum dapat dinilai', () => {
+    const model = buildPanelModel(
+      findingFor({ displayName: 'Budi Santoso', fromAddress: 'x7k2@randomisp.co.id' }),
+    );
+
+    expect(model.state).toBe('UNASSESSABLE');
+    expect(model.report).toContain(model.basis ?? '');
+    expect(model.report).toContain(model.guidance ?? '');
+  });
+
+  it('laporan tidak memuat isi pesan, dan tidak memuat istilah internal engine', () => {
+    // Subjek dan isi pesan tidak pernah masuk panel — batas privasi di `docs/DESIGN.md`
+    // bagian 9 berlaku juga untuk apa pun yang keluar dari panel.
+    const model = buildPanelModel(TIER_B);
+
+    expect(model.report).not.toContain('<html');
+    expect(model.report).not.toContain(model.state);
+    expect(model.report).not.toContain(TIER_B.confidence);
   });
 });
 

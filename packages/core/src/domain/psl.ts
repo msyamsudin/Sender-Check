@@ -15,11 +15,12 @@ import {
   PSL_EXACT_RAW,
   PSL_EXCEPTION_RAW,
   PSL_PRIVATE_RAW,
+  PSL_UPDATED_AT,
   PSL_VERSION,
   PSL_WILDCARD_RAW,
 } from '../data/psl.generated.ts';
 
-export { PSL_VERSION };
+export { PSL_UPDATED_AT, PSL_VERSION };
 
 let exactSet: Set<string> | null = null;
 let wildcardSet: Set<string> | null = null;

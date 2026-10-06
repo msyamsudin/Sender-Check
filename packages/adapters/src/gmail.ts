@@ -38,6 +38,8 @@ import type {
   DocumentLike,
   ElementLike,
   GmailView,
+  ListReport,
+  ListRowReading,
   LocationLike,
   ScanOptions,
   SelectorProbe,
@@ -655,6 +657,64 @@ export function scanGmailInbox(doc: DocumentLike, options: ScanOptions = {}): Ad
     gmailOwnWarning,
     notes,
   };
+}
+
+/**
+ * Baris pada tampilan daftar (list view).
+ *
+ * `role="row"` dipilih, bukan kelas `zA`: kelas itu diobfuskasi dan berubah antar rilis,
+ * sedangkan `role` adalah kontrak aksesibilitas yang dipakai Gmail sendiri. Lingkupnya
+ * sengaja terbatas pada baris, dengan alasan yang sama dengan lingkup percakapan di atas:
+ * membaca seluruh halaman akan menemukan elemen beralamat yang bukan pengirim.
+ */
+export const LIST_ROW_SELECTOR = 'tr[role="row"]';
+
+/**
+ * Membaca pengirim dari setiap baris tampilan daftar, satu entri per baris.
+ *
+ * Pembacaan di dalam baris memakai `readMessageSender` yang sama dengan yang dipakai
+ * percakapan — kandidat selector dan urutannya identik, sehingga tidak ada aturan kedua
+ * tentang "elemen mana di dalam wadah" yang dapat menyimpang.
+ *
+ * Yang membedakan hasilnya adalah bentuknya: daftar per baris, berurutan dokumen, termasuk
+ * entri `null`. Itu yang membuat penanda dapat dipasang pada baris yang tepat, dan sekaligus
+ * batas yang tidak boleh dilanggar — membuang baris kosong akan menggeser seluruh penanda
+ * sesudahnya.
+ */
+export function scanGmailList(doc: DocumentLike): ListReport {
+  const rows = toArray(safeQuery(doc, LIST_ROW_SELECTOR));
+  const notes: string[] = [];
+  const readings: (ListRowReading | null)[] = [];
+  let fromText = 0;
+
+  if (rows.length === 0) {
+    notes.push(`tidak ada ${LIST_ROW_SELECTOR} di halaman; tidak ada baris yang dinilai`);
+    return { matched: false, rows: [], notes };
+  }
+
+  for (const row of rows) {
+    const sender = readMessageSender(row);
+
+    if (sender === null) {
+      readings.push(null);
+      continue;
+    }
+
+    if (sender.fromText) fromText++;
+
+    readings.push({
+      displayName: sender.displayName,
+      fromAddress: sender.address.trim(),
+      sourceSelector: sender.selector,
+      ...(sender.viaHint !== undefined ? { viaHint: sender.viaHint } : {}),
+    });
+  }
+
+  if (fromText > 0) {
+    notes.push(`display name dibaca dari teks pada ${fromText} baris; atribut name tidak ada di sana`);
+  }
+
+  return { matched: true, rows: readings, notes };
 }
 
 /**

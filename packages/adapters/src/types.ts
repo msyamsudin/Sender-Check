@@ -125,3 +125,33 @@ export interface HeaderReport {
   readonly identity: Partial<EmailIdentity> | null;
   readonly notes: readonly string[];
 }
+
+/**
+ * Satu baris pada tampilan daftar (list view), sudah dibaca pengirimnya.
+ *
+ * Bentuknya mirip `SenderCandidate`, tetapi **satu entri per baris dan berurutan dokumen** —
+ * bukan satu per alamat. Perbedaan itu yang membuat indikator list view dapat dipasang:
+ * pemanggil menempatkan penanda pada baris ke-i berdasarkan entri ke-i, dan dua daftar itu
+ * sejalan karena keduanya lahir dari selector baris yang sama.
+ */
+export interface ListRowReading {
+  /** `null` bila baris itu tidak menampilkan nama sama sekali. */
+  readonly displayName: string | null;
+  readonly fromAddress: string;
+  /** Elemen mana di dalam baris yang menghasilkan pembacaan ini, untuk mode diagnostik. */
+  readonly sourceSelector: string;
+  readonly viaHint?: string;
+}
+
+/** Hasil pemindaian tampilan daftar. */
+export interface ListReport {
+  /** `false` bila tidak ada satu pun baris yang ditemukan. */
+  readonly matched: boolean;
+  /**
+   * Satu entri per baris, urut dokumen. `null` berarti baris itu tidak menyediakan
+   * pengirim yang dapat dibaca — dan entrinya tetap ada, karena membuangnya akan
+   * menggeser seluruh penanda sesudahnya ke baris yang salah.
+   */
+  readonly rows: readonly (ListRowReading | null)[];
+  readonly notes: readonly string[];
+}

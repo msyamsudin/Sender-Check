@@ -31,14 +31,26 @@ export const PANEL_CLASS = 'sc-card';
 /**
  * Yang dapat dilakukan panel.
  *
- * Dikumpulkan dalam satu objek, bukan sebagai dua argumen: panel punya dua tombol, dan
- * pemanggil yang menambahkan tombol ketiga nanti tidak perlu mengubah tanda tangan setiap
+ * Dikumpulkan dalam satu objek, bukan sebagai argumen terpisah: panel punya beberapa tombol,
+ * dan pemanggil yang menambahkan tombol nanti tidak perlu mengubah tanda tangan setiap
  * fungsi gambar di berkas ini. Keadaan mode diagnostik sendiri **tidak** disimpan di sini —
  * ia milik pemanggil, dan berkas ini hanya melaporkan bahwa tombolnya ditekan.
+ *
+ * Ketiganya boleh `null`, dan keadaan itu berarti **tombolnya tidak digambar** — bukan
+ * tombol yang tidak berfungsi. Popup memakainya begitu: ia tidak punya tombol tutup (klik di
+ * luar jendela sudah menutup) dan tidak membuka mode diagnostik, sedangkan tombol yang ada
+ * tetapi diam adalah hal yang lebih buruk daripada tombol yang tidak ada.
  */
 export interface PanelActions {
-  readonly onClose: () => void;
-  readonly onToggleDiagnostic: () => void;
+  readonly onClose: (() => void) | null;
+  readonly onToggleDiagnostic: (() => void) | null;
+  /**
+   * Menyalin `model.report` ke clipboard, dengan `true` bila berhasil.
+   *
+   * Bernilai `Promise` karena clipboard di content script dapat ditolak browser — dan
+   * tombol harus dapat melaporkan kegagalan itu, bukan berpura-pura berhasil.
+   */
+  readonly onCopyReport: (() => Promise<boolean>) | null;
 }
 
 function element(tag: string, className: string, text?: string): HTMLElement {
@@ -65,26 +77,36 @@ function renderHeader(
 
   const buttons = element('div', 'sc-actions');
 
-  const diagnostic = element(
-    'button',
-    'sc-diag-toggle',
-    model.diagnostic === null ? 'diagnostik' : 'diagnostik · aktif',
-  );
-  diagnostic.setAttribute('type', 'button');
-  diagnostic.setAttribute('aria-pressed', model.diagnostic === null ? 'false' : 'true');
-  // Jalan masuknya disebutkan pada `title`, bukan sebagai teks di dalam kartu: tombol ini
-  // alat pengembang, dan panel bagi pengguna biasa tidak boleh menjelaskan dirinya sendiri
-  // dengan istilah internal.
-  diagnostic.setAttribute('title', 'Mode diagnostik (Alt+Shift+D)');
-  diagnostic.addEventListener('click', actions.onToggleDiagnostic);
+  if (actions.onToggleDiagnostic !== null) {
+    const diagnostic = element(
+      'button',
+      'sc-diag-toggle',
+      model.diagnostic === null ? 'diagnostik' : 'diagnostik · aktif',
+    );
+    diagnostic.setAttribute('type', 'button');
+    diagnostic.setAttribute('aria-pressed', model.diagnostic === null ? 'false' : 'true');
+    // Jalan masuknya disebutkan pada `title`, bukan sebagai teks di dalam kartu: tombol ini
+    // alat pengembang, dan panel bagi pengguna biasa tidak boleh menjelaskan dirinya sendiri
+    // dengan istilah internal.
+    diagnostic.setAttribute('title', 'Mode diagnostik (Alt+Shift+D)');
+    diagnostic.addEventListener('click', () => {
+      actions.onToggleDiagnostic?.();
+    });
+    buttons.append(diagnostic);
+  }
 
-  const close = element('button', 'sc-close', '×');
-  close.setAttribute('type', 'button');
-  close.setAttribute('aria-label', 'Tutup panel Sender-Check');
-  close.addEventListener('click', actions.onClose);
+  if (actions.onClose !== null) {
+    const close = element('button', 'sc-close', '×');
+    close.setAttribute('type', 'button');
+    close.setAttribute('aria-label', 'Tutup panel Sender-Check');
+    close.addEventListener('click', () => {
+      actions.onClose?.();
+    });
+    buttons.append(close);
+  }
 
-  buttons.append(diagnostic, close);
-  header.append(mark, titles, buttons);
+  header.append(mark, titles);
+  if (buttons.childElementCount > 0) header.append(buttons);
   return header;
 }
 
@@ -147,11 +169,39 @@ function renderAuthentication(model: PanelModel): HTMLElement | null {
   return section;
 }
 
-function renderDisclaimer(model: PanelModel): HTMLElement {
+function renderFooter(model: PanelModel, actions: PanelActions): HTMLElement {
   const footer = element('footer', 'sc-disclaimer');
   for (const line of model.disclaimer) {
     footer.append(element('p', 'sc-disclaimer-line', line));
   }
+
+  // Baris versi berada di footer yang sama, sesuai `docs/DESIGN.md` bagian 6.6, dan ia
+  // dibedakan lewat kelasnya sendiri supaya tidak terbaca sebagai bagian disclaimer:
+  // disclaimer menyatakan batas temuan, baris ini menyatakan alat yang memakainya.
+  for (const line of model.footer) {
+    footer.append(element('p', 'sc-meta', line));
+  }
+
+  if (actions.onCopyReport !== null) {
+    const copy = element('button', 'sc-copy', 'Salin laporan');
+    copy.setAttribute('type', 'button');
+    // Laporan yang sama persis dengan yang sedang dilihat — teksnya diambil dari model,
+    // bukan disusun ulang di sini, sehingga tombol ini tidak mungkin menyalin versi lain.
+    copy.setAttribute('title', 'Salin isi panel ini sebagai teks');
+    copy.addEventListener('click', () => {
+      void Promise.resolve(actions.onCopyReport?.()).then((ok) => {
+        copy.textContent = ok === true ? 'tersalin' : 'gagal menyalin';
+        // Kembali ke label semula supaya salinan kedua tetap memberi kabar. Tanpa ini,
+        // label yang sudah berubah menjadi "tersalin" tidak lagi memberi umpan balik
+        // apa pun pada klik berikutnya.
+        window.setTimeout(() => {
+          copy.textContent = 'Salin laporan';
+        }, 2000);
+      });
+    });
+    footer.append(copy);
+  }
+
   return footer;
 }
 
@@ -248,6 +298,23 @@ function renderDiagnostic(diagnostic: PanelDiagnostic): HTMLElement {
   );
   section.append(codeSection);
 
+  // Catatan adapter selalu digambar, termasuk ketika kosong: "tidak ada catatan" dan
+  // "catatan tidak ditampilkan" adalah dua keadaan yang berbeda, dan mode diagnostik
+  // memang ada untuk membedakan hal seperti ini. Isinya nilai apa adanya dari
+  // `packages/adapters` — di antaranya alasan sebuah selector gagal membaca nama.
+  const notesSection = element('section', 'sc-diag-section');
+  notesSection.append(element('h4', 'sc-diag-h', 'Catatan adapter'));
+  if (diagnostic.notes.length === 0) {
+    notesSection.append(element('p', 'sc-diag-mono', '(tidak ada catatan)'));
+  } else {
+    const list = element('ul', 'sc-diag-list');
+    for (const note of diagnostic.notes) {
+      list.append(element('li', 'sc-diag-item', note));
+    }
+    notesSection.append(list);
+  }
+  section.append(notesSection);
+
   const evidenceSection = element('section', 'sc-diag-section');
   evidenceSection.append(element('h4', 'sc-diag-h', 'Bukti apa adanya (termasuk yang netral)'));
 
@@ -308,6 +375,6 @@ export function renderPanel(
     card.append(renderDiagnostic(model.diagnostic));
   }
 
-  card.append(renderDisclaimer(model));
+  card.append(renderFooter(model, actions));
   container.append(card);
 }
