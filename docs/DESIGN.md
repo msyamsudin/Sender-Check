@@ -640,7 +640,7 @@ Artifact: laporan markdown otomatis di `tools/corpus/reports/corpus-report.md`, 
 matrix, rincian per kategori, dan daftar lengkap false positive serta false negative.
 
 Property tests (semuanya terimplementasi). Yang dapat dihitung mesin adalah keluaran `pnpm test`:
-**398 test di 23 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
+**457 test di 27 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
 menunggu satu snapshot DOM yang belum dapat diambil (§12):
 
 - `normalize(normalize(x)) === normalize(x)` untuk seluruh sampel sulit
@@ -652,6 +652,41 @@ menunggu satu snapshot DOM yang belum dapat diambil (§12):
   IP literal, punycode rusak) tidak pernah melempar
 - Test arsitektur: `packages/core` tidak boleh memuat DOM, `chrome.*`, jaringan, jam, RNG, atau
   `eval` — ditegakkan pada tingkat source, bukan sekadar dijanjikan di dokumen
+
+### Klaim yang diperiksa mesin
+
+Angka-angka di atas — jumlah test, jumlah berkasnya, jumlah kasus corpus termasuk rincian per
+berkas fixture — tidak lagi bergantung pada ingatan orang yang memperbarui dokumen.
+`pnpm docs:claims` membandingkan setiap angka yang dikutip dokumentasi dengan laporan test yang
+benar-benar berjalan dan dengan isi `tools/corpus/fixtures`. Klaim keadaan ikut diperiksa dengan
+cara yang sama: README direktori snapshot tidak boleh menyatakan dirinya kosong selama berkasnya
+ada.
+
+Pemeriksa itu **sengaja bukan** test vitest. Menambahkan test untuk memeriksa jumlah test akan
+mengubah jumlah yang sedang diperiksa, sehingga penjaganya gagal pada dirinya sendiri walaupun
+angkanya benar. Karena itu ia berdiri di luar suite: `pnpm test:report` menulis laporan JSON satu
+kali, dan CI menjalankan `pnpm docs:claims` setelahnya. Aturan yang tidak lagi menemukan klaim
+apa pun juga dilaporkan, supaya "sudah diperiksa" dan "tidak ada yang diperiksa" tidak pernah
+tampak sama.
+
+Angka yang salah pernah benar-benar hidup di sini: tiga jumlah test yang berbeda berdiri di tiga
+berkas selama dua rilis, dan direktori snapshot menyatakan dirinya kosong padahal tiga berkas
+sudah ada di dalamnya. Keduanya lolos dari 156 pemeriksaan tautan dan path yang sudah ada, karena
+tautan dan path memang benar — yang salah angkanya.
+
+Prinsip yang sama dipakai untuk dua klaim lain di luar dokumentasi. `pnpm changelog:check`
+membandingkan **setiap** baris indeks `CHANGELOG.md` dengan tag yang benar-benar ada, jenis tag
+beranotasi atau ringan, versi `package.json` pada tag itu, dan `ALGORITHM_VERSION` yang disebut
+pesan tagnya — `release-check` di CI hanya memeriksa tag yang baru didorong, sehingga baris lama
+tidak pernah diperiksa siapa pun setelah rilisnya lewat. `pnpm repo:settings` menyatakan setelan
+repositori yang diandalkan aliran rilis (branch dihapus otomatis setelah merge, squash merge tetap
+menyala), karena setelan itu hidup di luar repositori: tidak ada berkas yang memuatnya dan tidak
+ada diff yang menunjukkannya berubah.
+
+Satu batas yang disebut apa adanya: `repo:settings` **tidak berjalan di CI**. Endpoint setelan
+repositori tidak memuat medan itu untuk pemanggil tanpa kredensial, dan `GITHUB_TOKEN` tidak punya
+izin `administration`. Karena itu ia adalah pemeriksaan pemelihara, dan ketika tidak dapat
+memeriksa ia mengatakannya lalu keluar dengan kode 1 — bukan lulus seolah-olah sudah memeriksa.
 
 ---
 
@@ -692,7 +727,7 @@ apps/extension/                   ekstensi Firefox (WXT): content script + panel
   src/lib/clipboard.ts              menyalin laporan, dengan fallback execCommand
   src/lib/panel.css                 gaya panel
   src/lib/popup.css                 penyesuaian kartu untuk jendela popup
-  tests/                            66 test tanpa browser
+  tests/                            74 test tanpa browser
 ```
 
 `packages/adapters`, `tools/console`, dan ekstensinya sudah ada. Jadi **tidak ada lagi paket
@@ -892,7 +927,7 @@ laporan corpus otomatis. Belum ada adapter maupun UI.
 
 Angka-angka di bagian ini adalah keadaan **pada saat Phase 1–6 selesai**, dan tidak diperbarui
 setiap kali pekerjaan berjalan: ia catatan sejarah, bukan status. Jumlah yang berlaku sekarang ada
-di §11 — corpus **404 kasus** dan **398 test**.
+di §11 — corpus **404 kasus** dan **457 test**.
 
 ### 15.1 Kasus nyata yang lolos, dan perbaikannya
 

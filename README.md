@@ -114,7 +114,7 @@ dapat diverifikasi hilang. Karena itu angka tersebut tidak pernah ada.
 | Precision `INCONSISTENT`+HIGH | ≥ 95% | **100%** |
 | Nag rate pada kasus tidak mencurigakan | ≤ 3% | **0,0%** |
 | Recall pada kasus mencurigakan | sekunder | 76,4% |
-| Test | — | **238 lulus** |
+| Test | — | **455 lulus** (2 di-skip) |
 
 Presisi diutamakan di atas cakupan, dan itu dijalankan sebagai gate di CI: pull request yang
 menurunkan presisi di bawah ambang akan gagal.
@@ -134,13 +134,20 @@ berkas TypeScript langsung tanpa langkah build, memanfaatkan type stripping bawa
 
 ```bash
 pnpm example        # contoh pemakaian engine, dengan keluaran yang dapat dibaca
-pnpm test           # 328 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
+pnpm test           # 457 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
 pnpm typecheck      # tsc, termasuk test arsitektur
 pnpm corpus         # jalankan corpus + release gate, tulis laporan markdown
 pnpm rules          # cetak tabel katalog rule sebagai baris Markdown
 pnpm console:build  # bundel skrip konsol Firefox ke tools/console/dist/
 pnpm docs:check     # periksa tautan dan path di dokumentasi
+pnpm docs:claims    # periksa angka dan klaim keadaan di dokumentasi
+pnpm changelog:check # periksa setiap baris indeks CHANGELOG terhadap tag dan pesannya
 ```
+
+`pnpm repo:settings` memeriksa setelan repositori yang diandalkan aliran rilis (branch dihapus
+otomatis setelah merge, dan squash merge tetap menyala). Ia menuntut kredensial yang boleh membaca
+setelan repositori, sehingga **tidak berjalan di CI** — `GITHUB_TOKEN` tidak punya izin itu — dan
+mengatakan terus terang bila ia tidak dapat memeriksa, bukan lulus tanpa memeriksa apa pun.
 
 `pnpm corpus` keluar dengan kode 1 bila release gate gagal, sehingga dapat dipakai langsung di CI.
 Tambahkan `-- --verbose` untuk melihat daftar lengkap false positive dan false negative.

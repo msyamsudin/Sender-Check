@@ -88,3 +88,34 @@ export function changedFiles(repo: string, range: string): string[] {
 export function tagExists(repo: string, tag: string): boolean {
   return git(repo, ['tag', '--list', tag]).trim().length > 0;
 }
+
+/** Seluruh tag rilis, terbaru lebih dulu menurut versi. */
+export function tags(repo: string): string[] {
+  const list = git(repo, ['tag', '--list', '--sort=-v:refname', 'v[0-9]*']).trim();
+  if (list.length === 0) return [];
+  return list
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
+
+/**
+ * Jenis objek sebuah tag: `tag` bila beranotasi, `commit` bila ringan.
+ *
+ * Dibedakan karena hanya tag beranotasi yang punya pesan — dan pesan itulah catatan rilis
+ * proyek ini. Tag ringan yang diperlakukan sebagai catatan rilis akan selalu terbaca sebagai
+ * pesan commit biasa, sehingga pemeriksa apa pun di atasnya memeriksa hal yang salah.
+ */
+export function tagType(repo: string, tag: string): string {
+  return git(repo, ['cat-file', '-t', tag]).trim();
+}
+
+/** Pesan tag, apa adanya. Panggil `tagType` lebih dulu bila jenisnya belum diketahui. */
+export function tagMessage(repo: string, tag: string): string {
+  return git(repo, ['tag', '--list', '--format=%(contents)', tag]);
+}
+
+/** Isi sebuah berkas pada ref tertentu. Melempar bila berkasnya tidak ada di ref itu. */
+export function fileAtRef(repo: string, ref: string, path: string): string {
+  return git(repo, ['show', `${ref}:${path}`]);
+}
