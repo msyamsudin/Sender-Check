@@ -133,6 +133,7 @@ berkas TypeScript langsung tanpa langkah build, memanfaatkan type stripping bawa
 ## Menjalankan
 
 ```bash
+pnpm verify         # seluruh pemeriksa dalam urutan yang sama dengan CI, sekali jalan
 pnpm example        # contoh pemakaian engine, dengan keluaran yang dapat dibaca
 pnpm test           # 457 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
 pnpm typecheck      # tsc, termasuk test arsitektur

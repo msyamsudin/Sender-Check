@@ -40,25 +40,30 @@ namanya. Tidak satu pun berasal dari corpus umum.
 
 ```bash
 pnpm install
-pnpm typecheck
-pnpm test
-pnpm corpus
+pnpm verify
 ```
 
-Ketiganya harus lulus, dan `pnpm corpus` harus melaporkan `Release gate lulus`. Untuk perubahan
-dokumentasi, jalankan juga `pnpm docs:check` — pemeriksa itu memastikan setiap tautan dan path yang
-disebut di dokumentasi benar-benar ada.
+`pnpm verify` menjalankan seluruh pemeriksa dalam urutan yang sama dengan CI: typecheck, build
+konsol dan ekstensi, pemeriksa tautan dokumentasi, test beserta laporannya, pemeriksa klaim
+dokumentasi, pemeriksa indeks CHANGELOG terhadap tag, dan corpus + release gate. Ia ada supaya
+kamu tidak perlu menghafal daftar di bawah — kegagalan muncul di mesinmu dulu, bukan di CI.
 
-Kalau perubahanmu menyentuh `CHANGELOG.md` atau apa pun yang berkaitan dengan rilis, jalankan
-`pnpm changelog:check` — ia membandingkan setiap baris indeks dengan tag yang benar-benar ada,
-beserta `ALGORITHM_VERSION` yang disebut pesan tag itu. Ia membaca tag, jadi `git fetch --tags`
-lebih dulu bila checkout-mu dangkal.
+Urutannya penting, bukan kosmetik: `docs:claims` membaca laporan JSON yang ditulis `test:report`,
+dan pemeriksa dokumentasi membaca hasil build dua bundel. Bila kamu hanya ingin menjalankan ulang
+yang relevan dengan perubahanmu, ini perintah per satuan:
 
-Kalau perubahanmu menambah atau menghapus test, jalankan `pnpm test:report` lalu `pnpm docs:claims`.
-Yang kedua membandingkan angka yang dikutip dokumentasi — jumlah test, jumlah berkasnya, jumlah
-kasus corpus — dengan hasil test yang benar-benar berjalan, dan kegagalannya menyebut angka baru
-yang seharusnya ditulis. CI menjalankan keduanya dengan urutan itu, jadi pull request yang menambah
-test tanpa memperbarui angkanya akan gagal di sana, bukan setelah di-merge.
+- `pnpm corpus` — harus melaporkan `Release gate lulus`.
+- `pnpm docs:check` — perubahan dokumentasi: pemeriksa ini memastikan setiap tautan dan path yang
+  disebut di dokumentasi benar-benar ada.
+- `pnpm changelog:check` — perubahan `CHANGELOG.md` atau apa pun yang berkaitan dengan rilis: ia
+  membandingkan setiap baris indeks dengan tag yang benar-benar ada, beserta `ALGORITHM_VERSION`
+  yang disebut pesan tag itu. Ia membaca tag, jadi `git fetch --tags` lebih dulu bila checkout-mu
+  dangkal.
+- `pnpm test:report` lalu `pnpm docs:claims` — perubahan yang menambah atau menghapus test: yang
+  kedua membandingkan angka yang dikutip dokumentasi — jumlah test, jumlah berkasnya, jumlah kasus
+  corpus — dengan hasil test yang benar-benar berjalan, dan kegagalannya menyebut angka baru yang
+  seharusnya ditulis. CI menjalankan keduanya dengan urutan itu, jadi pull request yang menambah
+  test tanpa memperbarui angkanya akan gagal di sana, bukan setelah di-merge.
 
 ## Aturan yang ditegakkan otomatis
 

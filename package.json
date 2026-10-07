@@ -35,6 +35,7 @@
     "test:report": "vitest run --reporter=default --reporter=json --outputFile=tools/corpus/reports/test-report.json",
     "test:watch": "vitest",
     "typecheck": "tsc -p tsconfig.json && tsc -p apps/extension/tsconfig.json",
+    "verify": "pnpm typecheck && pnpm console:build && pnpm extension:build && pnpm docs:check && pnpm test:report && pnpm docs:claims && pnpm changelog:check && pnpm corpus",
     "corpus": "pnpm --filter @sender-check/corpus run corpus",
     "rules": "pnpm --filter @sender-check/corpus run rules",
     "docs:check": "node tools/check-docs.ts",
