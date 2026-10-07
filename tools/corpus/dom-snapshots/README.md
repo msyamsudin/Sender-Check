@@ -1,7 +1,13 @@
 # Snapshot DOM Gmail
 
-Direktori ini kosong dengan sengaja. Isinya dibutuhkan untuk membangun adapter Gmail
-(Phase 7), dan hanya dapat diambil dari sesi Gmail yang sudah login.
+Direktori ini memuat **tiga dari empat** berkas yang dibutuhkan untuk membangun adapter Gmail
+(Phase 7): `list-row.html`, `thread-open.html`, dan `show-original.html`. Satu slot sengaja
+dibiarkan kosong karena isinya belum pernah ditemukan di akun pemelihara. Seluruh berkas di sini
+hanya dapat diambil dari sesi Gmail yang sudah login.
+
+Direktori ini dulu memang kosong, dan kalimat "kosong dengan sengaja" yang berdiri di sini sejak
+saat itu sempat tertinggal dari isinya sendiri. Berkas ini adalah tempat orang pertama kali mencari
+cara menambah snapshot, sehingga kalimat itu menyuruhnya berhenti sebelum mulai.
 
 ## Kenapa ini diperlukan
 
