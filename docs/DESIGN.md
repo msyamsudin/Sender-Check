@@ -640,7 +640,7 @@ Artifact: laporan markdown otomatis di `tools/corpus/reports/corpus-report.md`, 
 matrix, rincian per kategori, dan daftar lengkap false positive serta false negative.
 
 Property tests (semuanya terimplementasi). Yang dapat dihitung mesin adalah keluaran `pnpm test`:
-**432 test di 25 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
+**457 test di 27 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
 menunggu satu snapshot DOM yang belum dapat diambil (§12):
 
 - `normalize(normalize(x)) === normalize(x)` untuk seluruh sampel sulit
@@ -673,6 +673,20 @@ Angka yang salah pernah benar-benar hidup di sini: tiga jumlah test yang berbeda
 berkas selama dua rilis, dan direktori snapshot menyatakan dirinya kosong padahal tiga berkas
 sudah ada di dalamnya. Keduanya lolos dari 156 pemeriksaan tautan dan path yang sudah ada, karena
 tautan dan path memang benar — yang salah angkanya.
+
+Prinsip yang sama dipakai untuk dua klaim lain di luar dokumentasi. `pnpm changelog:check`
+membandingkan **setiap** baris indeks `CHANGELOG.md` dengan tag yang benar-benar ada, jenis tag
+beranotasi atau ringan, versi `package.json` pada tag itu, dan `ALGORITHM_VERSION` yang disebut
+pesan tagnya — `release-check` di CI hanya memeriksa tag yang baru didorong, sehingga baris lama
+tidak pernah diperiksa siapa pun setelah rilisnya lewat. `pnpm repo:settings` menyatakan setelan
+repositori yang diandalkan aliran rilis (branch dihapus otomatis setelah merge, squash merge tetap
+menyala), karena setelan itu hidup di luar repositori: tidak ada berkas yang memuatnya dan tidak
+ada diff yang menunjukkannya berubah.
+
+Satu batas yang disebut apa adanya: `repo:settings` **tidak berjalan di CI**. Endpoint setelan
+repositori tidak memuat medan itu untuk pemanggil tanpa kredensial, dan `GITHUB_TOKEN` tidak punya
+izin `administration`. Karena itu ia adalah pemeriksaan pemelihara, dan ketika tidak dapat
+memeriksa ia mengatakannya lalu keluar dengan kode 1 — bukan lulus seolah-olah sudah memeriksa.
 
 ---
 
@@ -913,7 +927,7 @@ laporan corpus otomatis. Belum ada adapter maupun UI.
 
 Angka-angka di bagian ini adalah keadaan **pada saat Phase 1–6 selesai**, dan tidak diperbarui
 setiap kali pekerjaan berjalan: ia catatan sejarah, bukan status. Jumlah yang berlaku sekarang ada
-di §11 — corpus **404 kasus** dan **432 test**.
+di §11 — corpus **404 kasus** dan **457 test**.
 
 ### 15.1 Kasus nyata yang lolos, dan perbaikannya
 

@@ -35,6 +35,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DOC_FILES } from './check-docs.ts';
+import { computeMetrics, loadCases, runCases } from './corpus/src/harness.ts';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -203,6 +204,114 @@ export function countCorpus(fixturesDir = join(repoRoot, FIXTURES_DIR)): Canonic
   }
 
   return { kasus, perFile };
+}
+
+// ---------------------------------------------------------------------------
+// Baris metrik di tabel "Hasil terukur"
+// ---------------------------------------------------------------------------
+
+/**
+ * Tiga metrik corpus yang dikutip README, sebagai proporsi 0–1.
+ *
+ * Dipisahkan dari klaim angka test karena bentuknya berbeda: yang ini pecahan yang ditulis
+ * sebagai persen dengan aturan penulisan sendiri, bukan bilangan bulat hasil hitungan.
+ */
+export interface CorpusMetrics {
+  readonly precision: number;
+  readonly nagRate: number;
+  readonly recall: number;
+}
+
+/** Menghitung metrik dari fixture — sumber yang sama dengan release gate, bukan salinannya. */
+export function corpusMetrics(fixturesDir = join(repoRoot, FIXTURES_DIR)): CorpusMetrics {
+  const metrics = computeMetrics(runCases(loadCases(fixturesDir)));
+  return { precision: metrics.precisionHigh, nagRate: metrics.nagRate, recall: metrics.recall };
+}
+
+/** Persen dengan koma desimal, mengikuti ejaan Indonesia yang dipakai dokumentasi. */
+function percent(raw: number, decimals: number): string {
+  return `${(raw * 100).toFixed(decimals).replace('.', ',')}%`;
+}
+
+/**
+ * Persen tanpa desimal bila nilainya bulat, dan satu desimal bila tidak.
+ *
+ * Aturan ini bukan selera: presisi ditulis `100%` selama ia sempurna, dan menuliskannya
+ * sebagai `100,0%` akan mengubah kalimat yang sudah benar. Begitu ia tidak lagi bulat,
+ * satu desimal wajib — `96%` untuk 95,5% membuang informasi yang justru penting.
+ */
+function percentExact(raw: number): string {
+  return Number.isInteger(Number((raw * 100).toFixed(6))) ? percent(raw, 0) : percent(raw, 1);
+}
+
+export interface MetricClaim {
+  readonly description: string;
+  readonly label: string;
+  readonly pattern: RegExp;
+  readonly expected: (metrics: CorpusMetrics) => string;
+}
+
+/**
+ * Baris tabel yang angkanya dapat dihitung mesin.
+ *
+ * Bentuknya sengaja tetap, bukan aturan generik seperti klaim angka di atas: baris tabel
+ * ini tiga jumlahnya dan tidak bertambah, sedangkan penulisan persennya berbeda per baris —
+ * sesuatu yang tidak dapat ditebak oleh penguraian angka biasa.
+ */
+export const METRIC_CLAIMS: readonly MetricClaim[] = [
+  {
+    description: 'presisi flagged HIGH',
+    label: 'presisi',
+    pattern: /Precision `INCONSISTENT`\+HIGH \| ≥ 95% \| \*\*([^*|]+)\*\*/,
+    expected: (metrics) => percentExact(metrics.precision),
+  },
+  {
+    description: 'nag rate pada kasus tidak mencurigakan',
+    label: 'nag rate',
+    pattern: /Nag rate pada kasus tidak mencurigakan \| ≤ 3% \| \*\*([^*|]+)\*\*/,
+    expected: (metrics) => percent(metrics.nagRate, 1),
+  },
+  {
+    description: 'recall pada kasus mencurigakan',
+    label: 'recall',
+    pattern: /Recall pada kasus mencurigakan \| sekunder \| ([^|\n]+?) \|/,
+    expected: (metrics) => percent(metrics.recall, 1),
+  },
+];
+
+/** Membandingkan baris metrik di README dengan keluaran harness corpus. */
+export function checkCorpusMetrics(input: {
+  readonly file: string;
+  readonly content: string;
+  readonly metrics: CorpusMetrics;
+}): readonly ClaimProblem[] {
+  const problems: ClaimProblem[] = [];
+
+  for (const claim of METRIC_CLAIMS) {
+    const match = claim.pattern.exec(input.content);
+    if (match === null) {
+      problems.push({
+        file: input.file,
+        line: 0,
+        excerpt: '',
+        reason: `baris "${claim.description}" tidak lagi terbaca, sehingga angkanya tidak diperiksa apa pun`,
+      });
+      continue;
+    }
+
+    const quoted = (match[1] ?? '').trim();
+    const expected = claim.expected(input.metrics);
+    if (quoted !== expected) {
+      problems.push({
+        file: input.file,
+        line: lineAt(input.content, match.index),
+        excerpt: excerptAt(input.content, match.index),
+        reason: `menyebut ${claim.label} ${quoted}, yang sebenarnya ${expected}`,
+      });
+    }
+  }
+
+  return problems;
 }
 
 // ---------------------------------------------------------------------------
@@ -556,6 +665,7 @@ if (isDirectRun()) {
     const report = JSON.parse(readFileSync(reportPath, 'utf8')) as TestReport;
     const canonical = canonicalFromReport(report, countCorpus());
     const files = readFiles(CLAIM_FILES);
+    const metrics = corpusMetrics();
 
     const problems = [
       // Test yang gagal berarti angka "lulus" di laporan bukan angka yang boleh dikutip
@@ -573,6 +683,7 @@ if (isDirectRun()) {
         : []),
       ...findClaimProblems({ files, canonical }),
       ...findCoverageProblems(files),
+      ...checkCorpusMetrics({ file: 'README.md', content: files.get('README.md') ?? '', metrics }),
       ...STATE_CLAIMS.flatMap((claim) => {
         const content = files.get(claim.file);
         return content === undefined ? [] : claim.check(content, { snapshotDir: join(repoRoot, SNAPSHOT_DIR) });
@@ -587,7 +698,12 @@ if (isDirectRun()) {
       `angka kanonik  : ${canonical.test.total} test (${canonical.test.lulus} lulus, ${canonical.test.diSkip} di-skip) di ${canonical.test.berkas} berkas; ekstensi ${canonical.test.extension}; corpus ${canonical.corpus.kasus} kasus`,
     );
     console.log(`snapshot       : ${stored.length} tersimpan, ${missing.length} belum diambil`);
-    console.log(`klaim diperiksa: ${claims.length} angka, ${STATE_CLAIMS.length} keadaan`);
+    console.log(
+      `metrik corpus  : presisi ${percentExact(metrics.precision)}, nag ${percent(metrics.nagRate, 1)}, recall ${percent(metrics.recall, 1)}`,
+    );
+    console.log(
+      `klaim diperiksa: ${claims.length} angka, ${METRIC_CLAIMS.length} metrik, ${STATE_CLAIMS.length} keadaan`,
+    );
 
     if (problems.length === 0) {
       console.log('semua klaim cocok dengan kenyataan');

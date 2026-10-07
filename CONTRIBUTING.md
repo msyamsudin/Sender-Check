@@ -49,6 +49,11 @@ Ketiganya harus lulus, dan `pnpm corpus` harus melaporkan `Release gate lulus`. 
 dokumentasi, jalankan juga `pnpm docs:check` — pemeriksa itu memastikan setiap tautan dan path yang
 disebut di dokumentasi benar-benar ada.
 
+Kalau perubahanmu menyentuh `CHANGELOG.md` atau apa pun yang berkaitan dengan rilis, jalankan
+`pnpm changelog:check` — ia membandingkan setiap baris indeks dengan tag yang benar-benar ada,
+beserta `ALGORITHM_VERSION` yang disebut pesan tag itu. Ia membaca tag, jadi `git fetch --tags`
+lebih dulu bila checkout-mu dangkal.
+
 Kalau perubahanmu menambah atau menghapus test, jalankan `pnpm test:report` lalu `pnpm docs:claims`.
 Yang kedua membandingkan angka yang dikutip dokumentasi — jumlah test, jumlah berkasnya, jumlah
 kasus corpus — dengan hasil test yang benar-benar berjalan, dan kegagalannya menyebut angka baru
@@ -64,6 +69,8 @@ Beberapa hal tidak bergantung pada kebaikan hati peninjau, melainkan gagal di CI
 | `packages/core` tidak memuat DOM, `chrome.*`, jaringan, jam, RNG, atau `eval` | `packages/core/tests/architecture.test.ts` |
 | Tidak ada kode rule yang mati atau tidak terpicu fixture | `tools/corpus/tests/rule-coverage.test.ts` |
 | Angka dan klaim keadaan di dokumentasi cocok dengan kenyataan | `pnpm docs:claims` |
+| Setiap baris indeks CHANGELOG cocok dengan tag yang benar-benar ada dan pesannya | `pnpm changelog:check` |
+| Setelan repositori yang diandalkan rilis (pemelihara — tidak di CI, `GITHUB_TOKEN` tidak boleh membacanya) | `pnpm repo:settings` |
 | Tidak ada berkas teks yang rusak encodingnya | `tools/corpus/tests/repo-hygiene.test.ts` |
 | Tautan dan path di dokumentasi benar-benar ada | `tools/corpus/tests/docs.test.ts` |
 | Engine deterministik untuk seluruh corpus | `tools/corpus/tests/rule-coverage.test.ts` |

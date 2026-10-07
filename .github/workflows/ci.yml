@@ -21,6 +21,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          # Riwayat penuh dan tag dibutuhkan `pnpm changelog:check`, yang membandingkan setiap
+          # baris indeks CHANGELOG dengan tag yang benar-benar ada beserta pesannya. Checkout
+          # dangkal tidak memuat tag sama sekali, dan pemeriksa yang tidak menemukan tag akan
+          # melaporkan masalah yang menuduh repositori padahal checkout-nya yang kurang.
+          fetch-depth: 0
+          fetch-tags: true
 
       # Versi pnpm diambil dari field `packageManager` di package.json, sehingga
       # CI dan mesin pengembang tidak dapat menyimpang.
@@ -73,6 +80,13 @@ jobs:
       # tidak dapat dihitung dari sumber karena sebagian test dibangkitkan dari data.
       - name: Periksa klaim dokumentasi
         run: pnpm docs:claims
+
+      # Menyusul langkah di atas karena keduanya memeriksa hal yang sama dari arah berbeda:
+      # yang pertama memeriksa angka di dokumentasi, yang ini memeriksa klaim baris indeks
+      # CHANGELOG terhadap tag yang benar-benar ada. `release-check` hanya memeriksa tag yang
+      # baru didorong, sehingga baris lama tidak pernah diperiksa siapa pun setelah rilisnya lewat.
+      - name: Periksa indeks CHANGELOG terhadap tag
+        run: pnpm changelog:check
 
       # Menjalankan release gate. Keluar dengan kode 1 bila precision atau nag rate
       # tidak memenuhi ambang, sehingga pull request yang menurunkan presisi gagal.

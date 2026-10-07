@@ -39,6 +39,8 @@
     "rules": "pnpm --filter @sender-check/corpus run rules",
     "docs:check": "node tools/check-docs.ts",
     "docs:claims": "node tools/check-doc-claims.ts",
+    "changelog:check": "node tools/check-changelog.ts",
+    "repo:settings": "node tools/check-repo-settings.ts",
     "console:build": "pnpm --filter @sender-check/console run build",
     "extension:build": "pnpm --filter @sender-check/extension run build",
     "extension:zip": "pnpm --filter @sender-check/extension run zip",

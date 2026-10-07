@@ -5,11 +5,14 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   CLAIM_FILES,
+  METRIC_CLAIMS,
   NUMERIC_RULES,
   STATE_CLAIMS,
   assertRulesAreWellFormed,
   canonicalFromReport,
+  checkCorpusMetrics,
   collectClaims,
+  corpusMetrics,
   countCorpus,
   findClaimProblems,
   findCoverageProblems,
@@ -175,6 +178,65 @@ describe('klaim angka pada dokumentasi', () => {
 
     // Perbandingan angkanya sendiri tetap bersih: yang hilang cakupan, bukan kecocokan.
     expect(findClaimProblems({ files, canonical: synthetic() })).toEqual([]);
+  });
+});
+
+describe('metrik corpus di tabel hasil terukur', () => {
+  const metrics = { precision: 1, nagRate: 0, recall: 0.764 };
+
+  /** Tabel README, dengan tiga angkanya diisi apa adanya supaya bisa dibuat salah. */
+  function table(precision: string, nag: string, recall: string): string {
+    return [
+      '| Gate | Ambang | Hasil |',
+      '|---|---|---|',
+      `| Precision \`INCONSISTENT\`+HIGH | ≥ 95% | **${precision}** |`,
+      `| Nag rate pada kasus tidak mencurigakan | ≤ 3% | **${nag}** |`,
+      `| Recall pada kasus mencurigakan | sekunder | ${recall} |`,
+    ].join('\n');
+  }
+
+  it('menerima metrik yang cocok dengan keluaran harness', () => {
+    const problems = checkCorpusMetrics({
+      file: 'README.md',
+      content: table('100%', '0,0%', '76,4%'),
+      metrics,
+    });
+
+    expect(problems).toEqual([]);
+  });
+
+  it('menangkap metrik yang basi', () => {
+    const problems = checkCorpusMetrics({
+      file: 'README.md',
+      content: table('99%', '3,1%', '60,0%'),
+      metrics,
+    });
+
+    const reasons = problems.map((problem) => problem.reason);
+    expect(reasons).toContain('menyebut presisi 99%, yang sebenarnya 100%');
+    expect(reasons).toContain('menyebut nag rate 3,1%, yang sebenarnya 0,0%');
+    expect(reasons).toContain('menyebut recall 60,0%, yang sebenarnya 76,4%');
+  });
+
+  it('mengeluh bila baris metriknya tidak lagi terbaca', () => {
+    const problems = checkCorpusMetrics({
+      file: 'README.md',
+      content: 'Tabel hasil terukur sudah tidak ada di sini.',
+      metrics,
+    });
+
+    expect(problems).toHaveLength(METRIC_CLAIMS.length);
+    expect(problems[0]?.reason).toContain('tidak lagi terbaca');
+  });
+
+  it('tabel sungguhan di README cocok dengan metrik sungguhan', () => {
+    // Satu-satunya perbandingan di berkas ini yang memakai dokumen dan mesin sungguhan.
+    // Ia tidak dapat salah karena perubahan jumlah test: metrik corpus tidak dihitung dari suite.
+    const readme = readFileSync(join(repoRoot, 'README.md'), 'utf8');
+
+    const problems = checkCorpusMetrics({ file: 'README.md', content: readme, metrics: corpusMetrics() });
+
+    expect(problems).toEqual([]);
   });
 });
 
