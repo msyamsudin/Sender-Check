@@ -399,7 +399,7 @@ halaman "Show original". List view belum ditangani.
 
 Urutan pengerjaannya disengaja: memisahkan engine dari adapter membuat algoritma dapat diuji
 tanpa browser, sehingga tuning presisi menjadi iterasi hitungan detik alih-alih siklus reload
-ekstensi. Sampai sekarang urutan itu bertahan — 398 test berjalan di Node, dan tidak satu pun
+ekstensi. Sampai sekarang urutan itu bertahan — 415 test berjalan di Node, dan tidak satu pun
 di antaranya membutuhkan browser; 2 di antaranya di-skip karena menunggu satu snapshot DOM yang
 belum dapat diambil.
 

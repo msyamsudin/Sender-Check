@@ -640,7 +640,7 @@ Artifact: laporan markdown otomatis di `tools/corpus/reports/corpus-report.md`, 
 matrix, rincian per kategori, dan daftar lengkap false positive serta false negative.
 
 Property tests (semuanya terimplementasi). Yang dapat dihitung mesin adalah keluaran `pnpm test`:
-**398 test di 23 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
+**415 test di 24 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
 menunggu satu snapshot DOM yang belum dapat diambil (§12):
 
 - `normalize(normalize(x)) === normalize(x)` untuk seluruh sampel sulit
@@ -692,7 +692,7 @@ apps/extension/                   ekstensi Firefox (WXT): content script + panel
   src/lib/clipboard.ts              menyalin laporan, dengan fallback execCommand
   src/lib/panel.css                 gaya panel
   src/lib/popup.css                 penyesuaian kartu untuk jendela popup
-  tests/                            66 test tanpa browser
+  tests/                            74 test tanpa browser
 ```
 
 `packages/adapters`, `tools/console`, dan ekstensinya sudah ada. Jadi **tidak ada lagi paket
@@ -892,7 +892,7 @@ laporan corpus otomatis. Belum ada adapter maupun UI.
 
 Angka-angka di bagian ini adalah keadaan **pada saat Phase 1–6 selesai**, dan tidak diperbarui
 setiap kali pekerjaan berjalan: ia catatan sejarah, bukan status. Jumlah yang berlaku sekarang ada
-di §11 — corpus **404 kasus** dan **398 test**.
+di §11 — corpus **404 kasus** dan **415 test**.
 
 ### 15.1 Kasus nyata yang lolos, dan perbaikannya
 
