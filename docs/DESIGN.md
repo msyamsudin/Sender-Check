@@ -640,7 +640,7 @@ Artifact: laporan markdown otomatis di `tools/corpus/reports/corpus-report.md`, 
 matrix, rincian per kategori, dan daftar lengkap false positive serta false negative.
 
 Property tests (semuanya terimplementasi). Yang dapat dihitung mesin adalah keluaran `pnpm test`:
-**415 test di 24 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
+**432 test di 25 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
 menunggu satu snapshot DOM yang belum dapat diambil (§12):
 
 - `normalize(normalize(x)) === normalize(x)` untuk seluruh sampel sulit
@@ -652,6 +652,27 @@ menunggu satu snapshot DOM yang belum dapat diambil (§12):
   IP literal, punycode rusak) tidak pernah melempar
 - Test arsitektur: `packages/core` tidak boleh memuat DOM, `chrome.*`, jaringan, jam, RNG, atau
   `eval` — ditegakkan pada tingkat source, bukan sekadar dijanjikan di dokumen
+
+### Klaim yang diperiksa mesin
+
+Angka-angka di atas — jumlah test, jumlah berkasnya, jumlah kasus corpus termasuk rincian per
+berkas fixture — tidak lagi bergantung pada ingatan orang yang memperbarui dokumen.
+`pnpm docs:claims` membandingkan setiap angka yang dikutip dokumentasi dengan laporan test yang
+benar-benar berjalan dan dengan isi `tools/corpus/fixtures`. Klaim keadaan ikut diperiksa dengan
+cara yang sama: README direktori snapshot tidak boleh menyatakan dirinya kosong selama berkasnya
+ada.
+
+Pemeriksa itu **sengaja bukan** test vitest. Menambahkan test untuk memeriksa jumlah test akan
+mengubah jumlah yang sedang diperiksa, sehingga penjaganya gagal pada dirinya sendiri walaupun
+angkanya benar. Karena itu ia berdiri di luar suite: `pnpm test:report` menulis laporan JSON satu
+kali, dan CI menjalankan `pnpm docs:claims` setelahnya. Aturan yang tidak lagi menemukan klaim
+apa pun juga dilaporkan, supaya "sudah diperiksa" dan "tidak ada yang diperiksa" tidak pernah
+tampak sama.
+
+Angka yang salah pernah benar-benar hidup di sini: tiga jumlah test yang berbeda berdiri di tiga
+berkas selama dua rilis, dan direktori snapshot menyatakan dirinya kosong padahal tiga berkas
+sudah ada di dalamnya. Keduanya lolos dari 156 pemeriksaan tautan dan path yang sudah ada, karena
+tautan dan path memang benar — yang salah angkanya.
 
 ---
 
@@ -892,7 +913,7 @@ laporan corpus otomatis. Belum ada adapter maupun UI.
 
 Angka-angka di bagian ini adalah keadaan **pada saat Phase 1–6 selesai**, dan tidak diperbarui
 setiap kali pekerjaan berjalan: ia catatan sejarah, bukan status. Jumlah yang berlaku sekarang ada
-di §11 — corpus **404 kasus** dan **415 test**.
+di §11 — corpus **404 kasus** dan **432 test**.
 
 ### 15.1 Kasus nyata yang lolos, dan perbaikannya
 

@@ -49,6 +49,12 @@ Ketiganya harus lulus, dan `pnpm corpus` harus melaporkan `Release gate lulus`. 
 dokumentasi, jalankan juga `pnpm docs:check` — pemeriksa itu memastikan setiap tautan dan path yang
 disebut di dokumentasi benar-benar ada.
 
+Kalau perubahanmu menambah atau menghapus test, jalankan `pnpm test:report` lalu `pnpm docs:claims`.
+Yang kedua membandingkan angka yang dikutip dokumentasi — jumlah test, jumlah berkasnya, jumlah
+kasus corpus — dengan hasil test yang benar-benar berjalan, dan kegagalannya menyebut angka baru
+yang seharusnya ditulis. CI menjalankan keduanya dengan urutan itu, jadi pull request yang menambah
+test tanpa memperbarui angkanya akan gagal di sana, bukan setelah di-merge.
+
 ## Aturan yang ditegakkan otomatis
 
 Beberapa hal tidak bergantung pada kebaikan hati peninjau, melainkan gagal di CI:
@@ -57,6 +63,7 @@ Beberapa hal tidak bergantung pada kebaikan hati peninjau, melainkan gagal di CI
 |---|---|
 | `packages/core` tidak memuat DOM, `chrome.*`, jaringan, jam, RNG, atau `eval` | `packages/core/tests/architecture.test.ts` |
 | Tidak ada kode rule yang mati atau tidak terpicu fixture | `tools/corpus/tests/rule-coverage.test.ts` |
+| Angka dan klaim keadaan di dokumentasi cocok dengan kenyataan | `pnpm docs:claims` |
 | Tidak ada berkas teks yang rusak encodingnya | `tools/corpus/tests/repo-hygiene.test.ts` |
 | Tautan dan path di dokumentasi benar-benar ada | `tools/corpus/tests/docs.test.ts` |
 | Engine deterministik untuk seluruh corpus | `tools/corpus/tests/rule-coverage.test.ts` |

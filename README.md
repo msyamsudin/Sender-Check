@@ -114,7 +114,7 @@ dapat diverifikasi hilang. Karena itu angka tersebut tidak pernah ada.
 | Precision `INCONSISTENT`+HIGH | ≥ 95% | **100%** |
 | Nag rate pada kasus tidak mencurigakan | ≤ 3% | **0,0%** |
 | Recall pada kasus mencurigakan | sekunder | 76,4% |
-| Test | — | **413 lulus** (2 di-skip) |
+| Test | — | **430 lulus** (2 di-skip) |
 
 Presisi diutamakan di atas cakupan, dan itu dijalankan sebagai gate di CI: pull request yang
 menurunkan presisi di bawah ambang akan gagal.
@@ -134,12 +134,13 @@ berkas TypeScript langsung tanpa langkah build, memanfaatkan type stripping bawa
 
 ```bash
 pnpm example        # contoh pemakaian engine, dengan keluaran yang dapat dibaca
-pnpm test           # 415 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
+pnpm test           # 432 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
 pnpm typecheck      # tsc, termasuk test arsitektur
 pnpm corpus         # jalankan corpus + release gate, tulis laporan markdown
 pnpm rules          # cetak tabel katalog rule sebagai baris Markdown
 pnpm console:build  # bundel skrip konsol Firefox ke tools/console/dist/
 pnpm docs:check     # periksa tautan dan path di dokumentasi
+pnpm docs:claims    # periksa angka dan klaim keadaan di dokumentasi
 ```
 
 `pnpm corpus` keluar dengan kode 1 bila release gate gagal, sehingga dapat dipakai langsung di CI.

@@ -18,7 +18,14 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-const DOC_FILES = [
+/**
+ * Berkas dokumentasi yang diperiksa.
+ *
+ * Diekspor karena `tools/check-doc-claims.ts` memeriksa berkas yang sama dengan sudut
+ * pandang berbeda — angka dan klaim keadaan, bukan tautan dan path. Dua daftar terpisah
+ * akan menyimpang, dan berkas yang luput dari salah satunya tidak akan pernah diperiksa.
+ */
+export const DOC_FILES = [
   'README.md',
   'CONTRIBUTING.md',
   'CHANGELOG.md',
