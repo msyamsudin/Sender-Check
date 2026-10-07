@@ -18,6 +18,7 @@ table berubah.
 
 | Versi | Tanggal | `ALGORITHM_VERSION` | Ringkasan | Catatan rilis |
 |---|---|---|---|---|
+| 0.6.2 | 2026-10-07 | 0.2.3 (tidak berubah) | Perintah `pnpm verify` menjalankan seluruh pemeriksa dalam urutan CI | pesan tag `v0.6.2` |
 | 0.6.1 | 2026-10-07 | 0.2.3 (tidak berubah) | Samakan klaim dengan kenyataan, dan jaga agar tidak bisa menyimpang lagi | pesan tag `v0.6.1` |
 | 0.6.0 | 2026-10-06 | 0.2.3 | Indikator tampilan daftar, popup, footer versi PSL, dan catatan adapter | pesan tag `v0.6.0` |
 | 0.5.1 | 2026-10-04 | 0.2.2 (tidak berubah) | Kunci selector adapter pada snapshot DOM Gmail sungguhan | pesan tag `v0.5.1` |
