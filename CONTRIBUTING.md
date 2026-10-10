@@ -75,7 +75,7 @@ Beberapa hal tidak bergantung pada kebaikan hati peninjau, melainkan gagal di CI
 | Tidak ada kode rule yang mati atau tidak terpicu fixture | `tools/corpus/tests/rule-coverage.test.ts` |
 | Angka dan klaim keadaan di dokumentasi cocok dengan kenyataan | `pnpm docs:claims` |
 | Setiap baris indeks CHANGELOG cocok dengan tag yang benar-benar ada dan pesannya | `pnpm changelog:check` |
-| Setelan repositori yang diandalkan rilis (pemelihara — tidak di CI, `GITHUB_TOKEN` tidak boleh membacanya) | `pnpm repo:settings` |
+| Setelan repositori yang diandalkan rilis (pemelihara — tidak dapat di CI: `administration` bukan kunci yang dikenali blok `permissions`) | `pnpm repo:settings` |
 | Tidak ada berkas teks yang rusak encodingnya | `tools/corpus/tests/repo-hygiene.test.ts` |
 | Tautan dan path di dokumentasi benar-benar ada | `tools/corpus/tests/docs.test.ts` |
 | Engine deterministik untuk seluruh corpus | `tools/corpus/tests/rule-coverage.test.ts` |
