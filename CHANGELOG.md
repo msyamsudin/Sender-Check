@@ -18,6 +18,7 @@ table berubah.
 
 | Versi | Tanggal | `ALGORITHM_VERSION` | Ringkasan | Catatan rilis |
 |---|---|---|---|---|
+| 0.7.2 | 2026-10-10 | 0.2.3 (tidak berubah) | Catat alasan sebenarnya repo:settings tidak dapat berjalan di CI | pesan tag `v0.7.2` |
 | 0.7.1 | 2026-10-10 | 0.2.3 (tidak berubah) | Perluas adversarial.json dengan kasus aksara, subdomain, dan lookalike brand | pesan tag `v0.7.1` |
 | 0.7.0 | 2026-10-10 | 0.2.3 (tidak berubah) | Paket AMO — versi manifes dari rilis, ikon, dan bahan peninjau | pesan tag `v0.7.0` |
 | 0.6.3 | 2026-10-10 | 0.2.3 (tidak berubah) | Verifikasi rilis sebelum tag didorong, dan halaman privasi | pesan tag `v0.6.3` |
