@@ -593,12 +593,12 @@ tools/corpus/fixtures/
   legit.json        172 kasus  (fokus utama)
   suspicious.json   146 kasus  (dipadankan per kategori)
   edge.json          56 kasus  (nama kosong, milis, CJK/Arab/Devanagari, token generik)
-  adversarial.json   18 kasus  (ditulis tangan untuk menyerang rule lookalike)
+  adversarial.json   23 kasus  (ditulis tangan untuk menyerang rule lookalike)
   realworld.json      8 kasus  (pola serangan yang dilaporkan pengguna, plus varian sahnya)
   coverage.json       4 kasus  (dituntut test kelengkapan katalog; lihat catatan di bawah)
 ```
 
-Keenam berkas itu berjumlah **404 kasus** — angka yang dikutip §13, README, dan laporan corpus.
+Keenam berkas itu berjumlah **409 kasus** — angka yang dikutip §13, README, dan laporan corpus.
 
 Kategori wajib: personal, corporate, freemail, nama tunggal Indonesia, nama terbalik, inisial, ESP,
 alias, mailing list, support/billing, typo domain, lookalike, homoglyph Unicode, punycode,
@@ -611,6 +611,15 @@ struktural identik dengan typosquat: domain pribadi yang berbeda satu huruf dari
 domainnya sendiri, nama yang salah eja relatif terhadap domainnya sendiri, dan domain berupa akronim
 institusi. Tanpa berkas ini, ketiga false positive yang ditemukan saat implementasi tidak akan
 pernah terukur, karena semuanya berada di luar cakupan corpus awal.
+
+Tiga kelas yang paling mudah salah dinilai mendapat tempatnya sendiri di berkas itu, karena
+masing-masing menyerupai serangan hanya bagi mesin:
+
+| Kelas | Pola sah yang menyerupainya |
+|---|---|
+| Aksara (homoglyph) | Nama dan domain sama-sama beraksara Sirilik, juga organisasi yang mempertahankan domain Latin sementara namanya tetap Sirilik — huruf yang juga ada di Latin di situ bukan penyamaran |
+| Subdomain | Nama brand di subdomain milik domainnya sendiri, dan di subdomain penyedia pengiriman saat Return-Path membuktikan penyedianya |
+| Lookalike brand | Label registrable berupa nama brand yang disambung nama pasar/negaranya (`contohbank` + `indonesia`), pola yang lazim pada entitas anak perusahaan |
 
 `realworld.json` menyimpan pola serangan yang dilaporkan pengguna bersama varian sah yang paling
 mirip dengannya. Berkas ini penting karena berisi satu fixture berlabel `unassessable` yang sengaja
@@ -631,7 +640,7 @@ sahnya dengan fixture yang ditulis tangan.
 | Precision `INCONSISTENT`+HIGH | **≥ 95%** | **100%** |
 | `nagRate` visible (state `INCONSISTENT` pada non-suspicious) | **≤ 3%** | **0,0%** |
 | Recall (suspicious) | sekunder | 76,4% |
-| `nagRate` wide (sinyal apa pun, termasuk tak terlihat) | dipantau | 11,7% |
+| `nagRate` wide (sinyal apa pun, termasuk tak terlihat) | dipantau | 11,9% |
 
 Angka di tabel ini adalah keluaran `pnpm corpus` pada saat dokumen ini diperbarui; yang harus
 dipercaya kalau keduanya berbeda adalah keluarannya, dan `docs/USAGE.md` memuat contoh
@@ -869,7 +878,7 @@ Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 | 5 | Evidence engine + decision table (deterministik, traceable) | **selesai** |
 | 6 | Classification + corpus harness CLI + confusion matrix | **selesai** |
 | 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, panel ekstensi, popup, dan **indikator list view** ada; **selectornya sudah diverifikasi pada Gmail sungguhan** dan tiga di antaranya kini dikunci snapshot (list view, thread terbuka, Show original; satu akun, satu varian antarmuka). Yang belum: indikator list view **belum pernah dilihat pada halaman sungguhan** — ia memakai selector baris yang sama dengan yang sudah terverifikasi, tetapi pemasangan penandanya sendiri belum |
-| 8 | Perluas corpus + tuning precision-first | sebagian — 404 kasus, gate lulus |
+| 8 | Perluas corpus + tuning precision-first | sebagian — 409 kasus, gate lulus |
 | 9 | Tier B: parse halaman "Show original" | sebagian — rule dan adapter halaman lengkap dan teruji, **dan sudah diverifikasi pada halaman sungguhan** (blok header mentah di `pre.raw_message_text`, 23 header, termasuk `Reply-To`); snapshot `show-original.html` sudah tersimpan, sehingga assertion Tier B berjalan pada markup nyata |
 | 10 | Performa, i18n, privacy policy, packaging & release | sebagian — **halaman privasi sudah ada** di [`docs/PRIVACY.md`](PRIVACY.md) beserta apa yang menegakkannya; yang belum: cache sesi (§10), i18n EN (§9), dan packaging & publikasi |
 
@@ -928,7 +937,7 @@ laporan corpus otomatis. Belum ada adapter maupun UI.
 
 Angka-angka di bagian ini adalah keadaan **pada saat Phase 1–6 selesai**, dan tidak diperbarui
 setiap kali pekerjaan berjalan: ia catatan sejarah, bukan status. Jumlah yang berlaku sekarang ada
-di §11 — corpus **404 kasus** dan **458 test**.
+di §11 — corpus **409 kasus** dan **458 test**.
 
 ### 15.1 Kasus nyata yang lolos, dan perbaikannya
 

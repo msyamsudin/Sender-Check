@@ -124,5 +124,40 @@
     "category": "adversarial-shortened-typosquat",
     "note": "Brand with one letter dropped and a country suffix appended, on a domain the marketplace does not own.",
     "identity": { "displayName": "Shopee", "fromAddress": "promo@shope-id.com" }
+  },
+  {
+    "id": "legit-adversarial-019",
+    "label": "legit",
+    "category": "adversarial-homoglyph-same-script",
+    "note": "A bank whose brand and domain are both Cyrillic. The letters that also exist in Latin (a, e, o) are this language's own alphabet, not a disguise, and the name claims nothing outside its own domain.",
+    "identity": { "displayName": "Прекрасный Банк", "fromAddress": "support@xn--80aacoveeudmlco5l.xn--p1ai" }
+  },
+  {
+    "id": "legit-adversarial-020",
+    "label": "legit",
+    "category": "adversarial-homoglyph-transliterated",
+    "note": "A postal service keeps its Latin-script domain while the brand stays Cyrillic. Both are ordinary for organisations that predate IDN registration, and no character in the name stands in for a different one.",
+    "identity": { "displayName": "Почта", "fromAddress": "info@pochta.ru" }
+  },
+  {
+    "id": "legit-adversarial-021",
+    "label": "legit",
+    "category": "adversarial-brand-in-own-subdomain",
+    "note": "The brand appears in a subdomain of its own registrable domain, which is how organisations name their mail infrastructure. The registrable domain is still the brand's own, so nothing is delegated to a third party.",
+    "identity": { "displayName": "Contoh Bank", "fromAddress": "noreply@email.contohbank.co.id" }
+  },
+  {
+    "id": "legit-adversarial-022",
+    "label": "legit",
+    "category": "adversarial-brand-on-esp-subdomain",
+    "note": "Notification mail is sent through an ESP, so the brand sits in a subdomain of the provider's domain. The Return-Path proves which provider is delivering, which is exactly what the ESP class exists to keep from being flagged.",
+    "identity": { "displayName": "Contoh Bank", "fromAddress": "no-reply@contohbank.mailgun.org", "returnPath": "bounce@mailgun.org" }
+  },
+  {
+    "id": "legit-adversarial-023",
+    "label": "legit",
+    "category": "adversarial-brand-plus-legal-suffix",
+    "note": "The registrable label is the brand concatenated with its legal-market suffix (the brand plus the country), a naming pattern many subsidiaries use. The suffix is a real part of the organisation's name, not an unexplained addition.",
+    "identity": { "displayName": "Contoh Bank", "fromAddress": "info@contohbankindonesia.co.id" }
   }
 ]
