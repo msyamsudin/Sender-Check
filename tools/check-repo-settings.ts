@@ -13,8 +13,17 @@
  *
  * Setelan repositori dibaca lewat `api.github.com`, dan endpoint itu tidak memuat medan setelan
  * untuk pemanggil tanpa kredensial — sudah diuji: `delete_branch_on_merge` tidak ada di responsnya.
- * Di dalam workflow, satu-satunya kredensial yang tersedia adalah `GITHUB_TOKEN`, dan daftar izin
- * token itu tidak punya `administration`, sehingga ia **tidak dapat** membaca setelan repositori.
+ * Di dalam workflow, satu-satunya kredensial yang tersedia adalah `GITHUB_TOKEN`.
+ *
+ * Jalan yang tampak berikutnya adalah memberinya izin `administration: read` di blok `permissions`,
+ * dan jalan itu **tertutup, bukan sekadar sempit**. `administration` bukan salah satu kunci yang
+ * dikenali blok `permissions` untuk `GITHUB_TOKEN`; kunci itu milik GitHub App dan token akses
+ * halus. Workflow yang menuliskannya ditolak GitHub dengan `Unexpected value 'administration'`
+ * sebelum satu langkahnya berjalan — jadi yang didapat bukan kegagalan izin yang dapat dibaca,
+ * melainkan berkas yang tidak pernah dijalankan sama sekali. Karena itu tidak ada gunanya
+ * memindahkan pemeriksaan ini ke CI, dan mencobanya lagi hanya akan menghasilkan penolakan yang
+ * sama.
+ *
  * Satu-satunya jalan lain adalah menyimpan token pribadi sebagai secret, dan itu biaya yang tidak
  * sebanding untuk dua medan.
  *
@@ -132,7 +141,8 @@ if (isDirectRun()) {
       console.log(`sebab        : ${blocked}`);
       console.log('');
       console.log('Pemeriksaan ini menuntut kredensial yang boleh membaca setelan repositori.');
-      console.log('Di dalam workflow, GITHUB_TOKEN tidak punya izin itu — lihat catatan di berkas ini.');
+      console.log('Di dalam workflow, jalan itu tidak ada: `administration` bukan kunci yang');
+      console.log('dikenali blok `permissions` — lihat catatan di kepala berkas ini.');
       process.exitCode = 1;
     } else {
       const problems = findSettingProblems(live);

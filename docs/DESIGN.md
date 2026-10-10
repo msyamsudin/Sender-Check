@@ -694,10 +694,13 @@ repositori yang diandalkan aliran rilis (branch dihapus otomatis setelah merge, 
 menyala), karena setelan itu hidup di luar repositori: tidak ada berkas yang memuatnya dan tidak
 ada diff yang menunjukkannya berubah.
 
-Satu batas yang disebut apa adanya: `repo:settings` **tidak berjalan di CI**. Endpoint setelan
-repositori tidak memuat medan itu untuk pemanggil tanpa kredensial, dan `GITHUB_TOKEN` tidak punya
-izin `administration`. Karena itu ia adalah pemeriksaan pemelihara, dan ketika tidak dapat
-memeriksa ia mengatakannya lalu keluar dengan kode 1 — bukan lulus seolah-olah sudah memeriksa.
+Satu batas yang disebut apa adanya: `repo:settings` **tidak berjalan di CI**, dan alasannya bukan
+sekadar bahwa `GITHUB_TOKEN` tidak diberi izin itu. `administration` bukan kunci yang dikenali blok
+`permissions` untuk token tersebut — ia milik GitHub App dan token akses halus — sehingga workflow
+yang menuliskannya ditolak GitHub dengan `Unexpected value 'administration'` sebelum berjalan, dan
+juga endpoint setelan repositori tidak memuat medannya untuk pemanggil tanpa kredensial. Karena itu
+ia adalah pemeriksaan pemelihara, dan ketika tidak dapat memeriksa ia mengatakannya lalu keluar
+dengan kode 1 — bukan lulus seolah-olah sudah memeriksa.
 
 ---
 
