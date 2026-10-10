@@ -320,6 +320,33 @@ Firefox versi rilis menolak add-on yang tidak ditandatangani. Ada dua jalan:
 Firefox biasa (release) dan Beta tidak menyediakan jalan kedua, karena Mozilla menghapus
 kemampuan itu dari saluran rilis.
 
+### Menerbitkan ke addons.mozilla.org
+
+`pnpm extension:zip` menghasilkan dua berkas di `apps/extension/.output/`: satu untuk diunggah ke
+AMO, dan satu berisi sumber untuk peninjau. Yang diunggah adalah yang berakhiran `-firefox`.
+
+Empat hal menentukan apakah peninjauannya berjalan lancar, dan semuanya sudah diperiksa di sini
+sebelum ada yang dikirim:
+
+| Yang diperiksa | Keadaannya sekarang |
+|---|---|
+| Versi add-on | Diambil dari versi rilis repositori, jadi ia sama dengan tag dan `CHANGELOG.md`. AMO menuntut setiap unggahan **lebih tinggi** daripada seluruh versi yang pernah terbit di sana, dan membandingkannya sebagai angka per komponen — bukan sebagai teks |
+| Halaman privasi | [`docs/PRIVACY.md`](PRIVACY.md), dan tautan publiknya dapat dipakai langsung di formulir |
+| Pernyataan pengumpulan data | Manifes menyatakan `none`. Nilai itu harus sama dengan yang diisi di formulir AMO, dan test menjaga agar pernyataannya tidak menyimpang dari perilaku kode |
+| Sumber untuk peninjau | **Bukan** zip sumber buatan WXT: berkas itu hanya memuat berkas di dalam `apps/extension`, sedangkan ekstensinya bergantung pada tiga paket workspace, sehingga peninjau tidak dapat membangunnya dari sana |
+
+**Sumber yang dilampirkan** harus dapat dibangun ulang oleh peninjau, karena kode ekstensinya
+dibundel dan diminifikasi. Arsip repositori pada tag rilis sudah cukup: GitHub menyediakan
+**Code → Download ZIP** untuk setiap tag, dan di dalamnya sudah ada `pnpm-lock.yaml`, seluruh
+paket workspace, serta konfigurasi buildnya. Yang perlu ditulis di catatan peninjau hanya
+perintahnya — Node sesuai `engines` di `package.json`, pnpm, `pnpm install --frozen-lockfile`,
+lalu `pnpm extension:build` — dan hasilnya ada di `apps/extension/.output/firefox-mv3/`.
+
+**Dua hal tidak dapat diubah setelah terbit**, sehingga keduanya harus diputuskan sebelum
+unggahan pertama: id add-on di manifes (id yang berbeda adalah add-on yang berbeda, dan pengguna
+tidak dapat dimigrasikan otomatis), dan nomor versi yang sudah terpakai — versi yang pernah
+diterbitkan tidak dapat ditarik dari daftar versi AMO.
+
 ### Dua hal khas Firefox yang sudah diketahui
 
 Keduanya ditemukan saat menyiapkan adapter, dan keduanya mudah menjebak:

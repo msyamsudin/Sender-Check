@@ -182,6 +182,26 @@ describe('arsitektur ekstensi', () => {
     }
   });
 
+  it('versi manifes berasal dari versi rilis, bukan angka yang ditulis di berkas ini', () => {
+    // Angka ini yang dicatat AMO, dan AMO menuntut setiap unggahan lebih tinggi daripada
+    // seluruh versi yang pernah diterbitkan di sana. Sebelum ini, angkanya datang dari
+    // `package.json` paket ekstensi, dan angka itu tetap 0.3.0 sepanjang rilis 0.4.0 sampai
+    // 0.6.3 — otomatisasi rilis hanya menaikkan `package.json` akar — sehingga add-on
+    // pertama akan terbit sebagai 0.3.0 sementara tag dan catatan rilisnya menyebut 0.6.x.
+    //
+    // Kegagalan seperti itu tidak terlihat sebelum add-on terbit, dan setelah terbit ia tidak
+    // dapat diperbaiki: versi yang sudah dipakai tidak dapat ditarik dari daftar versi AMO.
+    // Karena itu angkanya dibaca dari akar workspace, dan test ini menjaga agar ia tidak
+    // kembali ditulis di sini.
+    const config = stripComments(readFileSync(join(here, '..', 'wxt.config.ts'), 'utf8'));
+
+    expect(config, 'manifes tidak memakai versi rilis').toContain('version: releaseVersion');
+    expect(config, 'versi rilis tidak dibaca dari package.json akar').toMatch(/package\.json/);
+    expect(config, 'ada angka versi yang ditulis langsung di berkas ini').not.toMatch(
+      /version:\s*\d/,
+    );
+  });
+
   it('pernyataan pengumpulan data sesuai dengan kode yang tidak mengirim apa pun', () => {
     // Firefox mewajibkan pernyataan ini, dan pernyataan yang salah adalah masalah yang
     // lebih serius daripada peringatan build: ia pernyataan resmi kepada pengguna.
