@@ -135,13 +135,32 @@ menyimpang. `CHANGELOG.md` hanya indeks: satu baris per versi, ditambahkan otoma
    - menyusun catatan rilis dari judul **dan badan** commit, lalu menulisnya di luar repositori;
    - menambahkan satu baris di tabel indeks `CHANGELOG.md`.
 
-3. Commit `chore(release): <versi>` didorong, tag `v<versi>` dibuat dengan catatan rilis sebagai
-   pesannya, lalu GitHub Release dibuat dari pesan tag itu.
+3. Commit `chore(release): <versi>` dibuat **lokal**, dan tag `v<versi>` dibuat dengan catatan
+   rilis sebagai pesannya — keduanya masih di mesin runner, belum didorong.
+4. `pnpm verify` dijalankan atas keadaan itu: seluruh pemeriksa yang sama dengan yang dijalankan
+   job `verify`, tetapi kini atas berkas yang baru saja ditulis `prepare.ts`.
+5. Kalau semuanya lulus, commit dan tag didorong, lalu GitHub Release dibuat dari pesan tag itu.
 
-Job `release` bergantung pada `verify` (`needs: verify`), sehingga tag tidak pernah dibuat untuk
-commit yang gagal. Perhatikan juga: commit yang didorong `GITHUB_TOKEN` **tidak memicu workflow
-lain**, jadi tag yang dibuat otomatis tidak menjalankan job `release-check` — job itu ada untuk tag
-yang ditandai tangan, dan job `release` sudah memeriksa hal yang sama lewat `needs`.
+Dua hal menentukan urutan itu, dan keduanya bukan soal kerapian:
+
+- **Dorongan adalah titik yang tidak dapat ditarik kembali.** Tag yang sudah tersebar tidak dapat
+  diambil kembali, dan GitHub Release dibentuk dari pesannya. Karena itu verifikasinya berjalan
+  setelah tag dibuat tetapi sebelum ia didorong: yang diperiksa adalah keadaan tepat seperti yang
+  akan dipublikasikan, dan kegagalannya masih dapat menghentikan rilis tanpa meninggalkan apa pun.
+- **`pnpm verify` menuntut tagnya sudah ada.** `changelog:check` di dalamnya membandingkan baris
+  indeks `CHANGELOG.md` dengan objek tag sungguhan, versi `package.json` pada tag itu, dan
+  `ALGORITHM_VERSION` di pesan tagnya. Menjalankannya lebih dulu akan menggagalkan rilis yang
+  sebenarnya benar.
+
+Job `release` bergantung pada `verify` (`needs: verify`), sehingga rilis tidak dihitung untuk
+commit yang gagal — dan langkah verifikasi di dalam job `release` menutup bagian yang tidak dapat
+dijangkau `needs`: berkas yang ditulis `prepare.ts` sendiri.
+
+Perhatikan juga: commit dan tag yang didorong `GITHUB_TOKEN` **tidak memicu workflow lain**,
+sehingga `chore(release): …` tidak pernah menjalankan job `verify`, dan tag otomatis tidak pernah
+menjalankan job `release-check`. Itu bukan alasan untuk melepas keduanya, melainkan alasan langkah
+`pnpm verify` berada di dalam job `release`. Job `release-check` tetap berlaku untuk tag yang
+ditandai tangan.
 
 ### Yang tersisa untuk manusia
 
