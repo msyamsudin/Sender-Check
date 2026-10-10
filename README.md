@@ -25,7 +25,7 @@ runtime. Janji itu, beserta apa yang benar-benar dibaca ekstensinya, ada di
 | Adapter Gmail (`packages/adapters`) | **selesai**; jalur yang dipakai panel sudah diverifikasi pada Gmail sungguhan (list, thread, Show original) |
 | Skrip konsol Firefox | **selesai** — `pnpm console:build`, lalu tempel ke konsol |
 | Ekstensi Firefox (`apps/extension`) | **dapat dimuat**; panel pada thread yang dibuka dan pada halaman "Show original", keduanya sudah diverifikasi pada Gmail sungguhan |
-| Corpus 404 kasus berlabel + release gate | **selesai** |
+| Corpus 409 kasus berlabel + release gate | **selesai** |
 
 Ekstensi Firefox sudah ada dan dapat dimuat lewat `about:debugging`, tetapi cakupannya
 sengaja sempit: panel penjelasan muncul hanya ketika satu thread dibuka atau pada halaman
@@ -108,7 +108,7 @@ dapat diverifikasi hilang. Karena itu angka tersebut tidak pernah ada.
 
 ## Hasil terukur
 
-404 kasus berlabel buatan manusia, dijalankan di Node tanpa browser:
+409 kasus berlabel buatan manusia, dijalankan di Node tanpa browser:
 
 | Gate | Ambang | Hasil |
 |---|---|---|
@@ -243,7 +243,7 @@ packages/adapters/        DOM webmail menjadi EmailIdentity. Bekerja pada antarm
 packages/presentation/    code + args dari engine menjadi kalimat dan struktur tampilan;
                           dipakai skrip konsol, contoh, dan panel ekstensi
 apps/extension/           ekstensi Firefox (WXT): content script + panel penjelasan
-tools/corpus/             404 fixture berlabel + harness CLI + laporan otomatis
+tools/corpus/             409 fixture berlabel + harness CLI + laporan otomatis
 tools/console/            skrip konsol Firefox: probe selector dan analisis
 tools/gen-psl/            generator PSL dari daftar resmi (build-time)
 tools/gen-unicode/        generator tabel confusable dari confusables.txt (build-time)

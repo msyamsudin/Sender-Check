@@ -302,13 +302,13 @@ Perintah ini menjalankan seluruh fixture, mencetak ringkasan, dan menulis
 Arti keluaran:
 
 ```
-kasus            : 404
-label            : legit 190, suspicious 157, unassessable 57
-state            : UNCLEAR=48  CONSISTENT=133  UNASSESSABLE=103  INCONSISTENT=120
+kasus            : 409
+label            : legit 195, suspicious 157, unassessable 57
+state            : UNCLEAR=49  CONSISTENT=135  UNASSESSABLE=105  INCONSISTENT=120
 precision (flagged HIGH) : 100.0%   ← proporsi hasil flag yang memang berlabel suspicious
 recall (suspicious)      : 76.4%    ← proporsi kasus suspicious yang berhasil di-flag
 nag rate (visible)       : 0.0%     ← proporsi kasus tidak mencurigakan yang muncul di list view
-nag rate (wide)          : 11.7%    ← termasuk sinyal yang tidak terlihat pengguna
+nag rate (wide)          : 11.9%    ← termasuk sinyal yang tidak terlihat pengguna
 ```
 
 `nag rate (wide)` sengaja dipantau meskipun tidak di-gate. Angka itu menunjukkan berapa banyak
