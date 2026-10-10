@@ -115,7 +115,7 @@ dapat diverifikasi hilang. Karena itu angka tersebut tidak pernah ada.
 | Precision `INCONSISTENT`+HIGH | ≥ 95% | **100%** |
 | Nag rate pada kasus tidak mencurigakan | ≤ 3% | **0,0%** |
 | Recall pada kasus mencurigakan | sekunder | 76,4% |
-| Test | — | **455 lulus** (2 di-skip) |
+| Test | — | **456 lulus** (2 di-skip) |
 
 Presisi diutamakan di atas cakupan, dan itu dijalankan sebagai gate di CI: pull request yang
 menurunkan presisi di bawah ambang akan gagal.
@@ -136,7 +136,7 @@ berkas TypeScript langsung tanpa langkah build, memanfaatkan type stripping bawa
 ```bash
 pnpm verify         # seluruh pemeriksa dalam urutan yang sama dengan CI, sekali jalan
 pnpm example        # contoh pemakaian engine, dengan keluaran yang dapat dibaca
-pnpm test           # 457 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
+pnpm test           # 458 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
 pnpm typecheck      # tsc, termasuk test arsitektur
 pnpm corpus         # jalankan corpus + release gate, tulis laporan markdown
 pnpm rules          # cetak tabel katalog rule sebagai baris Markdown
