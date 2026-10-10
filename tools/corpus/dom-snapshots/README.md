@@ -57,6 +57,21 @@ mengisi atribut `name` dengan alamatnya sendiri. Bila ya, `readDisplayName` akan
 itu sebagai display name, karena perbandingan terhadap alamat hanya ada di jalur cadangan teks —
 bukan di jalur atribut. Tidak ada bukti ke arah mana pun dari akun ini, jadi kodenya tidak diubah.
 
+**Apa yang sudah dicari, dan apa yang belum — supaya pencarian yang sama tidak diulang.**
+Pencarian yang pernah dilakukan memakai dua kriteria, dan keduanya tentang **atribut** `name`:
+`span[email]` tanpa atribut itu, dan `span[email]` yang atributnya berisi alamatnya sendiri. Kedua
+kriteria itu dijalankan pada inbox dan Spam, dan keduanya nihil. Yang belum pernah dijalankan
+adalah kriteria ketiga, yaitu bentuk yang justru diminta berkas ini: atribut `name` **ada**, tetapi
+teks yang Gmail render adalah alamatnya. Keduanya keadaan yang berbeda, dan yang kedua itulah yang
+dijaga test *memperlakukan teks yang sama dengan alamat sebagai tanpa nama* di
+`packages/adapters/tests/gmail.test.ts`. Jadi mengulang pencarian lama akan menghasilkan nol lagi —
+yang belum dicoba adalah kriteria itu, dan itu kueri yang berbeda, bukan pengulangan.
+
+Batasnya tetap disebut apa adanya: nihilnya pencarian lama berlaku untuk **satu akun, dua folder,
+pada satu waktu**. Ia bukan bukti bahwa Gmail tidak pernah merender pengirim tanpa nama, dan tidak
+ada dasar untuk menyimpulkan itu. Pesan yang sudah lama, hasil impor, dan pengirim dari milis
+tidak ikut tersapu, karena sapuan itu hanya menyentuh inbox dan Spam.
+
 Untuk yang terakhir, Gmail menyediakan halaman itu lewat menu **⋮ → Show original**
 (atau **Tampilkan aslinya**). Alamatnya berbentuk
 `mail.google.com/mail/u/N/?...&view=om&th=...`, dan halaman itu memuat header mentah di

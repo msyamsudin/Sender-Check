@@ -217,7 +217,11 @@ jobs:
 
       # Pesan tag adalah catatan rilisnya, jadi `-F` dipakai alih-alih `-m`: tidak ada teks yang
       # perlu dikutip ulang, dan tidak ada salinan kedua yang bisa menyimpang.
-      - name: Commit, tag, dan dorong
+      #
+      # Commit dan tag dibuat di sini tetapi **belum didorong**. Pemisahan itu disengaja: inilah
+      # satu-satunya titik di seluruh alur ini yang masih dapat dihentikan tanpa akibat (lihat
+      # langkah berikutnya).
+      - name: Commit dan tag (belum didorong)
         if: steps.prepare.outputs.skip != 'true'
         env:
           VERSION: ${{ steps.prepare.outputs.version }}
@@ -227,8 +231,37 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -am "chore(release): $VERSION"
           git tag -a "v$VERSION" -F "$NOTES_PATH"
+
+      # Isi rilis diperiksa **sebelum** ia dipublikasikan, dan langkah ini ada karena tanpa itu
+      # tidak ada apa pun yang memeriksanya.
+      #
+      # Alasannya, dan ini sempat terbaca sebaliknya: commit dan tag yang didorong `GITHUB_TOKEN`
+      # **tidak memicu workflow lain**, sehingga `chore(release): …` tidak pernah menjalankan job
+      # `verify`, dan tag `v…` tidak pernah menjalankan job `release-check`. Buktinya ada di riwayat
+      # Actions repositori ini: sejak `v0.4.0` tidak ada satu pun run pada sebuah tag, dan empat
+      # commit rilis (0.5.1, 0.6.0, 0.6.1, 0.6.2) tidak punya run sama sekali. `needs: verify` di
+      # job ini hanya memeriksa commit **sebelum** rilis, bukan berkas yang ditulis `prepare.ts`.
+      #
+      # Urutannya wajib begini, bukan sekadar lebih rapi: `pnpm verify` menjalankan
+      # `changelog:check`, dan pemeriksa itu menuntut tagnya sudah ada — ia membandingkan baris
+      # indeks dengan objek tag sungguhan, versi `package.json` pada tag itu, dan
+      # `ALGORITHM_VERSION` di pesan tagnya. Menjalankannya sebelum `git tag` akan menggagalkan
+      # rilis yang sebenarnya benar. Karena tagnya dibuat lokal di langkah sebelumnya, git di sini
+      # sudah melihatnya, dan yang diperiksa adalah keadaan tepat seperti yang akan dipublikasikan.
+      - name: Verifikasi keadaan rilis
+        if: steps.prepare.outputs.skip != 'true'
+        run: pnpm verify
+
+      # Dorongan adalah titik yang tidak dapat ditarik kembali: tag yang sudah tersebar tidak dapat
+      # diambil kembali, dan GitHub Release dibentuk dari pesannya. Karena itu ia dikerjakan paling
+      # akhir, setelah seluruh pemeriksa di atas lulus.
+      - name: Dorong commit dan tag
+        if: steps.prepare.outputs.skip != 'true'
+        run: |
           git push origin main
           git push origin "v$VERSION"
+        env:
+          VERSION: ${{ steps.prepare.outputs.version }}
 
       # `--notes-from-tag` menjadikan pesan tag satu-satunya sumber catatan, sehingga GitHub
       # Release dan tag tidak dapat menceritakan hal yang berbeda.
