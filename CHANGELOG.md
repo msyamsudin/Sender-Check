@@ -18,6 +18,7 @@ table berubah.
 
 | Versi | Tanggal | `ALGORITHM_VERSION` | Ringkasan | Catatan rilis |
 |---|---|---|---|---|
+| 0.7.0 | 2026-10-10 | 0.2.3 (tidak berubah) | Paket AMO — versi manifes dari rilis, ikon, dan bahan peninjau | pesan tag `v0.7.0` |
 | 0.6.3 | 2026-10-10 | 0.2.3 (tidak berubah) | Verifikasi rilis sebelum tag didorong, dan halaman privasi | pesan tag `v0.6.3` |
 | 0.6.2 | 2026-10-07 | 0.2.3 (tidak berubah) | Perintah `pnpm verify` menjalankan seluruh pemeriksa dalam urutan CI | pesan tag `v0.6.2` |
 | 0.6.1 | 2026-10-07 | 0.2.3 (tidak berubah) | Samakan klaim dengan kenyataan, dan jaga agar tidak bisa menyimpang lagi | pesan tag `v0.6.1` |
