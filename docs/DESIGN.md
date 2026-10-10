@@ -515,7 +515,9 @@ Dua catatan tentang panel ini:
 **Status implementasi.** Yang sudah berlaku di `apps/extension`: disclaimer permanen di
 setiap state, lambang yang menyertai warna sehingga warna bukan satu-satunya pembawa arti,
 tidak ada `innerHTML` di lapisan tampilan (dijaga test), dan tidak ada nama maupun logo
-webmail di dalam produk. **Indikator list view** kini juga ada: penanda hanya dipasang pada
+webmail di dalam produk. **Halaman privasi** juga sudah ditulis dan ada di
+[`PRIVACY.md`](PRIVACY.md) — setiap pernyataannya menunjuk kode atau test yang menegakkannya,
+sehingga ia tidak dapat menjadi lebih longgar daripada perilaku ekstensinya tanpa ada yang gagal. **Indikator list view** kini juga ada: penanda hanya dipasang pada
 baris `INCONSISTENT` berbukti kuat dengan nama utuh, dan ia berada di DOM halaman (bukan di
 shadow root) karena yang ditandai adalah baris milik Gmail. **Popup** juga ada: ia tidak menganalisis sendiri melainkan
 meminta isi panel yang sama ke content script lewat pesan runtime (`lib/messaging.ts`),
@@ -710,7 +712,7 @@ tools/corpus/                     fixture berlabel + harness CLI + laporan + tes
 tools/gen-psl/                    generator build-time dari daftar PSL resmi
 tools/gen-unicode/                generator build-time dari confusables.txt
 examples/                         contoh pemakaian yang dapat dijalankan
-docs/                             DESIGN.md, USAGE.md, RULES.md, FIREFOX.md, CHANGELOG-0.x.md
+docs/                             DESIGN.md, USAGE.md, RULES.md, FIREFOX.md, PRIVACY.md, CHANGELOG-0.x.md
 ```
 
 Struktur lengkapnya:
@@ -869,7 +871,7 @@ Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 | 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, panel ekstensi, popup, dan **indikator list view** ada; **selectornya sudah diverifikasi pada Gmail sungguhan** dan tiga di antaranya kini dikunci snapshot (list view, thread terbuka, Show original; satu akun, satu varian antarmuka). Yang belum: indikator list view **belum pernah dilihat pada halaman sungguhan** — ia memakai selector baris yang sama dengan yang sudah terverifikasi, tetapi pemasangan penandanya sendiri belum |
 | 8 | Perluas corpus + tuning precision-first | sebagian — 404 kasus, gate lulus |
 | 9 | Tier B: parse halaman "Show original" | sebagian — rule dan adapter halaman lengkap dan teruji, **dan sudah diverifikasi pada halaman sungguhan** (blok header mentah di `pre.raw_message_text`, 23 header, termasuk `Reply-To`); snapshot `show-original.html` sudah tersimpan, sehingga assertion Tier B berjalan pada markup nyata |
-| 10 | Performa, i18n, privacy policy, packaging & release | belum — lihat catatan i18n di §9 |
+| 10 | Performa, i18n, privacy policy, packaging & release | sebagian — **halaman privasi sudah ada** di [`docs/PRIVACY.md`](PRIVACY.md) beserta apa yang menegakkannya; yang belum: cache sesi (§10), i18n EN (§9), dan packaging & publikasi |
 
 Perbedaan dari urutan awal: corpus & decision table **sebelum** UI; header auth Tier B **setelah**
 core terbukti presisi, karena tuning rule di atas sinyal yang cakupannya sebagian kecil email
@@ -895,8 +897,7 @@ ada, dan keputusan yang menunggu indikator list view sudah diambil (§12.1 butir
 | Cache `chrome.storage.session`, LRU ~500, beserta permission `storage` | kode | — | §10 |
 | `IntersectionObserver` untuk baris yang terlihat | kode | — | §10 |
 | i18n EN — hanya `packages/presentation` yang berubah | kode | ada pengguna berbahasa Inggris | §9 |
-| Halaman privasi | dokumen | — | §9, §14 |
-| Packaging dan publikasi ke AMO | rilis | halaman privasi | §13 Phase 10 |
+| Packaging dan publikasi ke AMO | rilis | — | §13 Phase 10 |
 | Perluas `adversarial.json` lebih dulu, bukan `suspicious.json` | kualitas | — | §15.5 butir 1 |
 | Daftar brand kurasi dengan lisensi yang jelas | kualitas | lisensi yang jelas | §15.4, §15.5 butir 2 |
 | Naikkan recall setelah presisi bertahan 100% dua putaran | kualitas | dua putaran perubahan berturut-turut | §15.5 butir 3 |

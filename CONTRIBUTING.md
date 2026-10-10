@@ -247,5 +247,7 @@ Gmail sungguhan, dan tiga dari empat snapshot DOM-nya sudah tersimpan di
 `tools/corpus/dom-snapshots/`. Yang belum dapat diambil adalah snapshot pengirim **tanpa display
 name** — alasannya, termasuk bentuk markup yang benar bila suatu saat ditemukan, ada di README
 direktori itu. Di luar itu, yang menunggu bukan lagi pengamatan melainkan pekerjaan kode: cache
-`storage.session` dan `IntersectionObserver` untuk indikator list view, i18n, halaman
-privasi, dan packaging.
+`storage.session` dan `IntersectionObserver` untuk indikator list view, i18n, dan packaging.
+Halaman privasi **sudah ada** di `docs/PRIVACY.md`, beserta apa yang menegakkan setiap
+pernyataannya; ia prasyarat publikasi ke AMO, dan ia wajib diperbarui bila cakupan pembacaan
+ekstensi berubah.

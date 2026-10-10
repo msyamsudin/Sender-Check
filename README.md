@@ -8,7 +8,8 @@ Memeriksa apakah **display name pengirim konsisten dengan alamat emailnya**, lal
 bukti di balik kesimpulannya.
 
 Dijalankan sepenuhnya di sisi klien. Tanpa network request, tanpa AI/ML, tanpa database brand
-runtime.
+runtime. Janji itu, beserta apa yang benar-benar dibaca ekstensinya, ada di
+**[`docs/PRIVACY.md`](docs/PRIVACY.md)**.
 
 > Ini bukan alat yang menentukan apakah sebuah email aman. Ia adalah *second pair of eyes*: ia
 > menunjukkan hubungan antara nama yang ditampilkan dan alamat yang sebenarnya, beserta alasannya,
@@ -248,7 +249,7 @@ tools/gen-psl/            generator PSL dari daftar resmi (build-time)
 tools/gen-unicode/        generator tabel confusable dari confusables.txt (build-time)
 tools/release/            rilis otomatis: versi, versi algoritma, catatan rilis, baris indeks
 examples/                 contoh pemakaian yang dapat dijalankan
-docs/                     DESIGN.md, USAGE.md, RULES.md, FIREFOX.md, CHANGELOG-0.x.md
+docs/                     DESIGN.md, USAGE.md, RULES.md, FIREFOX.md, PRIVACY.md, CHANGELOG-0.x.md
 ```
 
 Empat invariant ditegakkan oleh test yang membaca source-nya sendiri, bukan sekadar
@@ -288,6 +289,7 @@ data tidak pernah membuat hasil lama menghantui.
 | Berkas | Isi |
 |---|---|
 | [`docs/FIREFOX.md`](docs/FIREFOX.md) | Cara memakai di Firefox: skrip konsol, cara memuat ekstensi, dan jebakan khas Firefox |
+| [`docs/PRIVACY.md`](docs/PRIVACY.md) | Kebijakan privasi: apa yang dibaca, apa yang tidak pernah dikirim, dan apa yang disimpan |
 | [`docs/USAGE.md`](docs/USAGE.md) | Cara memakai, arti keluaran, cara menambah fixture, pemecahan masalah |
 | [`docs/RULES.md`](docs/RULES.md) | Referensi seluruh kode rule beserta contoh fixture yang memicunya |
 | [`docs/DESIGN.md`](docs/DESIGN.md) | Design record: keputusan, alasan, dan catatan implementasi |
