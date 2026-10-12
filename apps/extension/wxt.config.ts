@@ -6,7 +6,7 @@ import { defineConfig } from 'wxt';
 /**
  * Konfigurasi ekstensi.
  *
- * Tujuh keputusan di berkas ini perlu dijelaskan, karena masing-masing adalah pilihan
+ * Delapan keputusan di berkas ini perlu dijelaskan, karena masing-masing adalah pilihan
  * yang lebih sempit daripada yang dimungkinkan WXT.
  *
  * **1. `host_permissions` hanya `https://mail.google.com/*`.** Bukan `<all_urls>`, bukan
@@ -68,6 +68,24 @@ import { defineConfig } from 'wxt';
  * "dua hal yang seharusnya sejalan" — karena ikon centang akan menyiratkan "sudah aman",
  * dan justru itulah kesimpulan yang alat ini menolak berikan. Berkasnya dihasilkan
  * `tools/gen-icon/generate.ts`.
+ *
+ * **8. `strict_min_version: '142.0'`, dan `gecko_android` sengaja tidak ditulis.** Angka ini
+ * bukan pilihan jangkauan, melainkan batas yang dituntut keputusan 5: Firefox baru mengenali
+ * `data_collection_permissions` sejak 140 di desktop dan 142 di Android, sehingga nilai yang
+ * lebih rendah membuat addons-linter mengeluarkan `KEY_FIREFOX_UNSUPPORTED_BY_MIN_VERSION` dan
+ * `KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION`. Keduanya bukan keluhan kosmetik: artinya
+ * manifes menjanjikan pemasangan pada Firefox yang tidak mengerti pernyataan data di dalamnya.
+ *
+ * Nilai sebelumnya `115.0` terbaca masuk akal tetapi salah pada dua hal. Pertama, ESR 115 kini
+ * hanya dirawat untuk Windows 7–8.1 dan macOS 10.12–10.14 (115.42.0, September 2026); ESR 140
+ * berakhir di 140.17.0, dan ESR yang berlaku sekarang 153. Kedua dan lebih menentukan: Gmail —
+ * satu-satunya halaman yang disentuh ekstensi ini — hanya didukung Google pada Firefox versi
+ * terkini dan satu sebelumnya, jadi menjanjikan 115 berarti menjanjikan halaman yang Google
+ * sendiri tidak dukung.
+ *
+ * `gecko_android` hanya boleh ditulis bila ekstensinya benar-benar pernah dijalankan di Firefox
+ * for Android, dan itu belum terjadi. Membiarkannya kosong membuat klaimnya jujur: satu platform,
+ * yang memang diuji.
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -121,7 +139,7 @@ export default defineConfig({
     browser_specific_settings: {
       gecko: {
         id: '{5edc8414-50a9-4b71-957d-77a729f962ff}',
-        strict_min_version: '115.0',
+        strict_min_version: '142.0',
         data_collection_permissions: {
           required: ['none'],
         },

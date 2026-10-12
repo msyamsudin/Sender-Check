@@ -39,14 +39,24 @@ murni ASCII; sisanya ditangani NFKC.
 
 ## Ketergantungan pengembangan
 
-Seluruh dependensi hanya untuk pengembangan dan pengujian, dan tidak ada satu pun yang
-dibundel ke dalam hasil akhir:
+Seluruh dependensi hanya untuk pengembangan dan pengujian:
 
 | Paket | Lisensi | Dipakai untuk |
 |---|---|---|
 | TypeScript | Apache-2.0 | Typecheck |
 | Vitest | MIT | Test |
 | @types/node | MIT | Tipe untuk alat bantu Node |
+| linkedom | ISC | Mengurai HTML Gmail yang tersimpan untuk regression test adapter, di Node dan tanpa browser |
+| esbuild | MIT | Membundel skrip konsol (`tools/console/build.ts`) |
+| wxt | MIT | Membangun dan mengemas ekstensi Firefox |
 
-Extension yang dibangun dari repositori ini tidak memuat kode pihak ketiga saat
-berjalan, dan tidak melakukan network request.
+Tabel ini sempat ketinggalan tiga baris terakhir. Ketiganya sudah dipakai sejak lebih dulu —
+`linkedom` oleh `packages/adapters`, `esbuild` oleh `tools/console`, dan `wxt` oleh
+`apps/extension` — sehingga yang salah bukan pemakaiannya, melainkan halamannya: lisensi yang tidak
+dicatat adalah lisensi yang tidak diperiksa siapa pun. Karena itu tabel ini ditulis lengkap, bukan
+hanya ditambahi satu baris yang kebetulan sedang berubah.
+
+Tidak ada perpustakaan pihak ketiga yang dibundel ke dalam hasil akhir: satu-satunya kode dari luar
+`packages/` di dalam bundel ekstensi adalah pembungkus kecil `browser.*` milik WXT, dan dua berkas
+data yang sudah disebut di atas. Extension yang dibangun dari repositori ini tidak melakukan
+network request saat berjalan.

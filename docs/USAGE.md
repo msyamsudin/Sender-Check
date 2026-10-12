@@ -307,7 +307,7 @@ label            : legit 195, suspicious 157, unassessable 57
 state            : UNCLEAR=49  CONSISTENT=135  UNASSESSABLE=105  INCONSISTENT=120
 precision (flagged HIGH) : 100.0%   ← proporsi hasil flag yang memang berlabel suspicious
 recall (suspicious)      : 76.4%    ← proporsi kasus suspicious yang berhasil di-flag
-nag rate (visible)       : 0.0%     ← proporsi kasus tidak mencurigakan yang muncul di list view
+nag rate (visible)       : 0.0%     ← proporsi kasus tidak mencurigakan yang menghasilkan sinyal terlihat (`INCONSISTENT`)
 nag rate (wide)          : 11.9%    ← termasuk sinyal yang tidak terlihat pengguna
 ```
 
@@ -395,11 +395,15 @@ akan dipakai ulang dari cache.
 
 Ekstensi Firefox sudah ada di `apps/extension` dan dapat dimuat hari ini, tetapi cakupannya
 sengaja sempit: panel penjelasan muncul hanya ketika **satu thread sedang dibuka**, atau pada
-halaman "Show original". List view belum ditangani.
+halaman "Show original". Pada list view tidak ada apa-apa: tanpa panel, dan tanpa elemen yang
+ditambahkan ke baris pesan. Penanda baris yang pernah dipasang di sana — beserta alat diagnostik
+yang dibangun untuk membuktikannya — dicabut pada 12 Oktober 2026, dengan alasan yang dicatat di
+[`DESIGN.md`](DESIGN.md) §9. Daftar periksa untuk sesi pengujian sungguhan ada di
+[`UJI-GMAIL.md`](UJI-GMAIL.md).
 
 Urutan pengerjaannya disengaja: memisahkan engine dari adapter membuat algoritma dapat diuji
 tanpa browser, sehingga tuning presisi menjadi iterasi hitungan detik alih-alih siklus reload
-ekstensi. Sampai sekarang urutan itu bertahan — 458 test berjalan di Node, dan tidak satu pun
+ekstensi. Sampai sekarang urutan itu bertahan — 451 test berjalan di Node, dan tidak satu pun
 di antaranya membutuhkan browser; 2 di antaranya di-skip karena menunggu satu snapshot DOM yang
 belum dapat diambil.
 

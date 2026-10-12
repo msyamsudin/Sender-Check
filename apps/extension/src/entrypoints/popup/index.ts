@@ -18,6 +18,15 @@
  * Ketiga hasilnya dibedakan di `lib/messaging.ts`, karena ketiganya menjawab pertanyaan
  * yang berbeda.
  *
+ * ## Kenapa tidak ada apa pun untuk tampilan daftar
+ *
+ * Sampai 0.7.x, popup memuat kartu diagnostik untuk penanda baris di daftar inbox: angka yang
+ * menjelaskan kenapa penanda itu muncul atau tidak, ditambah uji baris sintetis dan tombol yang
+ * menyalin satu baris yang sudah disamarkan. Semuanya dicabut pada 12 Oktober 2026 bersama
+ * penandanya — lihat `docs/DESIGN.md` §9. Konsekuensinya sederhana: di daftar inbox popup
+ * mengatakan bahwa belum ada pesan yang dapat dianalisis, karena memang tidak ada yang dinilai
+ * di sana.
+ *
  * ## Yang tidak dilakukannya
  *
  * Tidak ada permission baru, tidak ada `chrome.tabs` selain `query`/`sendMessage` yang tidak
@@ -171,6 +180,8 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Tidak ada panel: halaman ini thread yang tidak menghasilkan temuan, daftar inbox, atau
+  // halaman lain. Ketiganya dijawab sama, karena memang tidak ada yang dapat ditampilkan.
   render(root, snapshot, null, tabId);
 }
 

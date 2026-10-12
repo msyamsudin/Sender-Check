@@ -212,6 +212,26 @@ describe('arsitektur ekstensi', () => {
     expect(config).toContain("required: ['none']");
   });
 
+  it('versi minimum Firefox tidak lebih rendah daripada yang mengenal pernyataan data', () => {
+    // `data_collection_permissions` baru dikenali Firefox 140 di desktop dan 142 di Android.
+    // Nilai minimum yang lebih rendah membuat addons-linter mengeluarkan peringatan, dan
+    // peringatan itu benar: manifes menjanjikan pemasangan pada Firefox yang tidak mengerti
+    // pernyataan data di dalamnya. Angka 115.0 sempat tertulis di sini sebagai jangkauan yang
+    // lebih luas, padahal Gmail — satu-satunya halaman yang disentuh ekstensi ini — hanya
+    // didukung Google pada Firefox versi terkini dan satu sebelumnya.
+    //
+    // Android sengaja tidak diklaim: `gecko_android` hanya boleh ditulis bila ekstensinya benar
+    // pernah dijalankan di sana, dan sampai sekarang belum.
+    const config = stripComments(readFileSync(join(here, '..', 'wxt.config.ts'), 'utf8'));
+    const min = /strict_min_version:\s*'(\d+)\./.exec(config);
+
+    expect(min, 'strict_min_version tidak ditemukan di wxt.config.ts').not.toBeNull();
+    expect(Number(min?.[1]), 'strict_min_version di bawah 142').toBeGreaterThanOrEqual(142);
+    expect(config, 'gecko_android diklaim tanpa pernah diuji di Android').not.toContain(
+      'gecko_android',
+    );
+  });
+
   it('kode ekstensi tidak melakukan network request', () => {
     // Aturan ini sempat dilonggarkan: panel pernah punya tombol yang mengambil halaman
     // header pesan dari Gmail. Percobaan itu dicabut kembali, dan alasannya dicatat di

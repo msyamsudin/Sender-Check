@@ -115,7 +115,7 @@ dapat diverifikasi hilang. Karena itu angka tersebut tidak pernah ada.
 | Precision `INCONSISTENT`+HIGH | ≥ 95% | **100%** |
 | Nag rate pada kasus tidak mencurigakan | ≤ 3% | **0,0%** |
 | Recall pada kasus mencurigakan | sekunder | 76,4% |
-| Test | — | **456 lulus** (2 di-skip) |
+| Test | — | **449 lulus** (2 di-skip) |
 
 Presisi diutamakan di atas cakupan, dan itu dijalankan sebagai gate di CI: pull request yang
 menurunkan presisi di bawah ambang akan gagal.
@@ -136,7 +136,7 @@ berkas TypeScript langsung tanpa langkah build, memanfaatkan type stripping bawa
 ```bash
 pnpm verify         # seluruh pemeriksa dalam urutan yang sama dengan CI, sekali jalan
 pnpm example        # contoh pemakaian engine, dengan keluaran yang dapat dibaca
-pnpm test           # 458 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
+pnpm test           # 451 test: unit, property, end-to-end, adapter, arsitektur, dokumentasi
 pnpm typecheck      # tsc, termasuk test arsitektur
 pnpm corpus         # jalankan corpus + release gate, tulis laporan markdown
 pnpm rules          # cetak tabel katalog rule sebagai baris Markdown
@@ -210,6 +210,8 @@ inbox-mu sendiri sebelum UI-nya ada.
 
 Panduan lengkapnya, termasuk cara memuat ekstensi sementara via `about:debugging` dan dua
 jebakan khas Firefox yang sudah diketahui, ada di **[`docs/FIREFOX.md`](docs/FIREFOX.md)**.
+Daftar periksa untuk menguji ekstensi pada sesi Gmail sungguhan — termasuk apa yang seharusnya
+**tidak** terjadi di daftar inbox — ada di **[`docs/UJI-GMAIL.md`](docs/UJI-GMAIL.md)**.
 
 ## Batasan yang diketahui
 
