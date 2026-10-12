@@ -73,6 +73,10 @@ Tier B ketika provenance = `dom-inbox` (ketidakhadiran data ≠ ketidakcocokan).
 Sinyal di list view hanya muncul untuk `strength: strong`. Penjelasan penuh muncul sebagai panel
 saat thread dibuka, plus popup untuk pesan aktif. Mode default = tenang.
 
+**Bagian list view dicabut 12 Oktober 2026** (§9, §12.1 butir 6, §13): penanda baris belum pernah
+terlihat bekerja pada halaman sungguhan, dan ia satu-satunya bagian ekstensi yang menulis ke DOM
+Gmail. Panel di thread dan popup tetap seperti yang dinyatakan di sini.
+
 ### D3 — Stack: pnpm workspace + TypeScript + Vitest + WXT · **ACCEPTED**
 
 Tanpa remote code. Tanpa dependency yang mengeksekusi string.
@@ -204,7 +208,7 @@ menjadi kode mati: ia hanya dapat berjalan bila gate lolos, sedangkan seluruh ko
 mensyaratkan adanya kecocokan token atau freemail. Akibatnya
 `"Bank BCA" <cs@totally-unrelated.xyz>` berhenti sebagai "tidak dapat dinilai" padahal ada sesuatu
 yang layak dikatakan. G6 aman terhadap false positive karena rule yang dipicu berstrength menengah,
-sehingga paling jauh menghasilkan `UNCLEAR` dan tidak pernah muncul di list view.
+sehingga paling jauh menghasilkan `UNCLEAR` dan tidak pernah menjadi sinyal `INCONSISTENT`.
 
 Gate **gagal** → `UNASSESSABLE`, dan **UI tidak menampilkan apa pun** (bukan kuning, bukan badge).
 
@@ -221,7 +225,7 @@ dengan prinsip bagian ini sendiri, dan prinsipnya yang benar: menandai setiap na
 alamat pribadi sebagai mismatch adalah persis kebisingan yang hendak dihindari.
 
 Kebalikannya juga perlu dicatat: `"Andi" <andi@gmail.com>` menghasilkan `CONSISTENT` karena token
-"andi" cocok persis dengan local-part-nya. Ini bukan flag, tidak muncul di list view, dan
+"andi" cocok persis dengan local-part-nya. Ini bukan flag, tidak menjadi sinyal `INCONSISTENT`, dan
 pernyataannya memang benar — nama konsisten dengan alamat.
 
 **Metrik yang dijaga:** `nagRate` = % baris inbox yang memunculkan sinyal **visible** (state
@@ -286,7 +290,7 @@ karena hanya dua bigram itulah yang berisiko: digit praktis tidak muncul di dala
 kehadiran digit pada token brand memang sebuah sinyal dan tidak perlu dijaga.
 
 Alasannya bisa diukur. `DIGIT_SUBSTITUTION_MATCH` berstrength `weak` di luar label registrable, dan
-`weak` paling jauh menghasilkan `UNCLEAR/LOW` — yang tidak pernah ditampilkan di list view. Jadi
+`weak` paling jauh menghasilkan `UNCLEAR/LOW` — yang tidak pernah menjadi sinyal `INCONSISTENT`. Jadi
 kesalahan di penjaga ini berbiaya sangat rendah, sementara kamus 20k kata berbiaya nyata pada ukuran
 bundel dan provenance lisensinya. Karena itu daftar kurasi dipilih, dengan konsekuensi `modern`,
 `internet`, `pernah`, dan `turnamen` terlindungi sementara kata langka ber-`rn` mungkin tidak.
@@ -443,11 +447,11 @@ sebuah pesan yang punya konsistensi kuat sekaligus inkonsistensi menengah akan d
 
 ## 9. Spesifikasi UI
 
-- **List view:** indikator halus **hanya** untuk `INCONSISTENT` + `strength: strong`.
-  Tidak ada badge untuk `UNASSESSABLE`/`UNCLEAR`. Nama pengirim yang **dipotong Gmail
-  dilewati sama sekali** — keputusannya ada di §12.1 butir 6 beserta alasannya, dan ia
-  menjaga agar pengirim yang sama tidak memperoleh dua state berbeda antara daftar dan
-  thread.
+- **List view:** tidak ada indikator, dan daftar tidak disentuh. Penanda baris — indikator halus
+  untuk `INCONSISTENT` + `strength: strong` — ditulis pada 0.7.x dan **dicabut 12 Oktober 2026**:
+  ia belum pernah terlihat bekerja pada halaman sungguhan, dan ia satu-satunya bagian ekstensi
+  yang menulis ke DOM Gmail. Keputusan §12.1 butir 6 (nama terpotong dilewati) ikut gugur karena
+  tidak ada lagi yang dinilai di daftar; pengamatannya sendiri tetap berlaku.
 - **Thread terbuka:** panel penuh, evidence-first, dengan tombol "Copy report" yang menyalin
   isi panel apa adanya sebagai teks. Pada state `UNASSESSABLE` panel **menjelaskan mengapa** ia tidak
   menilai dan **menyebut langkah aman** yang dapat dikerjakan pengguna: periksa header asli
@@ -517,9 +521,11 @@ setiap state, lambang yang menyertai warna sehingga warna bukan satu-satunya pem
 tidak ada `innerHTML` di lapisan tampilan (dijaga test), dan tidak ada nama maupun logo
 webmail di dalam produk. **Halaman privasi** juga sudah ditulis dan ada di
 [`PRIVACY.md`](PRIVACY.md) — setiap pernyataannya menunjuk kode atau test yang menegakkannya,
-sehingga ia tidak dapat menjadi lebih longgar daripada perilaku ekstensinya tanpa ada yang gagal. **Indikator list view** kini juga ada: penanda hanya dipasang pada
-baris `INCONSISTENT` berbukti kuat dengan nama utuh, dan ia berada di DOM halaman (bukan di
-shadow root) karena yang ditandai adalah baris milik Gmail. **Popup** juga ada: ia tidak menganalisis sendiri melainkan
+sehingga ia tidak dapat menjadi lebih longgar daripada perilaku ekstensinya tanpa ada yang gagal.
+**Indikator list view** pernah ada dan sudah **dicabut** (12 Oktober 2026): penanda titik 7 px yang
+dipasang ke dalam baris Gmail, beserta alat diagnostik dan uji barisnya, dihapus seluruhnya
+sehingga ekstensi kembali tidak menulis apa pun ke DOM halaman selain panelnya sendiri.
+**Popup** juga ada: ia tidak menganalisis sendiri melainkan
 meminta isi panel yang sama ke content script lewat pesan runtime (`lib/messaging.ts`),
 sehingga analisisnya identik dengan panel halaman; tombolnya membuka halaman header dengan
 mendorong menu Gmail, dan bila itemnya tidak dikenali pada bahasa pengguna, popup menuliskan
@@ -576,11 +582,12 @@ sudah dipakai, sesuai butir pertama. Permission minimal sudah, dan dijaga test y
 `<all_urls>`, `tabs`, `webRequest`, `cookies`, serta `history`. Multi-akun sudah: pencocokan
 host maupun pengenalan thread tidak membedakan nomor `u/N`.
 
-Yang **belum** adalah `IntersectionObserver` dan cache `storage.session`, dan sekarang alasan
-menundanya sudah habis: indikator list view (§9) menilai seluruh baris pada setiap perubahan
-DOM, yaitu persis keadaan yang semula disebut sebagai syarat agar keduanya bermakna. Keduanya
-kini terdaftar di §13.1 sebagai pekerjaan berikutnya, beserta permission `storage` yang
-menyertainya — dan permission itu baru diminta bersama kodenya, bukan lebih dulu.
+Yang **belum** adalah `IntersectionObserver` dan cache `storage.session`, dan alasan menundanya
+kembali berlaku sejak indikator list view dicabut (12 Oktober 2026, §9): keduanya bermakna untuk
+memeriksa puluhan baris daftar pada setiap perubahan DOM, sedangkan sekarang tidak ada yang
+dinilai di daftar. Keduanya tetap terdaftar di §13.1 sebagai pekerjaan berikutnya, beserta
+permission `storage` yang menyertainya — dan permission itu baru diminta bersama kodenya, bukan
+lebih dulu.
 
 ---
 
@@ -651,7 +658,7 @@ Artifact: laporan markdown otomatis di `tools/corpus/reports/corpus-report.md`, 
 matrix, rincian per kategori, dan daftar lengkap false positive serta false negative.
 
 Property tests (semuanya terimplementasi). Yang dapat dihitung mesin adalah keluaran `pnpm test`:
-**458 test di 27 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
+**451 test di 26 berkas** pada saat dokumen ini diperbarui, 2 di antaranya di-skip karena
 menunggu satu snapshot DOM yang belum dapat diambil (§12):
 
 - `normalize(normalize(x)) === normalize(x)` untuk seluruh sampel sulit
@@ -741,7 +748,7 @@ apps/extension/                   ekstensi Firefox (WXT): content script + panel
   src/lib/clipboard.ts              menyalin laporan, dengan fallback execCommand
   src/lib/panel.css                 gaya panel
   src/lib/popup.css                 penyesuaian kartu untuk jendela popup
-  tests/                            75 test tanpa browser
+  tests/                            68 test tanpa browser
 ```
 
 `packages/adapters`, `tools/console`, dan ekstensinya sudah ada. Jadi **tidak ada lagi paket
@@ -841,20 +848,18 @@ perubahan Gmail.
    nama 19 karakter (`"Alpha Capital Group"`) utuh. Karena `notes` tidak memuat satu pun catatan
    "dibaca dari teks", pemotongan itu ada di **atribut `name` Gmail sendiri**, bukan di adapter.
    Akibatnya bukan sekadar kosmetik: token yang seharusnya dibandingkan bisa hilang, dan indikator
-   list view yang kini dibangun (§9) akan menilai nama yang berbeda dari yang dinilai panel saat
-   thread dibuka — pengirim yang sama dapat memperoleh dua state berbeda. Perbedaan itu harus
-   diputuskan sebelum indikatornya dikerjakan. `list-row.html` menyimpan salah satu contohnya;
+   list view yang sempat dibangun (§9) akan menilai nama yang berbeda dari yang dinilai panel saat
+   thread dibuka — pengirim yang sama dapat memperoleh dua state berbeda. Perbedaan itu dulu harus
+   diputuskan sebelum indikatornya dikerjakan, dan keputusannya ada di bawah. `list-row.html` menyimpan salah satu contohnya;
    `thread-open.html` belum dapat menjawab apakah thread menampilkan nama penuh, karena nama
    pengirim pada berkas itu pendek.
 
-   **Keputusan: indikator list view melewatkan nama yang terpotong.** Penanda hanya dipasang
-   bila nama di daftar utuh, sehingga kegagalannya selalu ke arah "tidak menampilkan" —
-   bukan "menampilkan penilaian yang salah". Itu pilihan yang sama dengan presisi-pertama
-   di §9 dan dengan aturan "panel kosong lebih baik daripada panel yang salah" di butir 5.
-   Tanda potongnya sendiri adalah heuristik yang sengaja sempit: nama tepat 20 karakter yang
-   berakhir titik — pola yang muncul pada kedua contoh di atas — sehingga ia juga gagal ke
-   arah yang aman. Penerapannya ada di `apps/extension/src/lib/scan.ts`
-   (`isTruncatedName`), dan testnya mengunci kedua contoh asli itu.
+   **Keputusan itu sudah tidak berlaku (12 Oktober 2026).** Indikator list view dicabut (§9),
+   sehingga tidak ada lagi yang dinilai di daftar dan tidak ada nama potong yang perlu dilewati.
+   Heuristik tanda potongnya (`isTruncatedName` di `apps/extension/src/lib/scan.ts`) ikut dihapus
+   bersama testnya. Yang tetap: pengamatan di atas — Gmail memang memotong `name` pada baris daftar
+   tepat di 20 karakter dengan titik — dan aturan "panel kosong lebih baik daripada panel yang
+   salah" di butir 5, yang tetap berlaku untuk panel di thread.
 
 Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 
@@ -880,7 +885,7 @@ Pemetaan yang benar dari halaman Show original ke `EmailIdentity`:
 | 4 | Similarity engine + aturan panjang token (§7) | **selesai** |
 | 5 | Evidence engine + decision table (deterministik, traceable) | **selesai** |
 | 6 | Classification + corpus harness CLI + confusion matrix | **selesai** |
-| 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, panel ekstensi, popup, dan **indikator list view** ada; **selectornya sudah diverifikasi pada Gmail sungguhan** dan tiga di antaranya kini dikunci snapshot (list view, thread terbuka, Show original; satu akun, satu varian antarmuka). Yang belum: indikator list view **belum pernah dilihat pada halaman sungguhan** — ia memakai selector baris yang sama dengan yang sudah terverifikasi, tetapi pemasangan penandanya sendiri belum |
+| 7 | Gmail adapter + UI mode tenang | sebagian — adapter, skrip konsol, panel ekstensi, popup, dan mode diagnostik ada; **selectornya sudah diverifikasi pada Gmail sungguhan** dan tiga di antaranya dikunci snapshot (list view, thread terbuka, Show original; satu akun, satu varian antarmuka). **Indikator list view ditulis lalu dicabut 12 Oktober 2026** (§9) karena belum pernah terlihat bekerja pada halaman sungguhan, sehingga tidak ada lagi bagian UI yang menunggu pengamatan itu. Yang belum: sesi pengujian sungguhan yang menutup butir-butir di §13.1 |
 | 8 | Perluas corpus + tuning precision-first | sebagian — 409 kasus, gate lulus |
 | 9 | Tier B: parse halaman "Show original" | sebagian — rule dan adapter halaman lengkap dan teruji, **dan sudah diverifikasi pada halaman sungguhan** (blok header mentah di `pre.raw_message_text`, 23 header, termasuk `Reply-To`); snapshot `show-original.html` sudah tersimpan, sehingga assertion Tier B berjalan pada markup nyata |
 | 10 | Performa, i18n, privacy policy, packaging & release | sebagian — **halaman privasi sudah ada** di [`docs/PRIVACY.md`](PRIVACY.md) beserta apa yang menegakkannya; yang belum: cache sesi (§10), i18n EN (§9), dan packaging & publikasi |
@@ -890,9 +895,10 @@ core terbukti presisi, karena tuning rule di atas sinyal yang cakupannya sebagia
 menghasilkan threshold yang salah.
 
 Phase 7 sengaja dinyatakan **sebagian**, bukan selesai, walaupun kodenya sudah ada dan jalurnya
-sudah terbukti pada Gmail sungguhan. Indikator list view kini **sudah ditulis**, termasuk
-keputusan pemotongan namanya (§12.1 butir 6), tetapi ia belum pernah dilihat berjalan pada
-halaman Gmail sungguhan — dan karena itu ia belum dihitung selesai.
+sudah terbukti pada Gmail sungguhan. Indikator list view ditulis pada 0.7.x dan **dicabut pada
+12 Oktober 2026** sebelum pernah dilihat berjalan pada halaman Gmail sungguhan — dan yang tersisa
+dari percobaan itu adalah keputusan yang tetap berlaku: ekstensi tidak menulis apa pun ke DOM
+Gmail.
 
 ### 13.1 Yang perlu dikerjakan selanjutnya
 
@@ -900,7 +906,8 @@ Daftar ini mengumpulkan pekerjaan yang selama ini tersebar sebagai catatan "belu
 §10, §12.1, §13, dan §15.5. Ia sengaja **tidak** mengulang alasannya: setiap baris menunjuk bagian
 yang menjelaskannya, supaya tidak ada dua salinan yang bisa menyimpang. Kolom "Menunggu" bukan
 prioritas melainkan **ketergantungan** — dua baris di antaranya menunggu pengamatan yang belum
-ada, dan keputusan yang menunggu indikator list view sudah diambil (§12.1 butir 6).
+ada, dan keputusan yang dulu menunggu indikator list view sudah gugur bersama indikatornya
+(§9, §12.1 butir 6).
 
 | Pekerjaan | Sifat | Menunggu | Rujukan |
 |---|---|---|---|
@@ -940,7 +947,7 @@ laporan corpus otomatis. Belum ada adapter maupun UI.
 
 Angka-angka di bagian ini adalah keadaan **pada saat Phase 1–6 selesai**, dan tidak diperbarui
 setiap kali pekerjaan berjalan: ia catatan sejarah, bukan status. Jumlah yang berlaku sekarang ada
-di §11 — corpus **409 kasus** dan **458 test**.
+di §11 — corpus **409 kasus** dan **451 test**.
 
 ### 15.1 Kasus nyata yang lolos, dan perbaikannya
 

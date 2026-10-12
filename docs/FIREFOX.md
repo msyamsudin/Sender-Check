@@ -166,7 +166,7 @@ sempit: satu content script dan satu popup, tanpa background, tanpa halaman opsi
 |---|---|
 | Satu thread sedang dibuka | Panel muncul di sudut kanan bawah: state, identitas pengirim, alasan, hasil autentikasi, dan disclaimer |
 | Halaman "Show original" | Panel yang sama, dengan sinyal Tier B: `Reply-To`, `Return-Path`, `Authentication-Results` |
-| List view, hasil pencarian, halaman pengaturan | **Tidak ada panel.** Pada list view hanya muncul penanda kecil pada baris yang memenuhi syarat (lihat di bawah); di halaman lain tidak ada apa-apa |
+| List view, hasil pencarian, halaman pengaturan | **Tidak ada apa-apa.** Tidak ada panel, dan tidak ada elemen yang ditambahkan ke halaman itu — lihat catatan di bawah |
 | Ikon toolbar ditekan | Popup menampilkan analisis pesan yang sedang terbuka — isi yang sama dengan panel — plus tombol "Analisis header lengkap" dan langkah manualnya. Di luar thread yang terbuka, popup hanya menyatakan belum ada yang dapat dianalisis |
 
 Popup tidak menganalisis halaman sendiri: ia meminta isi panel kepada content script yang
@@ -174,14 +174,16 @@ sudah berada di halaman Gmail, lewat kontrak pesan di `apps/extension/src/lib/me
 Karena itu jawabannya selalu sama dengan yang sedang dilihat di halaman, dan popup tidak
 memerlukan permission apa pun di luar yang sudah diminta manifesnya.
 
-Panel hanya muncul ketika pengguna membuka satu pesan. Di **list view** yang muncul bukan
-panel melainkan penanda per baris, dan syaratnya sengaja sempit: hanya `INCONSISTENT` dengan
-bukti `strong`, hanya bila nama di daftar **tidak dipotong Gmail**, dan tidak ada tanda sama
-sekali untuk `UNCLEAR` maupun `UNASSESSABLE`. Pemotongan nama itu yang membuatnya perlu
-sempit: nama di daftar berbeda dari nama yang dinilai panel saat thread dibuka, sehingga
-menilainya akan membuat pengirim yang sama memperoleh dua state berbeda — keputusannya ada di
-`docs/DESIGN.md` bagian 12.1 butir 6. Penanda berada di DOM halaman, bukan di dalam panel,
-karena yang ditandai adalah baris milik Gmail.
+Panel hanya muncul ketika pengguna membuka satu pesan. Di **list view** ekstensi tidak melakukan
+apa pun: sampai 0.7.x ia memasang penanda titik 7 px pada baris yang memenuhi syarat, dan penanda
+itu **dicabut pada 12 Oktober 2026** — ia belum pernah terlihat bekerja pada halaman sungguhan, dan
+ia satu-satunya bagian ekstensi yang menulis ke DOM Gmail. Keputusannya ada di `docs/DESIGN.md` §9,
+beserta alat diagnostik yang dibangun untuk membuktikannya dan ikut dihapus.
+
+Konsekuensinya jujur dan disebut apa adanya: daftar inbox tidak dinilai sama sekali, sehingga satu
+baris yang mencurigakan baru terlihat ketika pesannya dibuka. Itu batas yang dipilih dengan sadar —
+satu panel per thread lebih mudah dipertanggungjawabkan daripada penilaian yang muncul tanpa diminta
+pada puluhan baris sekaligus.
 
 ### Yang dibaca panel: satu pengirim per pesan
 
@@ -260,9 +262,11 @@ Dua hal, dan keduanya disengaja agar batas kemampuannya jelas:
    sengaja hanya mengembalikan data.
 2. **Tanpa cache dan tanpa `IntersectionObserver`.** `docs/DESIGN.md` merencanakan cache
    `storage.session` (LRU ~500) bersama pembatasan analisis pada baris yang terlihat. Keduanya
-   belum dikerjakan: penanda list view kini menilai seluruh baris yang ada di daftar, dan
-   selama daftarnya satu layar hal itu tidak terasa. Meminta permission `storage` sebelum ia
-   dipakai akan membuat tinjauan izin menanyakan sesuatu yang belum dapat dijelaskan.
+   belum dikerjakan, dan alasan menundanya kembali berlaku sejak penanda list view dicabut
+   (12 Oktober 2026, §9): keduanya bermakna untuk memeriksa puluhan baris daftar sekaligus,
+   sedangkan sekarang yang dinilai hanya satu pesan yang sedang dibuka. Meminta permission
+   `storage` sebelum ia dipakai akan membuat tinjauan izin menanyakan sesuatu yang belum dapat
+   dijelaskan.
 
 ### Mode diagnostik
 
@@ -308,6 +312,10 @@ Untuk pengembangan, `pnpm --filter @sender-check/extension run dev` menjalankan 
 yang meluncurkan Firefox dengan muat ulang otomatis, sehingga langkah manual di atas hanya
 dipakai untuk mencoba hasil build.
 
+Daftar periksa untuk satu sesi pengujian sungguhan — urutan langkah, apa yang harus terlihat di
+tiap halaman (termasuk bahwa daftar inbox memang tidak disentuh), dan apa yang perlu dikirim
+kembali bila ada yang tidak sesuai — ada di [`docs/UJI-GMAIL.md`](UJI-GMAIL.md).
+
 ### Kalau ingin permanen
 
 Firefox versi rilis menolak add-on yang tidak ditandatangani. Ada dua jalan:
@@ -325,7 +333,7 @@ kemampuan itu dari saluran rilis.
 `pnpm extension:zip` menghasilkan dua berkas di `apps/extension/.output/`: satu untuk diunggah ke
 AMO, dan satu berisi sumber untuk peninjau. Yang diunggah adalah yang berakhiran `-firefox`.
 
-Empat hal menentukan apakah peninjauannya berjalan lancar, dan semuanya sudah diperiksa di sini
+Lima hal menentukan apakah peninjauannya berjalan lancar, dan semuanya sudah diperiksa di sini
 sebelum ada yang dikirim:
 
 | Yang diperiksa | Keadaannya sekarang |
@@ -334,6 +342,7 @@ sebelum ada yang dikirim:
 | Halaman privasi | [`docs/PRIVACY.md`](PRIVACY.md), dan tautan publiknya dapat dipakai langsung di formulir |
 | Pernyataan pengumpulan data | Manifes menyatakan `none`. Nilai itu harus sama dengan yang diisi di formulir AMO, dan test menjaga agar pernyataannya tidak menyimpang dari perilaku kode |
 | Sumber untuk peninjau | **Bukan** zip sumber buatan WXT: berkas itu hanya memuat berkas di dalam `apps/extension`, sedangkan ekstensinya bergantung pada tiga paket workspace, sehingga peninjau tidak dapat membangunnya dari sana |
+| Versi Firefox minimum | `strict_min_version: '142.0'`. Angka itu bukan pilihan jangkauan: Firefox mengenali pernyataan `data_collection_permissions` sejak 140 di desktop dan 142 di Android, sehingga nilai yang lebih rendah membuat manifes menjanjikan pemasangan pada Firefox yang tidak mengerti pernyataan data di dalamnya. Gmail juga hanya didukung Google pada Firefox versi terkini dan satu sebelumnya. `gecko_android` sengaja tidak diklaim karena ekstensinya belum pernah dijalankan di Android |
 
 **Sumber yang dilampirkan** harus dapat dibangun ulang oleh peninjau, karena kode ekstensinya
 dibundel dan diminifikasi. Arsip repositori pada tag rilis sudah cukup: GitHub menyediakan
@@ -414,7 +423,7 @@ kedua halaman**, bukan hanya di inbox.
 | `viaHint` tidak pernah terisi, `span.zx` selalu "tidak cocok" | Diharapkan, sampai ada bukti sebaliknya. Selector penanda "via" **belum pernah cocok** pada satu pun halaman Gmail yang diuji, jadi keluarannya memang `undefined`. Kalau kamu sendiri **melihat** `via <domain>` pada baris pengirim di Gmail, kirimkan keluaran probe halaman itu: hanya pengamatan seperti itu yang dapat menentukan selector mana yang benar |
 | Panel ekstensi tidak muncul | Empat sebab yang mungkin, berurutan dari yang paling sering: halamannya bukan thread yang terbuka (list view memang tidak menampilkan panel), halaman itu belum memuat wadah percakapan (`[data-message-id]`) sehingga panel sengaja diam, tidak ada pengirim yang terbaca, atau URL-nya tidak dikenali sebagai thread. Jalankan `sender-check.probe.js` di halaman itu: `notes` menyebutkan batas mana yang gagal |
 | Panel muncul di halaman yang bukan thread | Kirimkan URL-nya. Pengenalan thread memakai bentuk hash URL, dan halaman Gmail yang tidak lazim dapat salah dikenali. Aturannya ada di `apps/extension/src/lib/view.ts` beserta testnya |
-| Penanda tidak muncul di list view | Periksa tiga syaratnya, berurutan: barisnya memang `INCONSISTENT` berbukti `strong`? nama di daftar tidak dipotong (tepat 20 karakter dan berakhir titik)? dan halamannya memang daftar? Ketiganya disengaja — penanda yang tidak muncul lebih baik daripada penanda yang menilai nama potong |
+| Ada elemen tambahan di baris daftar inbox | Ekstensi tidak seharusnya menyentuh baris daftar sama sekali — penandanya dicabut 12 Oktober 2026 (§9 di `docs/DESIGN.md`), jadi ini bug. Kirimkan `outerHTML` baris itu yang sudah disamarkan, plus versi ekstensi yang dipakai |
 | Panel muncul tetapi isinya kosong | Kirimkan tangkapan layarnya. Kemungkinan besar ada elemen yang gagal dibuat, dan itu kesalahan di lapisan tampilan, bukan di analisis |
 | Panel menampilkan alamat yang sama — misalnya alamat Anda sendiri — untuk setiap email yang dibuka | Sebelum lingkup percakapan ada, chip penerima ("to saya") di dalam pesan yang sama ikut dibaca sebagai pengirim, dan `pickPrimary` memilihnya karena temuan terberat. Sekarang yang dibaca hanya elemen beralamat pertama pada baris pengirim. Bila masih terjadi, jalankan `sender-check.probe.js` di halaman itu dan kirimkan keluarannya: probe sengaja membaca seluruh halaman, sehingga ia menunjukkan elemen mana yang cocok |
 | Panel menampilkan pengirim yang benar, tetapi panelnya tidak berubah setelah berpindah email | Berbeda dari baris di atas: yang salah bukan yang dibaca, melainkan apakah panel digambar ulang. Buka konsol halaman, cari pesan berawalan `[Sender-Check]`, lalu kirimkan keluaran `console.warn` yang muncul beserta URL tiap email |

@@ -36,6 +36,7 @@ export const DOC_FILES = [
   'docs/RULES.md',
   'docs/FIREFOX.md',
   'docs/PRIVACY.md',
+  'docs/UJI-GMAIL.md',
   'docs/CHANGELOG-0.x.md',
 ];
 
@@ -63,6 +64,8 @@ export interface DocCheckResult {
  * direktori itu tetap tertangkap selama berkasnya ada.
  */
 const GENERATED_ARTIFACTS: ReadonlyArray<{ path: string; generator: string }> = [
+  { path: 'apps/extension/.output', generator: 'apps/extension/wxt.config.ts' },
+  { path: 'apps/extension/.output/firefox-mv3', generator: 'apps/extension/wxt.config.ts' },
   { path: 'tools/console/dist', generator: 'tools/console/build.ts' },
   { path: 'tools/console/dist/sender-check.probe.js', generator: 'tools/console/build.ts' },
   { path: 'tools/console/dist/sender-check.console.js', generator: 'tools/console/build.ts' },
