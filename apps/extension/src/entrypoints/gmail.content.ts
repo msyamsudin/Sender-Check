@@ -212,6 +212,14 @@ export default defineContentScript({
     let diagnostic = false;
 
     /**
+     * Status bentang panel pada thread saat ini.
+     *
+     * Dimulai dari `false` (pill ramping). Bila pengguna membentangkannya, status ini diingat
+     * agar mutasi DOM Gmail berikutnya tidak menutup panel secara mengejutkan.
+     */
+    let isExpanded = false;
+
+    /**
      * Isi panel yang sedang digambar, atau `null` bila tidak ada.
      *
      * Inilah yang dijawabkan kepada popup lewat `SNAPSHOT_REQUEST`. Menyimpannya di sini —
@@ -225,6 +233,14 @@ export default defineContentScript({
       currentModel = null;
       if (uiPromise === null) return;
       (await uiPromise).remove();
+    }
+
+    async function refreshImmediate(): Promise<void> {
+      if (pending !== null) {
+        clearTimeout(pending);
+        pending = null;
+      }
+      await refresh(true);
     }
 
     async function show(model: ReturnType<typeof buildPanelModel>): Promise<void> {
@@ -244,10 +260,11 @@ export default defineContentScript({
 
       const ui = await uiPromise;
 
-      // Dibersihkan lebih dulu, karena `ui` yang sama dipakai ulang setiap kali pesan
-      // berganti. Tanpa ini, setiap pemindaian ulang akan menumpuk panel.
-      ui.remove();
-      ui.mount();
+      // Hanya mount jika belum terpasang di DOM. Memanggil remove() dan mount() berulang
+      // kali akan merobek shadow root dari body dan memicu MutationObserver secara terus menerus.
+      if (ui.mounted === undefined) {
+        ui.mount();
+      }
 
       const container = ui.mounted;
       if (container === undefined) return;
@@ -263,19 +280,26 @@ export default defineContentScript({
         onCopyReport: () => copyToClipboard(model.report),
         onToggleDiagnostic: () => {
           diagnostic = !diagnostic;
-          // Digambar ulang lewat jalur yang sama dengan pemindaian biasa, bukan dengan
-          // menggambar langsung dari sini: hanya `refresh` yang tahu temuan mana yang
-          // ditampilkan, dan menggambar dari dua tempat akan membuat keduanya dapat
-          // menyimpang.
-          schedule();
+          if (diagnostic) isExpanded = true;
+          // Segera perbarui tampilan tanpa menunggu debounce 400ms agar tombol langsung responsif
+          void refreshImmediate();
+        },
+        onToggleExpand: (expanded) => {
+          isExpanded = expanded;
+          if (!expanded && diagnostic) {
+            diagnostic = false;
+            void refreshImmediate();
+          }
         },
       };
 
-      renderPanel(container, model, actions);
+      renderPanel(container, model, actions, {
+        initialExpanded: isExpanded,
+      });
       currentModel = model;
     }
 
-    async function refresh(): Promise<void> {
+    async function refresh(force = false): Promise<void> {
       const analysis = analyzePage(document, location);
       const finding = analysis.primary;
 
@@ -292,13 +316,25 @@ export default defineContentScript({
         // mengembalikan verdikt mentah, dan tidak ada alasan menyentuhnya pada pemakaian
         // biasa.
         const source = diagnostic ? diagnosticSourceFor(analysis, finding) : null;
+        const newModel = buildPanelModel(finding, {
+          diagnostic: diagnostic && source !== null,
+          ...(source !== null ? { source } : {}),
+        });
 
-        await show(
-          buildPanelModel(finding, {
-            diagnostic: diagnostic && source !== null,
-            ...(source !== null ? { source } : {}),
-          }),
-        );
+        // Optimasi performa: bila model laporan tidak berubah dan panel sudah terpasang,
+        // hindari manipulasi DOM yang tidak perlu agar status interaksi pengguna tidak terganggu.
+        if (
+          !force &&
+          currentModel !== null &&
+          currentModel.report === newModel.report &&
+          (currentModel.diagnostic !== null) === (newModel.diagnostic !== null) &&
+          uiPromise !== null &&
+          (await uiPromise).mounted !== undefined
+        ) {
+          return;
+        }
+
+        await show(newModel);
       } catch (error) {
         // Halaman web adalah input yang tidak dapat dipercaya: bila body belum ada atau
         // sudah diganti, yang benar adalah tidak menampilkan apa pun dan mencatatnya,
@@ -322,10 +358,39 @@ export default defineContentScript({
       }, DEBOUNCE_MS);
     }
 
-    // Setiap mutasi hanya menjadwalkan satu pemindaian. Penyaringan mutasi milik sendiri tidak
-    // lagi ada bersama penandanya: satu-satunya elemen yang ditambahkan ekstensi ini adalah
-    // panelnya, dan perubahan panel memang bukan perubahan halaman yang perlu diabaikan.
-    const observer = new MutationObserver(() => schedule());
+    // Setiap mutasi menjadwalkan satu pemindaian. Mutasi yang berasal dari panel ekstensi sendiri
+    // disaring agar tidak menciptakan siklus pemindaian berulang yang membebani browser.
+    const observer = new MutationObserver((mutations) => {
+      const isExternalMutation = mutations.some((mutation) => {
+        const target = mutation.target;
+        if (target instanceof Element && target.closest('sender-check-panel')) {
+          return false;
+        }
+        for (let i = 0; i < mutation.addedNodes.length; i++) {
+          const node = mutation.addedNodes[i];
+          if (
+            node instanceof Element &&
+            (node.tagName.toLowerCase() === 'sender-check-panel' || node.closest('sender-check-panel'))
+          ) {
+            return false;
+          }
+        }
+        for (let i = 0; i < mutation.removedNodes.length; i++) {
+          const node = mutation.removedNodes[i];
+          if (
+            node instanceof Element &&
+            (node.tagName.toLowerCase() === 'sender-check-panel' || node.closest('sender-check-panel'))
+          ) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (isExternalMutation) {
+        schedule();
+      }
+    });
     observer.observe(document.body, { childList: true, subtree: true });
     ctx.onInvalidated(() => {
       observer.disconnect();
@@ -377,7 +442,8 @@ export default defineContentScript({
 
         event.preventDefault();
         diagnostic = !diagnostic;
-        schedule();
+        if (diagnostic) isExpanded = true;
+        void refreshImmediate();
       },
       { capture: true },
     );
@@ -386,6 +452,9 @@ export default defineContentScript({
     // saja tidak cukup: panel yang sudah ditutup harus dapat muncul lagi di pesan lain.
     ctx.addEventListener(window, 'wxt:locationchange', () => {
       dismissedAt = '';
+      isExpanded = false;
+      diagnostic = false;
+      currentModel = null;
       schedule();
     });
 

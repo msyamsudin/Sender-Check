@@ -51,6 +51,18 @@ export interface PanelActions {
    * tombol harus dapat melaporkan kegagalan itu, bukan berpura-pura berhasil.
    */
   readonly onCopyReport: (() => Promise<boolean>) | null;
+  /**
+   * Dipanggil ketika status bentang/ringkas diubah oleh pengguna.
+   */
+  readonly onToggleExpand?: ((expanded: boolean) => void) | null;
+}
+
+export interface PanelRenderOptions {
+  /**
+   * Apakah kartu langsung terbuka secara default.
+   * Nilai bawaan adalah `false` (dimulai sebagai pill mengambang), kecuali mode diagnostik aktif.
+   */
+  readonly initialExpanded?: boolean;
 }
 
 function element(tag: string, className: string, text?: string): HTMLElement {
@@ -63,10 +75,11 @@ function element(tag: string, className: string, text?: string): HTMLElement {
 function renderHeader(
   model: PanelModel,
   actions: PanelActions,
+  onCollapse: (() => void) | null,
 ): HTMLElement {
   const header = element('header', 'sc-head');
 
-  const mark = element('span', 'sc-mark', model.mark);
+  const mark = element('span', `sc-mark sc-mark--${model.state}`, model.mark);
   mark.setAttribute('aria-hidden', 'true');
 
   const titles = element('div', 'sc-titles');
@@ -93,6 +106,17 @@ function renderHeader(
       actions.onToggleDiagnostic?.();
     });
     buttons.append(diagnostic);
+  }
+
+  if (onCollapse !== null) {
+    const collapse = element('button', 'sc-collapse', '▴');
+    collapse.setAttribute('type', 'button');
+    collapse.setAttribute('aria-label', 'Kecilkan ke pill');
+    collapse.setAttribute('title', 'Kecilkan ke pill');
+    collapse.addEventListener('click', () => {
+      onCollapse();
+    });
+    buttons.append(collapse);
   }
 
   if (actions.onClose !== null) {
@@ -336,6 +360,76 @@ function renderDiagnostic(diagnostic: PanelDiagnostic): HTMLElement {
   return section;
 }
 
+function renderPill(
+  model: PanelModel,
+  actions: PanelActions,
+  onExpand: () => void,
+): HTMLElement {
+  const pill = element('div', 'sc-pill');
+  pill.setAttribute('role', 'button');
+  pill.setAttribute('tabindex', '0');
+  pill.setAttribute('aria-label', `Analisis pengirim: ${model.title}. Klik untuk melihat rincian.`);
+
+  const mark = element('span', `sc-pill-mark sc-pill-mark--${model.state}`, model.mark);
+  mark.setAttribute('aria-hidden', 'true');
+
+  const content = element('div', 'sc-pill-content');
+  const title = element('span', 'sc-pill-title', model.title);
+  content.append(title);
+
+  if (model.subject.length > 0) {
+    const subject = element('span', 'sc-pill-subject', model.subject);
+    content.append(subject);
+  }
+
+  const actionsDiv = element('div', 'sc-pill-actions');
+
+  const expandBtn = element('button', 'sc-pill-expand');
+  expandBtn.setAttribute('type', 'button');
+  expandBtn.setAttribute('aria-expanded', 'false');
+  expandBtn.setAttribute('aria-label', 'Buka detail analisis pengirim');
+  expandBtn.setAttribute('title', 'Buka detail analisis');
+
+  const expandText = element('span', 'sc-pill-expand-text', 'Detail');
+  const expandIcon = element('span', 'sc-pill-expand-icon', '▾');
+  expandIcon.setAttribute('aria-hidden', 'true');
+  expandBtn.append(expandText, expandIcon);
+
+  expandBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    onExpand();
+  });
+
+  actionsDiv.append(expandBtn);
+
+  if (actions.onClose !== null) {
+    const close = element('button', 'sc-pill-close', '×');
+    close.setAttribute('type', 'button');
+    close.setAttribute('aria-label', 'Tutup Sender-Check');
+    close.setAttribute('title', 'Tutup');
+    close.addEventListener('click', (event) => {
+      event.stopPropagation();
+      actions.onClose?.();
+    });
+    actionsDiv.append(close);
+  }
+
+  pill.append(mark, content, actionsDiv);
+
+  pill.addEventListener('click', () => {
+    onExpand();
+  });
+
+  pill.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onExpand();
+    }
+  });
+
+  return pill;
+}
+
 /**
  * Menggambar panel ke dalam `container`.
  *
@@ -352,29 +446,57 @@ export function renderPanel(
   container: HTMLElement,
   model: PanelModel,
   actions: PanelActions,
+  options?: PanelRenderOptions,
 ): void {
   container.replaceChildren();
 
-  const card = element('section', `${PANEL_CLASS} ${PANEL_CLASS}--${model.state}`);
+  let isExpanded = options?.initialExpanded ?? (model.diagnostic !== null);
+
+  const card = element(
+    'section',
+    `${PANEL_CLASS} ${PANEL_CLASS}--${model.state} ${isExpanded ? `${PANEL_CLASS}--expanded` : `${PANEL_CLASS}--collapsed`}`,
+  );
   // `role="status"` dan `aria-live="polite"` membuat pembaca layar mengumumkan hasilnya
   // tanpa merebut fokus pengguna dari webmail.
   card.setAttribute('role', 'status');
   card.setAttribute('aria-live', 'polite');
 
-  card.append(renderHeader(model, actions), renderFields(model));
-
-  if (model.diagnostic === null) {
-    card.append(renderReasons(model));
-
-    const auth = renderAuthentication(model);
-    if (auth !== null) card.append(auth);
-
-    const basis = renderBasis(model);
-    if (basis !== null) card.append(basis);
-  } else {
-    card.append(renderDiagnostic(model.diagnostic));
+  function setExpanded(expanded: boolean): void {
+    isExpanded = expanded;
+    if (isExpanded) {
+      card.classList.remove(`${PANEL_CLASS}--collapsed`);
+      card.classList.add(`${PANEL_CLASS}--expanded`);
+    } else {
+      card.classList.remove(`${PANEL_CLASS}--expanded`);
+      card.classList.add(`${PANEL_CLASS}--collapsed`);
+    }
+    actions.onToggleExpand?.(isExpanded);
   }
 
-  card.append(renderFooter(model, actions));
+  const pill = renderPill(model, actions, () => setExpanded(true));
+
+  const expandedContainer = element('div', 'sc-expanded');
+  const allowCollapse = actions.onClose !== null;
+
+  expandedContainer.append(
+    renderHeader(model, actions, allowCollapse ? () => setExpanded(false) : null),
+    renderFields(model),
+  );
+
+  if (model.diagnostic === null) {
+    expandedContainer.append(renderReasons(model));
+
+    const auth = renderAuthentication(model);
+    if (auth !== null) expandedContainer.append(auth);
+
+    const basis = renderBasis(model);
+    if (basis !== null) expandedContainer.append(basis);
+  } else {
+    expandedContainer.append(renderDiagnostic(model.diagnostic));
+  }
+
+  expandedContainer.append(renderFooter(model, actions));
+
+  card.append(pill, expandedContainer);
   container.append(card);
 }
