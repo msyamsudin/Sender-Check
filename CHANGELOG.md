@@ -18,6 +18,7 @@ table berubah.
 
 | Versi | Tanggal | `ALGORITHM_VERSION` | Ringkasan | Catatan rilis |
 |---|---|---|---|---|
+| 0.8.0 | 2026-10-14 | 0.2.3 (tidak berubah) | Panel ringkas pill, dan pemindaian yang tidak lagi merombak DOM | pesan tag `v0.8.0` |
 | 0.7.3 | 2026-10-12 | 0.2.3 (tidak berubah) | Cabut penanda daftar inbox beserta alat diagnostiknya | pesan tag `v0.7.3` |
 | 0.7.2 | 2026-10-10 | 0.2.3 (tidak berubah) | Catat alasan sebenarnya repo:settings tidak dapat berjalan di CI | pesan tag `v0.7.2` |
 | 0.7.1 | 2026-10-10 | 0.2.3 (tidak berubah) | Perluas adversarial.json dengan kasus aksara, subdomain, dan lookalike brand | pesan tag `v0.7.1` |
