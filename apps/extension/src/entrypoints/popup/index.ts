@@ -152,7 +152,7 @@ function render(root: HTMLElement, model: PanelModel | null, message: string | n
       onToggleDiagnostic: null,
       onCopyReport: () => copyToClipboard(model.report),
     };
-    renderPanel(holder, model, actions);
+    renderPanel(holder, model, actions, { initialExpanded: true });
     root.append(holder);
 
     if (tabId !== null) root.append(renderBar(tabId));

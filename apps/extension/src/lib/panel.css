@@ -1,14 +1,16 @@
 /*
- * Gaya panel.
+ * Gaya panel Sender-Check — Tema Forensic Inspector (Monospace Cyber Lab).
  *
- * Ditulis seolah-olah tidak ada apa pun di sekitarnya, dan itu memang keadaannya: WXT
- * menambahkan `all: initial` pada shadow root, sehingga font, warna, dan ukuran harus
- * dinyatakan sendiri. Perilaku itu yang diinginkan — panel ini disuntikkan ke dalam
- * aplikasi web milik orang lain, dan tampilannya tidak boleh bergantung pada CSS halaman
- * itu, begitu pula sebaliknya.
+ * Mengadopsi prinsip terminal keamanan siber dan visual forensik teknis:
+ * - Font monospace di seluruh hierarki teks (SF Mono, JetBrains Mono, Consolas).
+ * - Kanvas gelap berpresisi tinggi (#0d1117) dengan kontras terukur (#e6edf3, #8b949e).
+ * - Sudut tegas terkalibrasi (border-radius: 6px pada kartu dan pill) ala konsol inspeksi.
+ * - Indikator status berkontras tinggi dengan aksen pendar neon lembut (glow) sesuai status:
+ *   INCONSISTENT (merah terminal), CONSISTENT (hijau terminal), UNCLEAR (amber terminal).
+ * - Batas panel (border) dan pemisah baris bergaya kisi-kisi data telemetri.
  *
- * Panel memakai `position: fixed` di sudut kanan bawah supaya tidak menggeser tata letak
- * webmail, dan `z-index` besar supaya tetap terlihat di atas dialog webmail.
+ * Panel memakai Shadow DOM dengan `all: initial` dari WXT, sehingga seluruh font, warna,
+ * dan perataan dideklarasikan secara mandiri agar terisolasi dari gaya halaman webmail.
  */
 
 .sc-card {
@@ -18,49 +20,328 @@
   z-index: 2147483000;
 
   box-sizing: border-box;
-  width: min(360px, calc(100vw - 32px));
-  max-height: min(70vh, 560px);
-  overflow-y: auto;
-  padding: 14px 16px;
-
-  border: 1px solid #d0d5dd;
-  border-left: 4px solid #667085;
-  border-radius: 10px;
-  background: #ffffff;
-  box-shadow: 0 8px 28px rgba(16, 24, 40, 0.18);
-
-  color: #101828;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 13px;
+  color: #e6edf3;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
   line-height: 1.45;
   text-align: left;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-/* Aksen menurut state. Warnanya menyertakan lambang, bukan menggantikannya, karena warna
-   tidak boleh menjadi satu-satunya pembawa arti. */
-.sc-card--INCONSISTENT {
-  border-left-color: #b54708;
-}
-.sc-card--UNCLEAR {
-  border-left-color: #b58a08;
-}
-.sc-card--CONSISTENT {
-  border-left-color: #067647;
-}
-.sc-card--UNASSESSABLE {
-  border-left-color: #667085;
+/* --- Keadaan Ringkas (Floating Pill / Chip) ---------------------------------------
+   Hadir sebagai penanda telemetri kompak di sudut layar. */
+.sc-card--collapsed {
+  width: auto;
+  max-width: min(460px, calc(100vw - 32px));
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
+.sc-card--collapsed:hover {
+  border-color: #58a6ff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 12px rgba(88, 166, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.sc-card--collapsed .sc-pill {
+  display: flex;
+}
+
+.sc-card--collapsed .sc-expanded {
+  display: none;
+}
+
+/* Aksen pendar status pada pill */
+.sc-card--collapsed.sc-card--INCONSISTENT {
+  border-color: #f85149;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 14px rgba(248, 81, 73, 0.35);
+}
+.sc-card--collapsed.sc-card--UNCLEAR {
+  border-color: #d29922;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 14px rgba(210, 153, 34, 0.3);
+}
+.sc-card--collapsed.sc-card--CONSISTENT {
+  border-color: #3fb950;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 14px rgba(63, 185, 80, 0.25);
+}
+.sc-card--collapsed.sc-card--UNASSESSABLE {
+  border-color: #484f58;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Elemen Floating Pill --------------------------------------------------------- */
+.sc-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px 5px 8px;
+  cursor: pointer;
+  user-select: none;
+  font-family: inherit;
+  font-size: 11.5px;
+  line-height: 1;
+}
+
+.sc-pill:focus-visible {
+  outline: 2px solid #58a6ff;
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+
+.sc-pill-mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sc-pill-mark--INCONSISTENT {
+  background: rgba(248, 81, 73, 0.2);
+  color: #ff7b72;
+  border: 1px solid rgba(248, 81, 73, 0.5);
+}
+.sc-pill-mark--UNCLEAR {
+  background: rgba(210, 153, 34, 0.2);
+  color: #e3b341;
+  border: 1px solid rgba(210, 153, 34, 0.5);
+}
+.sc-pill-mark--CONSISTENT {
+  background: rgba(63, 185, 80, 0.2);
+  color: #56d364;
+  border: 1px solid rgba(63, 185, 80, 0.5);
+}
+.sc-pill-mark--UNASSESSABLE {
+  background: rgba(139, 148, 158, 0.15);
+  color: #8b949e;
+  border: 1px solid rgba(139, 148, 158, 0.35);
+}
+
+.sc-pill-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sc-pill-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #f0f6fc;
+  letter-spacing: -0.01em;
+}
+
+.sc-card--INCONSISTENT .sc-pill-title {
+  color: #ff7b72;
+}
+.sc-card--UNCLEAR .sc-pill-title {
+  color: #e3b341;
+}
+.sc-card--CONSISTENT .sc-pill-title {
+  color: #56d364;
+}
+
+.sc-pill-subject {
+  font-size: 11px;
+  color: #8b949e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+@media (max-width: 480px) {
+  .sc-pill-subject {
+    display: none;
+  }
+}
+
+.sc-pill-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sc-pill-expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  background: #161b22;
+  color: #79c0ff;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sc-pill-expand:hover {
+  background: #21262d;
+  border-color: #58a6ff;
+  color: #a5d6ff;
+}
+
+.sc-pill-expand-icon {
+  font-size: 9px;
+  line-height: 1;
+  color: #79c0ff;
+}
+
+.sc-pill-close {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #8b949e;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sc-pill-close:hover {
+  background: #21262d;
+  color: #f0f6fc;
+}
+
+/* --- Keadaan Terbuka (Expanded Card) ----------------------------------------------- */
+.sc-card--expanded {
+  width: min(390px, calc(100vw - 32px));
+  max-height: min(78vh, 620px);
+  overflow-y: auto;
+  padding: 16px;
+  border-radius: 6px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+  scrollbar-color: #30363d #0d1117;
+}
+
+.sc-card--expanded.sc-card--INCONSISTENT {
+  border-color: rgba(248, 81, 73, 0.5);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(248, 81, 73, 0.18);
+}
+.sc-card--expanded.sc-card--UNCLEAR {
+  border-color: rgba(210, 153, 34, 0.5);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(210, 153, 34, 0.18);
+}
+.sc-card--expanded.sc-card--CONSISTENT {
+  border-color: rgba(63, 185, 80, 0.5);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(63, 185, 80, 0.15);
+}
+.sc-card--expanded.sc-card--UNASSESSABLE {
+  border-color: #30363d;
+}
+
+.sc-card--expanded::-webkit-scrollbar {
+  width: 5px;
+}
+.sc-card--expanded::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+.sc-card--expanded::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+.sc-card--expanded::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+.sc-card--expanded .sc-pill {
+  display: none;
+}
+
+.sc-card--expanded .sc-expanded {
+  display: block;
+}
+
+/* --- Kepala Kartu (Header) -------------------------------------------------------- */
 .sc-head {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
+  margin: -16px -16px 14px;
+  padding: 12px 14px 12px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom: 1px solid #30363d;
+  background: #161b22;
+}
+
+.sc-card--INCONSISTENT .sc-head {
+  background: #1c1317;
+  border-bottom-color: rgba(248, 81, 73, 0.3);
+}
+.sc-card--UNCLEAR .sc-head {
+  background: #1c1813;
+  border-bottom-color: rgba(210, 153, 34, 0.3);
+}
+.sc-card--CONSISTENT .sc-head {
+  background: #121d15;
+  border-bottom-color: rgba(63, 185, 80, 0.3);
+}
+.sc-card--UNASSESSABLE .sc-head {
+  background: #161b22;
+  border-bottom-color: #30363d;
 }
 
 .sc-mark {
   flex: none;
-  font-size: 16px;
-  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.sc-mark--INCONSISTENT {
+  background: rgba(248, 81, 73, 0.2);
+  color: #ff7b72;
+  border: 1px solid rgba(248, 81, 73, 0.5);
+}
+.sc-mark--UNCLEAR {
+  background: rgba(210, 153, 34, 0.2);
+  color: #e3b341;
+  border: 1px solid rgba(210, 153, 34, 0.5);
+}
+.sc-mark--CONSISTENT {
+  background: rgba(63, 185, 80, 0.2);
+  color: #56d364;
+  border: 1px solid rgba(63, 185, 80, 0.5);
+}
+.sc-mark--UNASSESSABLE {
+  background: rgba(139, 148, 158, 0.15);
+  color: #8b949e;
+  border: 1px solid rgba(139, 148, 158, 0.35);
 }
 
 .sc-titles {
@@ -71,237 +352,358 @@
 .sc-title {
   margin: 0;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #f0f6fc;
+  letter-spacing: -0.01em;
+}
+
+.sc-card--INCONSISTENT .sc-title {
+  color: #ff7b72;
+}
+.sc-card--UNCLEAR .sc-title {
+  color: #e3b341;
+}
+.sc-card--CONSISTENT .sc-title {
+  color: #56d364;
 }
 
 .sc-subject {
-  margin: 2px 0 0;
-  color: #475467;
-  font-size: 12px;
+  margin: 3px 0 0;
+  color: #8b949e;
+  font-size: 11px;
+  line-height: 1.4;
   word-break: break-word;
 }
 
-.sc-close {
-  flex: none;
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: #667085;
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
+.sc-card--INCONSISTENT .sc-subject {
+  color: #ffa198;
 }
-
-.sc-close:hover {
-  background: #f2f4f7;
-  color: #101828;
+.sc-card--UNCLEAR .sc-subject {
+  color: #f2cc60;
+}
+.sc-card--CONSISTENT .sc-subject {
+  color: #7ee787;
 }
 
 .sc-actions {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
+  margin-top: -2px;
 }
 
-/* Tombol mode diagnostik. Sengaja kecil dan tanpa warna aksen: ia alat pengembang, dan
-   pengguna biasa tidak boleh tergoda menekannya lalu melihat istilah internal. */
-.sc-diag-toggle {
-  padding: 1px 6px;
-  border: 1px solid #d0d5dd;
-  border-radius: 5px;
+.sc-close,
+.sc-collapse {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
   background: transparent;
-  color: #667085;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
-  line-height: 1.6;
+  color: #8b949e;
+  font-size: 12px;
+  line-height: 1;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sc-close {
+  font-size: 14px;
+}
+
+.sc-close:hover,
+.sc-collapse:hover {
+  background: #21262d;
+  border-color: #30363d;
+  color: #f0f6fc;
+}
+
+.sc-diag-toggle {
+  padding: 2px 7px;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  background: #21262d;
+  color: #79c0ff;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .sc-diag-toggle:hover {
-  background: #f2f4f7;
-  color: #101828;
+  background: #30363d;
+  border-color: #58a6ff;
+  color: #a5d6ff;
 }
 
 .sc-diag-toggle[aria-pressed="true"] {
-  border-color: #3538cd;
-  background: #e0eaff;
-  color: #3538cd;
+  background: #1f6feb;
+  border-color: #388bfd;
+  color: #ffffff;
 }
 
+/* --- Medan Pengirim (Fields Inspector Table) -------------------------------------- */
 .sc-fields {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .sc-field {
   display: flex;
+  align-items: baseline;
   gap: 8px;
-  padding: 2px 0;
 }
 
 .sc-field-label {
   flex: none;
-  width: 86px;
-  color: #667085;
+  width: 64px;
+  color: #8b949e;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .sc-field-value {
   margin: 0;
   flex: 1 1 auto;
   min-width: 0;
+  color: #e6edf3;
+  font-size: 11.5px;
+  font-weight: 500;
   word-break: break-all;
 }
 
+/* --- Seksi Penjelasan / Bukti ---------------------------------------------------- */
 .sc-section {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid #eaecf0;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #21262d;
 }
 
 .sc-h {
-  margin: 0 0 6px;
-  color: #475467;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  margin: 0 0 8px;
+  color: #79c0ff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.sc-reasons,
-.sc-auth {
+.sc-reasons {
   margin: 0;
   padding: 0;
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .sc-reason {
   display: flex;
-  gap: 6px;
-  padding: 3px 0;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 6px;
+  background: #161b22;
+  border-left: 2px solid #30363d;
+  border-radius: 0 4px 4px 0;
+}
+
+.sc-reason--inconsistency {
+  border-left-color: #f85149;
+}
+.sc-reason--consistency {
+  border-left-color: #3fb950;
+}
+.sc-reason--context {
+  border-left-color: #58a6ff;
 }
 
 .sc-tag {
   flex: none;
-  /* Sengaja tidak ikut meregang: `align-items` bawaan flex adalah `stretch`, sehingga pil
-     mengikuti tinggi baris dan pada kalimat dua-tiga baris ia berubah menjadi elips besar,
-     bukan pil. `border-radius: 999px` membuatnya jelas terlihat. Dengan perataan ini pil
-     selalu setinggi teksnya sendiri. */
-  align-self: flex-start;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: #f2f4f7;
-  color: #475467;
-  font-size: 11px;
-  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.3;
 }
 
 .sc-reason--inconsistency .sc-tag {
-  background: #fef0c7;
-  color: #b54708;
+  background: rgba(248, 81, 73, 0.2);
+  color: #ff7b72;
+  border: 1px solid rgba(248, 81, 73, 0.4);
 }
 
 .sc-reason--consistency .sc-tag {
-  background: #d1fadf;
-  color: #067647;
+  background: rgba(63, 185, 80, 0.2);
+  color: #56d364;
+  border: 1px solid rgba(63, 185, 80, 0.4);
 }
 
 .sc-reason--context .sc-tag {
-  background: #e0eaff;
-  color: #3538cd;
+  background: rgba(56, 139, 253, 0.15);
+  color: #79c0ff;
+  border: 1px solid rgba(56, 139, 253, 0.35);
 }
 
 .sc-sentence {
   flex: 1 1 auto;
   min-width: 0;
+  color: #c9d1d9;
+  font-size: 11.5px;
+  line-height: 1.45;
   word-break: break-word;
 }
 
+.sc-auth {
+  margin: 0;
+  padding: 6px 10px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .sc-auth-item {
-  padding: 2px 0;
-  color: #475467;
+  color: #8b949e;
+  font-size: 11px;
+  line-height: 1.45;
+  position: relative;
+  padding-left: 14px;
+}
+
+.sc-auth-item::before {
+  content: "›";
+  position: absolute;
+  left: 2px;
+  color: #79c0ff;
+  font-weight: bold;
 }
 
 .sc-empty {
   margin: 0;
-  color: #475467;
+  color: #8b949e;
+  font-size: 11.5px;
+  font-style: italic;
 }
 
-/* Bagian "apa yang belum diperiksa, dan apa yang sebaiknya dilakukan". Sengaja bukan warna
-   peringatan: UNASSESSABLE berarti belum dapat dipastikan, bukan mencurigakan. */
+/* Bagian "apa yang belum diperiksa, dan apa yang sebaiknya dilakukan". */
 .sc-basis {
   margin: 0;
-  color: #475467;
+  color: #8b949e;
+  font-size: 11.5px;
+  line-height: 1.45;
 }
 
 .sc-guidance {
   margin: 8px 0 0;
   padding: 8px 10px;
-  border-left: 3px solid #98a2b3;
-  border-radius: 0 6px 6px 0;
-  background: #f9fafb;
-  color: #344054;
+  border-radius: 4px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  font-size: 11.5px;
+  line-height: 1.45;
 }
 
+/* --- Footer & Disclaimer ---------------------------------------------------------- */
 .sc-disclaimer {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid #eaecf0;
-  color: #667085;
-  font-size: 11px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #21262d;
+  color: #8b949e;
+  font-size: 10px;
 }
 
 .sc-disclaimer-line {
   margin: 0;
+  line-height: 1.4;
+  color: #8b949e;
 }
 
-/* Baris versi di footer (`pslVersion` + `pslUpdatedAt`, `docs/DESIGN.md` bagian 6.6).
-   Dibedakan dari disclaimer karena menerangkan alatnya, bukan temuannya — dan bentuk
-   monospace-nya menandai bahwa ini nilai yang dapat dicocokkan, bukan kalimat. */
 .sc-meta {
   margin: 6px 0 0;
-  color: #98a2b3;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
+  color: #58a6ff;
+  font-size: 9.5px;
   word-break: break-all;
 }
 
-/* Tombol "Salin laporan". Sengaja tipis dan tanpa warna aksen: ia meneruskan isi yang
-   sudah dilihat pengguna, bukan tindakan yang menuntut keputusan. */
 .sc-copy {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin: 8px 0 0;
-  padding: 3px 8px;
-  border: 1px solid #d0d5dd;
-  border-radius: 6px;
-  background: transparent;
-  color: #475467;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  background: #21262d;
+  color: #79c0ff;
   font-family: inherit;
-  font-size: 11px;
-  line-height: 1.5;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .sc-copy:hover {
-  background: #f2f4f7;
-  color: #101828;
+  background: #30363d;
+  border-color: #58a6ff;
+  color: #a5d6ff;
 }
 
-/* --- Mode diagnostik --------------------------------------------------------------
-   Isinya nilai mentah engine, jadi tampilannya dibuat berbeda dengan sekali pandang:
-   monospace dan latar gelap. Yang dibaca pengguna sebagai penilaian tetap memakai
-   tipografi biasa di atasnya, sehingga kesalahan membaca "ini bukti, bukan temuan"
-   tidak terjadi karena gaya. */
+/* --- Mode Diagnostik (Alt+Shift+D) ------------------------------------------------
+   Nilai mentah disajikan sebagai konsol telemetri forensik internal. */
 
 .sc-section--diag {
-  border-top-color: #344054;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  background: #040711;
+  color: #c9d1d9;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.sc-section--diag .sc-h {
+  color: #79c0ff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
 }
 
 .sc-diag-note {
-  margin: 0 0 8px;
-  color: #475467;
+  margin: 0 0 10px;
+  color: #8b949e;
+  font-size: 10px;
+  line-height: 1.4;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #21262d;
 }
 
 .sc-diag-section {
@@ -310,30 +712,33 @@
 
 .sc-diag-h {
   margin: 0 0 4px;
-  color: #344054;
-  font-size: 11px;
-  font-weight: 600;
+  color: #58a6ff;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .sc-diag-rows {
   margin: 0;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: #101828;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-size: 10.5px;
 }
 
 .sc-diag-row {
   display: flex;
   gap: 8px;
-  padding: 1px 0;
+  padding: 2px 0;
+  border-bottom: 1px dotted #21262d;
 }
 
 .sc-diag-label {
   flex: none;
-  width: 108px;
-  color: #98a2b3;
+  width: 88px;
+  color: #8b949e;
+  font-size: 10px;
 }
 
 .sc-diag-value,
@@ -341,43 +746,60 @@
   margin: 0;
   flex: 1 1 auto;
   min-width: 0;
-  color: #d0d5dd;
-  word-break: break-word;
+  color: #e6edf3;
+  font-size: 10px;
+  word-break: break-all;
 }
 
 .sc-diag-winner {
   margin: 0 0 4px;
-  color: #3538cd;
-  font-weight: 600;
+  color: #56d364;
+  font-weight: 700;
+  font-size: 10.5px;
 }
 
 .sc-diag-list {
   margin: 0;
   padding: 0;
   list-style: none;
+  background: transparent;
+  border: none;
 }
 
-.sc-diag-item,
-.sc-diag-mono {
+.sc-diag-item {
   margin: 0;
-  color: #475467;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  padding: 2px 0;
+  color: #8b949e;
+  font-size: 10px;
   word-break: break-word;
 }
 
+.sc-diag-mono {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #c9d1d9;
+  font-size: 10px;
+  word-break: break-all;
+}
+
 .sc-diag-evidence {
-  margin-top: 8px;
-  padding: 6px 8px;
-  border-left: 2px solid #d0d5dd;
-  background: #f9fafb;
+  margin-top: 6px;
+  padding: 6px 0;
+  border-top: 1px solid #21262d;
+  background: transparent;
+}
+
+.sc-diag-evidence .sc-diag-mono {
+  color: #8b949e;
+  font-size: 9.5px;
 }
 
 .sc-diag-code {
   margin: 0 0 2px;
-  color: #101828;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  color: #79c0ff;
+  font-size: 10.5px;
   font-weight: 600;
   word-break: break-word;
 }
