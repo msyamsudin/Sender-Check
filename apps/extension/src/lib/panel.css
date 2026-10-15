@@ -285,16 +285,20 @@
   background: #f8f9fa;
 }
 
+/* Kepala kartu tetap berwarna menurut state, tetapi sebagai tint terang, bukan banner gelap:
+   versi gelapnya hanya terbaca sebagai "sedikit lebih gelap dari kartu" selama kartunya sendiri
+   gelap. Di permukaan putih ia menjadi pita hitam dengan judul merah di atasnya (kontras 2,9:1),
+   dan itu kebalikan dari yang dimaksudkan tema ini. */
 .sc-card--INCONSISTENT .sc-head {
-  background: #1c1317;
+  background: #fce8e6;
   border-bottom-color: rgba(248, 81, 73, 0.3);
 }
 .sc-card--UNCLEAR .sc-head {
-  background: #1c1813;
+  background: #fef7e0;
   border-bottom-color: rgba(210, 153, 34, 0.3);
 }
 .sc-card--CONSISTENT .sc-head {
-  background: #121d15;
+  background: #e6f4ea;
   border-bottom-color: rgba(63, 185, 80, 0.3);
 }
 .sc-card--UNASSESSABLE .sc-head {
