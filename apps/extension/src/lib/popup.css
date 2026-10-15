@@ -1,5 +1,5 @@
 /*
- * Gaya popup — Tema Forensic Inspector (Monospace Cyber Lab).
+ * Gaya popup — permukaan ringan dengan tipografi sistem.
  *
  * `panel.css` dipakai apa adanya — isi kartunya memang sama persis dengan panel halaman,
  * dan menulis ulang gayanya akan membuat dua tampilan yang dapat menyimpang. Yang diubah
@@ -21,11 +21,11 @@ body {
    tidak membuat jendela melebar sendiri. Tingginya mengikuti isi, dan panel yang panjang
    menggulir bersama isi jendela. */
 body {
-  width: 380px;
-  background: #0d1117;
-  color: #e6edf3;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 12px;
+  width: 400px;
+  background: #ffffff;
+  color: #202124;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
 }
 
 .sc-card {
@@ -54,13 +54,13 @@ body {
 /* Bilah aksi bawah: langkah manual dan pintasnya. */
 .sc-bar {
   padding: 10px 16px 14px;
-  border-top: 1px solid #30363d;
-  background: #161b22;
+  border-top: 1px solid #dadce0;
+  background: #f8f9fa;
 }
 
 .sc-bar-note {
   margin: 0 0 8px;
-  color: #8b949e;
+  color: #5f6368;
   font-size: 11px;
   line-height: 1.45;
 }
@@ -68,10 +68,10 @@ body {
 .sc-bar-button {
   width: 100%;
   padding: 6px 10px;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  background: #21262d;
-  color: #79c0ff;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  background: #f1f3f4;
+  color: #1a73e8;
   font-family: inherit;
   font-size: 11px;
   font-weight: 600;
@@ -80,9 +80,9 @@ body {
 }
 
 .sc-bar-button:hover:not([disabled]) {
-  background: #30363d;
-  border-color: #58a6ff;
-  color: #a5d6ff;
+  background: #dadce0;
+  border-color: #1a73e8;
+  color: #174ea6;
 }
 
 .sc-bar-button[disabled] {
@@ -92,7 +92,7 @@ body {
 
 .sc-bar-status {
   margin: 8px 0 0;
-  color: #8b949e;
+  color: #5f6368;
   font-size: 11px;
   line-height: 1.45;
 }
@@ -100,7 +100,18 @@ body {
 .sc-popup-empty {
   margin: 0;
   padding: 16px;
-  color: #8b949e;
+  color: #5f6368;
   line-height: 1.5;
   font-size: 11.5px;
+}
+
+.sc-bar-note,
+.sc-bar-status,
+.sc-popup-empty {
+  font-size: 12.5px;
+}
+
+.sc-bar-button {
+  min-height: 34px;
+  font-size: 12px;
 }

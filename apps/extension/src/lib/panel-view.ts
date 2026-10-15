@@ -284,8 +284,9 @@ function renderDiagnosticSection(title: string, rows: readonly { label: string; 
 /**
  * Bagian diagnostik: nilai mentah engine, apa adanya.
  *
- * Sengaja dibedakan tampilannya dari bagian lain — tipografi monospace dan latar gelap — dan
- * itu bukan hiasan. Isi bagian ini adalah istilah internal dan bukti mentah, dan pengguna
+ * Sengaja dibedakan tampilannya dari bagian lain — kotak berbatas dengan permukaan sendiri, dan
+ * nilai mentahnya berhuruf monospace — dan itu bukan hiasan. Isi bagian ini adalah istilah internal
+ * dan bukti mentah, dan pengguna
  * yang membukanya harus melihat dengan sekali pandang bahwa ini bukan penilaian melainkan
  * dasarnya. Disclaimer tetap di bawah kartu, seperti pada panel biasa.
  */

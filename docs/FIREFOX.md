@@ -284,8 +284,9 @@ Ada dua cara membukanya, dan keduanya tindakan yang disengaja:
 | Tombol **diagnostik** | Tombol kecil di kepala panel, sebelah tombol tutup |
 
 Modenya **tidak** mengubah penilaian apa pun: kepala kartu, medan identitas, dan disclaimer
-tetap sama, dan yang berganti hanya bagian tengahnya. Isinya diberi tipografi monospace dan
-latar gelap supaya sekali pandang terlihat sebagai bahan mentah, bukan sebagai temuan. Modenya
+tetap sama, dan yang berganti hanya bagian tengahnya. Isinya diletakkan di dalam kotak berbatas
+dengan permukaan sendiri, dan nilai mentahnya berhuruf monospace, supaya sekali pandang terlihat
+sebagai bahan mentah, bukan sebagai temuan. Modenya
 juga tidak disimpan: berpindah halaman atau menutup tab berarti kembali ke panel biasa.
 
 Satu hal yang paling sering berguna dari bagian ini adalah pertanyaan "kenapa email ini tidak
